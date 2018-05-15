@@ -14,11 +14,18 @@
     \usepackage{hyperref}% allow for links via \url{} and \href{}: http://ctan.org/pkg/hyperref
     \hypersetup{% because the red outline boxes are very bleh
       colorlinks=true,
-      allcolors=purple
+      % allcolors=purple
+      urlcolor = blue,
+      linkcolor = purple
     }
     \usepackage{titlesec}
     \titleformat{\chapter}{\bfseries\Huge}{\thechapter.}{1.5ex}{}
     \titlespacing{\chapter}{0pt}{10pt}{30pt}
+
+    \usepackage{makeidx} % allows for indexing
+    \makeindex
+
+
 
 % from pandoc conversion (from markdown to LaTeX)
 \providecommand{\tightlist}{%
@@ -42,6 +49,7 @@
 
 \newpage
 
+
 \tableofcontents
 
 \newpage
@@ -49,11 +57,10 @@
 
 \chapter{Information Theory}\label{information-theory}
 
-\section{Entropy, Cross-Entropy, KL
-Divergence}\label{entropy-cross-entropy-kl-divergence}
+\section{Entropy and Cross-Entropy}\label{entropy-and-cross-entropy}
 
 There are a number of ways to think about/get to the Shannon entropy
-(\(H\)) (thankfully not \(S\)...) One simple way is to say what we want
+(\(H\)). One simple way is to say what we want
 it to mean qualitatively and impose some desired characteristics to
 determine its mathematical formulation. In this case, it may make more
 sense to start with cross-entropy first.
@@ -68,7 +75,7 @@ distribution) \(q\).
 
 Now we want to measure how surprised I am by any given message you send
 me -\/- let's call it \(\tau\).\footnote{
-    Rhymes with ``wow". 
+    Rhymes with ``wow''. 
     Alas, not standard notation for a measure of surprise.
     }
 We would imagine the following properties would be useful for \(\tau\) to have:
@@ -91,9 +98,9 @@ We would imagine the following properties would be useful for \(\tau\) to have:
 
 Using these two criteria, a reasonable mapping is
 
-\[\tau_{a} = \log\left(\frac{1}{q_a}\right), a \in A\]
+\[\tau_{a \sim q} = \log\left(\frac{1}{q(a)}\right), a \in A\]
 
-where \(q_a\) is the probability I think you'll send the symbol \(a\).
+where \(q(a)\) is the probability I think you'll send the symbol \(a\).
 
 I mean, that's great and all, but that works for individual instances of
 strings or symbols. How much should I \emph{expect} to be surprised by
@@ -105,30 +112,30 @@ Hmm, this smells of expectation! And indeed, that's all we do -\/- take
 the expectation over \(A\) (using the \emph{actual} probability of each
 symbol occurring, i.e., using \(p\)) of my surprise per symbol:
 
-\[E_{a \sim p}[\tau] = \sum_{a \in A} p_a \log\left(\frac{1}{q_a}\right) = H(p,q)\]
+\[E_{a \sim p}[\tau_{a \sim q}] = \sum_{a \in A} p_a \log\left(\frac{1}{q(a)}\right) = H(p,q)\]
 
 We denote this metric \(H(p,q)\) (where \(p\) and \(q\) are the actual
 and presumed distributions, respectively) and call it the
-\textbf{cross-entropy} (because that sounds pretty cyberpunk to me. I
-like to think they throw in ``cross" because it measures the surprise
-caused by ``crossing" the distributions \(p\) and \(q\) together.)
+\textbf{cross-entropy} \index{cross-entropy}
+(because that sounds pretty cyberpunk to me. I
+like to think they throw in ``cross'' because it measures the surprise
+caused by ``crossing'' the distributions \(p\) and \(q\) together.)
 
 Now, we'd imagine that I'd be the least surprised if my presumed
 distribution of symbols were in fact the actual distribution, i.e. when
 \(p = q\). In fact, this is true!
-
 \[H(p,p) = H(p) = \sum_{a \in A} p_a \log\left(\frac{1}{p_a}\right)\]
 
-% \footnote{test somewhere else}
-
-is called the \textbf{entropy} (or \textbf{Shannon entropy}) of the
+is called the \textbf{entropy} (or \textbf{Shannon entropy})
+\index{entropy (information theory)!for distributions}
+of the
 probability distribution and written \(H\).\footnote
 {
   You know, it'd arguably make more sense for the 
-  \emph{Shannon} entropy to be denoted \(S\),
+  \emph{\textbf{S}hannon} entropy to be denoted \(S\),
   which would also be a happy notational coincidence 
   with the symbol used for entropy in most other fields. 
-  Instead, we have a collision with \emph{enthalpy}.
+  Instead, we have a notational collision with \emph{enthalpy}.
   Ah well, such is the arbitrariness of a symbol's meaning. 
   (I suppose it's fitting.)
 }
@@ -142,29 +149,41 @@ expect I don't necessarily know the actual probability distribution
 \(p\) of symbols, I just think I do (and I think it's \(q\)) and base my
 series of questions based on \(q\).
 
+\section{KL divergence and mutual information.}\label{kl-divergence-and-mutual-information}
+
+
 Now, hopefully that makes it clear that \( p \neq q \implies H(p,q)
 > H(p) \) --- if I don't know the actual distribution, I'm
 not going to be able to answer the most optimal series of questions.
-This suggestions to us a notion of ``distance" (i.e. a metric) between
+This suggestions to us a notion of ``distance'' (i.e. a metric) between
 the probability distributions \(p\) and \(q\):
-
 \[ KL(p \mid\mid q) = H(p,q) - H(p) \]
 
-This metric is called the \textbf{Kullback--Leibler divergence} (because
+This metric is called the \textbf{Kullback--Leibler divergence}
+\index{KL divergence} \index{relative entropy (information theory)}
+(because
 names) or the \textbf{KL divergence} (because initialisms), or seemingly
 most rarely but probably most clearly the \textbf{relative entropy}. Out
 loud, you'd say \(KL(p \mid\mid q)\) is ``the {[}blah{]} of p with
 respect to q". The closer the KL divergence is to 0, the closer \(q\) is
-to being \(p\), and \() KL(p \mid\mid q) = 0 \implies p = q \) at every
-point in the domain of \(q\) (which is the same as the domain of \(p\)).
+to being \(p\), and \( KL(p \mid\mid q) = 0 \implies p = q \) at every
+point in the domain of \(q\) (which is the same as the domain of \(p\)). 
+(From the above formula, 
+it should be clear that the KL divergence is not symmetric.)
 
-This makes describing the \textbf{mutual information} of random
-variables X and Y in terms of a KL divergence fairly intuitive. Just
+This makes describing the
+\textbf{mutual information between two random variables \(X\) and \(Y\)}
+\index{mutual information (information theory)}
+in terms of a KL divergence fairly intuitive. Just
 running off the name, if X and Y were independent, you'd expect no
-mutual information between them. In such a case, \(P(X,Y) = P(X)P(Y)\),
-and \() KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) = 0\). And in fact, one
-way of writing the mutual information of random variables X and Y is
-exactly
+mutual information between them --- 
+observing one variable wouldn't tell you anything about the other variable, you don't gain
+a lot of information about one from the other. 
+In such a case, we know something about their probability distributions,
+namely that they're independent, i.e., \(P(X,Y) = P(X)P(Y)\), which implies 
+\( KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) = 0\). 
+And in fact, one way of writing the mutual information 
+between random variables X and Y is exactly
 
 \[ I(X;Y) = KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) \]
 \\
@@ -172,6 +191,111 @@ which I think is pretty neat.
 \\
 \\
 - DK (4/24/18)
+
+\section{Entropy of variables vs. entropy of distributions}\label{entropy-of-variables-vs-entropy-of-distributions}
+
+Now, there is another way of approaching mutual information by 
+defining a conditional entropy between two random variables 
+(itself requiring a defintion of joint entropy in order to put
+the equation in a ``plug n' chug'' form). This raises some questions, the
+first and most pressing of which being ``\emph{Variable?} We've been talking
+about distributions this whole time!''\footnote
+{
+  More an outcry than anything, but still appropriate.
+} 
+, and the answer to which is ``Yes, variable.'' Since we've been 
+focusing on distributions this whole time, the switch to a random variable \(X\) is
+actually fairly straightforward -- we use the distribution from which \(X\) is drawn.
+
+More explicitly, say \(X\) is drawn from a probability distribution \(p\). Then the
+\textbf{entropy of \(X\)} is
+\index{entropy (information theory)!for random variables}
+
+\[ H(X) = \sum_{x \in X} p(x) \log\left(\frac{1}{p(x)}\right) \]
+
+This may be reminiscent of our \(\tau_{a \sim q}\) from earlier, except that now we're using
+the actual distribution of \(X\) (which is \(p\)), so it'd be \(\tau_{x \sim p}\). 
+
+We can sort of think of it like this: the information entropy only really makes sense
+for probability distributions. So, if we want to figure out how hard it 
+is to encode a random variable \(X\),
+we kind of ``pull out'' the probability distribution that \(X\) is drawn from and
+use that in our formula.
+\\
+Now, unfortunately, the notation gets muddy when we allow ourselves to shove in
+these random variables as arguments. For example, what does \(H(X,Y)\) (X and Y being
+random variables) mean? H is provided two arguments -- is it the cross-entropy between
+the underlying distributions of X and Y? Nope, it's the \textbf{joint entropy} of X and Y,
+i.e., \index{joint entropy}
+
+\[ H(X,Y) = H(p)\]
+
+where \(p\) is the joint distribution of the random variables \(X\) and \(Y\).
+Our main defense against confusing the two formulae is that random variables are
+(normally -- hopefully!) denoted by capital letters while distributions are usually
+denoted by lowercase letters.
+\\
+\\
+You may wonder ``what's the point?'' Well, this begins to allow information theory analogues
+for intuitions on random variables gleaned from statistics. The main missing piece at this point
+is the \textbf{conditional entropy} \index{entropy (information theory)!conditional}
+of a random variable Y with respect to X.
+We'd expect that we could relate the joint entropy and conditional entropy of random variables
+with one another, like how we can do so with the joint and conditional probability
+distributions of the variables, especially since we've defined the entropy of a random
+variable in terms of its probability distribution. And since:
+\begin{enumerate}
+  \tightlist
+  \item 
+    we applied a logarithm to the probability distribution (and took the expected value) when defining the entropy of a random variable; and
+  \item
+    the relationship between conditional and joint probability depends on multiplication:
+    \[P(Y|X) \times P(X) = P(X,Y) \]
+\end{enumerate}
+we'd want the relationship between conditional and joint entropy to hold via addition:
+\[ H(Y|X) + H(X) = H(X,Y) \]
+
+In fact, that's exactly the case! You can derive the formula 
+for conditional entropy based on the above relationship.
+And just to circle back to information gain, we'd expect that we might gain some information
+about a random variable X when we observe the random variable Y, depending on how the joint
+distribution P(X,Y) compares with P(X). Earlier, we defined the mutual information in terms
+of a KL divergence:
+\[ I(X;Y) = KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) \]
+
+but we can also capture the quantity of ``how much does knowing Y (on average) help us figure
+out X (and vice-versa)?'' using the language of entropies of random variables:
+\[ I(X;Y) = H(X) - H(X|Y) \]
+
+This is the expected amount of information gained 
+by knowing the state of the random variable Y. 
+Specific values of Y may give more information
+about X -- may lead to a much tighter conditional distribution -- than others.
+Then, you can look at it for specific cases, i.e., the
+\textbf{information gain} \index{information gain}
+about X from observing a specific state y for Y,
+IG(X,Y = y), which is related to the mutual information via
+\(E_{y \sim Y}\left[IG(X,Y)\right] = I(X;Y)\)).
+So if we observe that Y took on the
+value y, the information gain for X would be
+\[ IG(X, Y = y) = KL\left(P(X,Y)\mid\mid P(X | Y = y)\right) \]
+
+Writing the above in terms of information entropy would be
+\[ IG(X, Y = y) = H(X) - H(X|Y = y) \]
+
+
+where \(H(X|Y = y)\) is an expectation over the conditional distribution 
+\(P(X | Y = y)\):
+\[
+  H(X| Y = y) = \sum_{x \in X} p(x|y) \times \log\left(\frac{1}{p(x|y)}\right)
+\]
+
+The main takeaway is that \emph{defining the entropy of a random variable as it is above
+allows for the migrations of intuitions about random variables
+from statistics and probability.} A worthy cause!\footnote{The notational confusion is still unfortunate though.}
+\\
+\\
+- DK, 5/14/18
 
 \newpage
 \chapter{Statistics}\label{statistics}
@@ -203,7 +327,7 @@ both A and B to occur:
     \item 
       B happens first, then A happens.
 \end{enumerate}
-(``Duh", I know.)
+(``Duh'', I know.)
 \\
 Keeping in mind that the first event might affect the probability of the
 second event occurring (i.e. remembering that conditional probabilities
@@ -222,26 +346,36 @@ And then it's simple to write out Bayes' Theorem as it's often written
 Using the Bayesian interpretation: At first we thought the probability
 that \(A\) occurs is \(P(A)\). After we saw that \(B\) happened, we
 re-evaluate the probability that \(A\) occurs with a scaling factor \(
-\frac {P(B \mid A)} {P(B)} \)
+\frac {P(B \mid A)} {P(B)} \).
 
-Also worth knowing the fancy terminology: - the \textbf{\emph{a priori}
-probability} or just the \textbf{prior} is what we thought would be the
-probability that a random variable takes on a certain value before we
-observed anything. So the \emph{a priori} probability (or just prior)
-for the event \(A\) would be \(P(A)\). If we consider \(A\) to be a
-random variable instead of an event, we're guessing the distribution of
-\(A\) and so \(P(A)\) would be an \textbf{\emph{a priori} distribution}
-(or again, just the prior). - the \textbf{\emph{a posteriori}
-probability} or just the \textbf{posterior} is what we think the
-probability that a random variable takes on a certain value is after
-observing something. In this case, the \emph{a posteriori} probability
-(or just posterior) of the event \(A\) after observing \(B\) is
-\(P(A \mid B)\). If we consider \(A\) to be a random variable instead of
-an event, we're guessing the distribution of \(A\) after observing a
-random variable/event B and so \(P(A \mid B)\) would be an
-\textbf{\emph{a posteriori} distribution}, (or again, just the
-posterior).
-
+Also worth knowing the fancy terminology: 
+\begin{enumerate}
+  \tightlist
+  \item
+  the \textbf{\textit{a priori} probability} or just the \textbf{prior} 
+  \index{prior (Bayesian statistics)}
+  is what 
+  we thought would be the
+  probability that a random variable takes on a certain value before we
+  observed anything. So the \emph{a priori} probability (or just prior)
+  for the event \(A\) would be \(P(A)\). If we consider \(A\) to be a
+  random variable instead of an event, we're guessing the distribution of
+  \(A\) and so \(P(A)\) would be an \textbf{\textit{a priori} distribution}
+  (or again, just the prior). 
+  \item
+  the \textbf{\textit{a posteriori}
+  probability} or just the \textbf{posterior}
+  \index{posterior (Bayesian statistics)}
+  is what we think the
+  probability that a random variable takes on a certain value is after
+  observing something. In this case, the \emph{a posteriori} probability
+  (or just posterior) of the event \(A\) after observing \(B\) is
+  \(P(A \mid B)\). If we consider \(A\) to be a random variable instead of
+  an event, we're guessing the distribution of \(A\) after observing a
+  random variable/event B and so \(P(A \mid B)\) would be an
+  \textbf{\textit{a posteriori} distribution}, (or again, just the
+  posterior).
+\end{enumerate}
 Now, in cases of inference, we normally have some data on the likelihood
 of one of the conditionals -\/- let's say \(P(B \mid A)\) to avoid
 flipping our equation around again -\/- via empirical counts. So we've
@@ -255,7 +389,9 @@ Consider \(P(A,B)\) again. What would we get if we added \(P(A,B)\) over
 all possible values of A? (Remember we said that \(A \sim \alpha\), so A
 could have been some other event within the set \(\alpha\).) That's
 basically just saying that we don't care what value \(A\) is, so we end
-up with \(P(B)\)! ('!' used to denote excitement, not factorialization.)
+up with \(P(B)\)!\footnote{
+  `!' used to denote excitement, not factorialization.
+  }
 And conveniently, we'd already have a way to estimate these values:
 
 \[\begin{split} P(B) &= \sum_{A \in \alpha} P(A,B) \\
@@ -325,22 +461,23 @@ Let's call the constraint contour line (which we aren't allowed to
 change and is set to some constant \(c\)) \(G\) and the function contour
 line (which we can change by varying \(m\)) \(F(m)\). If we think about
 it for a bit, we'll see that \emph{solving our problem is analogous to
-choosing the largest value of \(m\) so that \(F(m)\) ``touches" \(G\) in
-the fewest number of places while still actually ``touching" \(G\).}
+choosing the largest value of \(m\) so that \(F(m)\) ``touches'' \(G\) in
+the fewest number of places while still actually ``touching'' \(G\).}
 Consider the alternatives:
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
+% \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   \emph{\(F(m)\) does not touch \(G\) at all:} Well, that means that
   when we look at the set of points that comprise the contour line
-  \(f(x,y) = m\) (i.e., the \textbf{level set} of \(f\) corresponding to
+  \(f(x,y) = m\) (i.e., the \textbf{level set} \index{level set}
+   of \(f\) corresponding to
   a value of \(m\)), \emph{none} of those points lie on
   \(g(\vec{x}) = c\). So we ignored the constraint again -\/- oops.
 \item
   \emph{\(F(m)\) touches \(G\) too many times:} This implies that
-  \(F(m)\) cuts across \(G\) (if it didn't, then where did the ``extra"
+  \(F(m)\) cuts across \(G\) (if it didn't, then where did the ``extra''
   touches come from?) And in that case, why not increase \(m\) a bit
   more? We're assuming \(f\) is relatively well-behaved, so if you nudge
   \(m\) up a bit to \(m^+\), the contour line \(F(m^+)\) will be fairly
@@ -357,9 +494,9 @@ bump it down and you're cutting across the circle (and also not
 maximizing \(f\)).)
 
 Now, if \(F(m)\) and \(G\) just barely touch but do not cross, then
-their instantaneous ``slopes" at their touching point must be in the same
+their instantaneous ``slopes'' at their touching point must be in the same
 orientation and the contour lines are moving in the exact same
-``direction" -\/- if they weren't, then the touching point is a crossing
+``direction'' -\/- if they weren't, then the touching point is a crossing
 point. So how do we capture this notion?
 
 \subsection{Doin' me some gradients}\label{doin-me-some-gradients}
@@ -369,16 +506,17 @@ contour lines. (Seems like a deep statement, but with a bit of thought,
 you can see that it just comes from the definition/intuition of contour
 lines (on which the value is constant) and gradients (which points
 toward the direction that increases the function output the largest -\/-
-with no portion of the ``step" being wasted on movement that would keep
+with no portion of the ``step'' being wasted on movement that would keep
 the value constant).)
 
 So, we can convert out ``contour lines \(F(m)\) and \(G\) are in the same
-direction" directly to ``the gradients of \(f\) and \(g\) are in the same
-direction", i.e. \[\nabla f = \lambda \nabla g \]
+direction'' directly to ``the gradients of \(f\) and \(g\) are in the same
+direction'', i.e. \[\nabla f = \lambda \nabla g \]
 
 where \(\nabla\) is the usual gradient operator and \(\lambda \neq 0\),
 the scalar proportionality constant (it's the \emph{direction} that
 matters, not the magnitude), is called the \textbf{Lagrange multiplier}
+\index{Lagrange multiplier}
 (dude got a lot of things named after him).
 
 It's actually worth looking at this a bit more. We originally framed our
@@ -388,7 +526,7 @@ the constraint functions:
 
 \[\nabla f = \lambda \nabla g \quad \impliedby \quad \nabla f \ \text{is perpendicular to the contour } G \]
 
-It makes sense that the right-hand side would also be the case -\/- if
+It makes sense that the right-hand side would be the case -\/- if
 \(\nabla f\) \emph{did} have some part of it along \(G\), then we're
 wasting that part! Why wouldn't we go along \(G\) a bit more? We'd still
 be meeting our constraint, and since we stepped partially along the
@@ -439,7 +577,7 @@ Alright, now what? Well, if we were to write something like
 \[ L(x) = f(x) - g(x) \]
 
 we'd be \emph{almost} there, because if we took the gradient of \(L\)
-and set it equal to zero, we get the ``direction" constraint back. But at
+and set it equal to zero, we get the ``direction'' constraint back. But at
 the moment, we're making it so that the magnitudes of the two gradients
 have to be the same too (which doesn't have to be true) \emph{and} we
 forgot to incorporate our constraint again!
@@ -454,7 +592,8 @@ satisfy these requirements fairly simply:
 
 Now that it's achieved its final form (thankfully didn't take ten
 episodes of powering up), we change \(L\) to \(\mathcal{L}\) and call it
-the \textbf{Lagrangian} of \(f(x)\) (because dude needs more things
+the \textbf{Lagrangian} \index{Lagrangian}
+of \(f(x)\) (because dude needs more things
 named after him -\/- and you know, he \emph{did} revolutionize the study
 of classical mechanics with this formulation).
 
@@ -469,7 +608,7 @@ difference is that compared with the \(\lambda\) we get from the
 A neat consequence of the formulation of \(\mathcal{L}\) is that we can
 consider \(\lambda\) as a measure of how much we could improve \(f(x)\)
 by incrementing the value of \(c\) (which we've been considering a
-constant) by a differential amount. While it may seem to be ``clear" just
+constant) by a differential amount. While it may seem to be ``clear'' just
 by taking \(\mathcal{L}_c = \lambda\), it's a bit more subtle than that,
 since \(\mathcal{L}(x, \lambda; c)\) was formulated with \(c\) as a
 constant. The proof for this observation involves:
@@ -534,7 +673,7 @@ that \(\mathcal{L}_{\lambda _i} = g_i - c_i\):
 
 And Bob's your uncle.
 
-\section{Explaining the convenience, and a more generalizable intuition.}\label{explaining-the-convenience}
+\subsection{Explaining the convenience, and a more generalizable intuition.}\label{explaining-the-convenience}
 
 Earlier we just kind of accepted the convenience of our guess, but it's
 worth figuring out why it works. Remember that observation you kept in
@@ -544,11 +683,16 @@ your pocket (or other handy container)?
 
 If \(\nabla f\) had any part of it along \(G\), then we could step along
 \(G\) and further increase \(f\). This sounds extensible to more than
-one constraint! And in fact, the ``convenient" result captures this for
+one constraint! And in fact, the ``convenient'' result captures this for
 the contour line created by the intersection of all the constraints:
 
-\[\nabla f = \sum_{i=1}^k \lambda _i \nabla g_i  \quad \impliedby
-                        \quad \nabla f \ \text{is perpendicular to the intersection of all constraint contours } \bigcap _i G_i \]
+\[
+% \begin{multline*}  
+  \nabla f = \sum_{i=1}^k \lambda _i \nabla g_i  \impliedby
+  \nabla f \text{is perpendicular to the intersection
+  of all constraint contours } \bigcap _i G_i 
+% \end{multline*}
+\]
 
 Here, \(\bigcap _i G_i\) serves as the one contour line on which we can
 move along that satisfies all the constraints. (Presumably such
@@ -558,13 +702,14 @@ checked individually.)
 
 Now, since we're dealing with the same construct (a contour along which
 we can move that satisfies the constraints), the same reasoning applies
-pretty much verbatim -- \textbf{if \(\nabla f\) weren't perfectly
+pretty much verbatim -- \emph{\textbf{if \(\nabla f\) weren't perfectly
 perpendicular to \(\bigcap _i G_i\), we'd be wasting the component of
 the gradient going along \(\bigcap _i G_i\), \(\nabla f ^{\parallel}\).
-So we'd just step along the contour and improve our result.} 
-(Excessive bolding used to emphasize the fact that this is the more
-mathematically rigorous ``intuition" to have/remember.)
-
+So we'd just step along the contour and improve our result.}}\footnote{
+  Excessive bolding, italicizing, and a gratuitous footnote 
+  used to emphasize the fact that this is the
+  mathematically rigorous ``intuition'' to have/remember.
+}
 So that explains why the right-hand side makes sense. But how does that
 imply the left-hand side? Specifically, how do we get the linear
 combination part, \( \sum_{i=1}^k \lambda _i \nabla g_i \)?
@@ -577,13 +722,14 @@ In fact, the gradients form a \emph{basis} for the space perpendicular
 to \(\bigcap _i G_i\), because of the symmetric property of the
 perpendicularity relation. More curtly, call the span of the gradients
 \(S\). By construction, \(\bigcap _i G_i \perp S\), and by symmetry, \(S
-\perp \bigcap _i G_i\).) We want \(\nabla f\) to be perpendicular to
+\perp \bigcap _i G_i\). We want \(\nabla f\) to be perpendicular to
 \(\bigcap _i G_i\) (as we've said before). Well then, that means
 \(\nabla f \in S\), which implies that it \(\nabla f\) can be written as
 a linear combination of \(S\)'s basis vectors, i.e., \( \nabla f =
 \sum _{i=1}^k \lambda _i \nabla g_i \). Bam! Stick that beautiful
 \(Q.E.D.\) square in the corner, we are done! \sout{Would do it myself were I
-writing this in \(LaTeX\) and not Markdown.} Well, since we've migrated to LaTeX, I think we owe ourselves a box!
+writing this in \(LaTeX\) and not Markdown.} 
+Well, since we've migrated to LaTeX, I think we owe ourselves a box!
 \begin{flushright}$\blacksquare$\end{flushright}
 Totally worth it.
 \\
@@ -600,19 +746,19 @@ be.}\label{not-nearly-as-scary-as-they-make-it-out-to-be.}
 
 For all the pomp and circumstance around this, with the caravan of names
 in the name itself and the esoteric terms used in its description like
-``complementary slackness" and ``dual feasibility", the
+``complementary slackness'' and ``dual feasibility'', the
 Karush-Kuhn-Trucker (KKT) conditions aren't nearly as hard to follow as
 one would expect if the method of Lagrange multipliers for multiple
 constraints makes sense/is comfortable.
 
-First, we pose the optimization problem in ``standard form" (which mainly
+First, we pose the optimization problem in ``standard form'' (which mainly
 just saves us from lugging around extra constants like we did with \(c\)
 in the Lagrange multipliers explanation):
 
 Optimize \(f(x)\) subject to \(g_i(x)\leq 0\), \(h_j(x)=0\), with
 \(i \in \{1, \cdots, k\}\) and \(j \in \{1, \cdots, l\}\) (so \(k\)
 inequality constraints and \(l\) equality constraints). Below, we'll
-assume ``optimize" = ``maximize". We'll point out where changes will occur
+assume ``optimize'' = ``maximize''. We'll point out where changes will occur
 if you're minimizing instead.
 
 \subsubsection{Primal feasibility}\label{primal-feasibility}
@@ -623,14 +769,15 @@ original constraints so we don't forget they exist:
 \[ g_i(x)\leq 0 \ \forall \ i, \ h_j(x) = 0 \ \forall \ j \]
 
 This is called the \textbf{primal feasibility} condition because it's a
-condition for the feasibility of the original, main, ``primal" problem.
+condition for the feasibility of the original, main, ``primal'' problem.
 
 \subsubsection{The dual formulation}\label{the-dual-formulation}
 
-We refer to the original problem as the ``primal" problem to contrast it
-with the ``dual" problem. That sounds all fancy, but we've made a dual
+We refer to the original problem as the ``primal'' problem to contrast it
+with the ``dual'' problem. That sounds all fancy, but we've made a dual
 problem before when we formed the Lagrangian for our
-equality-constraints-only version. That is, the dual problem is simply a
+equality-constraints-only version. That is, the 
+\textbf{dual problem} \index{dual problem} is simply a
 reframed but equivalent form of the primal problem. We did it before by
 solving a function that had all our constraints wrapped in one clean
 package (the Lagrangian form of the problem). And hey, that was both a
@@ -668,7 +815,7 @@ doing a minimization instead. We'll discuss that later on.)
 
 For one thing, our dual problem won't mimic our primal problem of
 optimizing \(f\) at all if we let any \(\mu_i\) be less than zero. If we
-did, then we'd easily ``win" the optimization game by choosing some \(x\)
+did, then we'd easily ``win'' the optimization game by choosing some \(x\)
 such that \(g_i(x) < 0\) (which is still satisfies our primal
 feasibility conditions), then setting the corresponding \(\mu_i\) to
 arbitrariliy large negative numbers -\/- who cares about \(f(x)\)
@@ -688,11 +835,11 @@ value \(g_i\) takes at an optimal point:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\tightlist
+% \tightlist
 \item
   \(g_i(x^*) < 0\): That means the inequality constraint is not actually
-  stopping the function from getting to a ``better" location where
-  \(g_i > 0\) (our optimal-point finder never hit a wall -\/- there's an
+  stopping the function from getting to a ``better'' location where
+  \(g_i > 0\) (our optimal-point finder didn't hit a wall -- there's an
   open neighborhood around \(x^*\) that still satisfies the constraint),
   so the constraint isn't being restrictive at all. So we don't have to
   worry about it!
@@ -736,7 +883,7 @@ Let's once again consider our two cases:
   is active, so \(\nabla g_i\) is part of the basis for \(S\). So we
   \emph{need} \(\mu_i\) to be nonzero so that we can describe any vector
   in \(S\) (of which \(\nabla f\) is an element, as we talked about when
-  we ``explained the convenience" for the multiple-equality-constraint
+  we ``explained the convenience'' for the multiple-equality-constraint
   formulation earlier).
 \end{enumerate}
 
@@ -777,12 +924,12 @@ above equations in one of the following ways:
   (again, note the minus sign).
 \item
   Keep \(L\) the same. Replace the dual feasibility condition with \(
-  \mu\_i \leq 0 \)
+  \mu_i \leq 0 \)
 \end{enumerate}
 
 The sign changes just ensure that our dual problem is still well-formed
 for the minimization problem (if you don't flip the sign somewhere, then
-we can just make arbitrarily ``good" values by playing with \(\mu_i\)
+we can just make arbitrarily ``good'' values by playing with \(\mu_i\)
 again; and if you flip the sign in the formulation of \(L\), you have to
 make sure you update the gradient expression accordingly (Option 1)).
 
@@ -790,13 +937,18 @@ make sure you update the gradient expression accordingly (Option 1)).
 much?}\label{if-its-not-that-bad-why-did-you-talk-so-much}
 
 ...OK, so maybe this was a lot more to explain than I had given credit
-at first. But it's really not that bad! The main intuition is that: 1.
-either the inequality constraint is lax and doesn't actually do any
-``constraining"; or 2. the inequality constraint is actually stopping us,
-in which case it just becomes another equality constraint!
-
+at first. But it's really not that bad! The main intuition is that either:
+\begin{enumerate}
+  \tightlist
+  \item
+    the inequality constraint is lax and doesn't actually do any
+``constraining''; or 
+  \item 
+    the inequality constraint is actually stopping us,
+    in which case it just becomes another equality constraint!
+\end{enumerate}
 All the blah-blah-blah is to make sure we dotted our \(i\)'s and crossed
-out \(t\)'s. (And boy, did we...)
+our \(t\)'s. (And boy, did we...)
 \\
 \\
 - DK, 4/30/18
@@ -808,11 +960,63 @@ out \(t\)'s. (And boy, did we...)
 
 (Avert your eyes!)
 
-    
+% \section{Mutual information and conditional entropy.}\label{mutual-information-and-conditional-entropy}
+
+% This makes describing the \textbf{mutual information between two random
+% variables \(X\) and \(Y\)} (or \textbf{information gain between two random variables})in terms of a KL divergence fairly intuitive. Just
+% running off the name, if X and Y were independent, you'd expect no
+% mutual information between them --- 
+% observing one variable wouldn't tell you anything about the other variable. 
+% In such a case, \(P(X,Y) = P(X)P(Y)\), and 
+% \( KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) = 0\). 
+% And in fact, one way of writing the mutual information 
+% between random variables X and Y is exactly
+
+% \[ I(X;Y) = KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) \]
+% \\
+% which I think is pretty neat.
+% \\
+% In fact, let's play this game of ``critical thinking'' a bit more. 
+% Just a second ago, we were talking about whether Y gives information about X
+% (or vice-versa -- let's stick with Y for now). If Y \emph{does} give information
+% about X and we've observed Y already, we'll be less surprised by the value of X
+% we do end up seeing. Hmm, surprise... Sounds like an extension to entropy is 
+% right in front of us! Let's go for it.
+
+% We want the \textbf{conditional entropy} of a random variable Y with respect to X 
+% to have the relationship where
+
+% \[ H(X) + H(Y|X)  \]
+
+% \[
+%   \begin{split}
+%       H(Y \mid X) &= E_{x \sim X}\left[H(Y)\right] \\
+%                   &= \sum_{x \in X} P(x) \times H(Y|X = x)
+%   \end{split}
+% \]
+
+% Let's expand \(H(Y|X = x)\):
+
+% \[
+%   H(Y| X = x) = \sum_{y \in Y} p(y|x) \times \log\left(\frac{1}{p(y|x)}\right)
+% \]
+
+% Now we stick it back up above and play with it a bit:
+
+
+% And bam!
 
 
     % Add a bibliography block to the postdoc
     
     
+
+
+
+    % show index
+      % add index to table of contents
+      \clearpage % flush all floating figures, "officially" start on next page
+      \addcontentsline{toc}{chapter}{Index}  % add entry to ToC
+    \printindex % actually print the index
     
 \end{document}
