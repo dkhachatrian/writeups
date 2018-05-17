@@ -1,3 +1,6 @@
+% Let's remember, if we're looking for a particular symbol, this link can help:
+% http://detexify.kirelabs.org/classify.html
+
 \documentclass[letterpaper,12pt]{report}
     \usepackage[margin=1in,letterpaper]{geometry}%%his shaves off default margins (which are too big)
     \usepackage{amsmath} %This lets us do more advanced math stuff -- in particular create unnumbered equations
@@ -22,6 +25,20 @@
     \titleformat{\chapter}{\bfseries\Huge}{\thechapter.}{1.5ex}{}
     \titlespacing{\chapter}{0pt}{10pt}{30pt}
 
+
+
+
+
+
+
+
+
+    \usepackage{bbm} % allow for fancy-case of numbers
+
+
+
+
+
     \usepackage{makeidx} % allows for indexing
     \makeindex
 
@@ -38,6 +55,11 @@
 
 
 \begin{document}
+
+% commands
+
+
+
 
 % Document parameters
 \title{A quick(ish) reference for some concepts whose
@@ -169,7 +191,9 @@ respect to q". The closer the KL divergence is to 0, the closer \(q\) is
 to being \(p\), and \( KL(p \mid\mid q) = 0 \implies p = q \) at every
 point in the domain of \(q\) (which is the same as the domain of \(p\)). 
 (From the above formula, 
-it should be clear that the KL divergence is not symmetric.)
+it should be clear that the KL divergence is not symmetric. The
+first argument is the ``correct'' distribution and we're measuring how suboptimal
+the second argument/distribution is at replicating the first one.)
 
 This makes describing the
 \textbf{mutual information between two random variables \(X\) and \(Y\)}
@@ -954,6 +978,244 @@ our \(t\)'s. (And boy, did we...)
 - DK, 4/30/18
 
 \newpage
+
+
+\chapter{Machine learning methods.}\label{machine-learning-methods}
+
+
+
+\section{Boosting.}\label{boosting}
+
+There's a lot of buzz about the winning models of many Kaggle competitions 
+use gradient-boosted trees. Considering its apparent effectiveness, it'd be worth understanding
+what ``gradient-boosted trees'' are and how they work. But before we jump into \emph{that}, 
+we should probably figure out what ``boosting'' means in this context.
+
+\subsection{An analogy to Taylor expansions.}
+
+
+\textbf{Boosting}\index{boosting (machine learning)} is a meta-algorithm involving
+the ensembling of many ``weak'' learners to form arbitrarily ``strong'' learners.
+A ``weak'' learner is a classifier/regressor (which we'll just call a \emph{predictor}) 
+that can only be weakly correlated with the true underlying 
+classication/regression (\emph{prediction}) model we are trying to 
+learn. A ``strong'' learner should be able to approximate the true prediction model
+arbitrarily closely.
+
+To make sense of the somewhat vague denotation above, 
+I like to think of writing a Taylor expansion of some (presumably non-polynomial)
+function, say \(f(x) = e^x\). Let's say we're expanding about \(x_0 = c\).\footnote{
+  Since the Taylor expansion is focused on being accurate
+  \emph{in the neighborhood of the point the expansion is centered around}, 
+  we can interpret this ``Taylor model'' as weighting inputs/examples near \(c\) 
+  as far more important than examples from other parts of the input space.
+} 
+Then the n'th-order Taylor expansion is
+\[ T_{n,c}(x) = \sum_{i=0}^{n} f^{(i)}(c) \times \frac{(x-c)^i}{i!}\]
+
+In a sense, each term of the sum is weakly correlated with the target function $f$ in that
+if we consider the \(i\)'th term \(T_n[i]\), its \(i\)'th derivative is equal to 
+that of \(f\) at \(x = c\) and so can be called a ``weak predictor'' of \(f\):
+\[T_{n,c}[i]^{{i}}(c) = f^{(i)}(c) \]
+
+Another important note is that none of our weak predictors are redundant; each of them
+contains at least \emph{some} new information about \(f\).\footnote{
+  If you fancy appropriating a linear algebra term, you can also consider each of the weak
+  predictors ``linearly independent'' of each other. 
+
+  This is actually more on-the-nose than
+  you might think. Just as we can think of vector spaces of \(R^n\) as being spanned by
+  \(n\) linearly independent basis vectors, we can think of a 
+  \emph{function space}\index{function space} being
+  spanned by an infinite number of linearly independent basis vectors, some of which
+  are \((x-c)^0, (x-c)^1, (x-c)^2, \cdots\). 
+  So a Taylor expansion approximates a function \(f\) using a linear combination of
+  only the basis vectors corresponding to polynomials, with each basis vectors scaled 
+  by a certain amount (\(f^{(i)}(c) \times {i!}\)).
+}
+Alone, \(T_n[i]\) is a pretty underwhelming approximator \textendash{} it's only guaranteed to
+approximate \(f\) in a specific way at one specific point. 
+That isn't necessarily useful for our goals \textemdash{}
+if we tried approximating \(e^x\) with the Taylor expansion's second term
+\(T_{n,c}[i = 1](x) = (x - c)\), we'd be off by hundreds, thousands, millions almost everywhere!
+
+The power of our ``weak predictors'' comes when we \emph{combine} them in some way 
+\textemdash{} in the case of the Taylor expansion, a uniformly weighted sum. 
+As we use more terms (i.e., more ``weak predictors''),
+the ensemble becomes arbitrarily accurate to the target function \(f\) near \(c\) and so is
+a ``strong predictor'' of \(f\).
+
+
+
+\subsection{Meta-algorithm vs. algorithm}\label{meta-algorithm-vs-algorithm}
+
+Importantly, we said that boosting is a \emph{meta}-algorithm, a meta-strategy that we
+apply onto a strategy that \emph{actually} performs the approximating. 
+In our ``Taylor boosting'' method, the strategy we use to approximate \(f\) is to create an
+approximator \(T_{n,c}[i]\) that has the same \(i\)'th derivative of \(f\) at \(c\), and the
+meta-strategy was to combine all those approximators together via addition. We can perform
+boosting on other strategies. For example, consider a ``Dirac boosting'' method, where our
+weak approximators are functions \(D_i\) where
+\[D_i(x) = \delta(x-i) \times f(x) = \mathbbm{1}\left[x = i\right] \times f(i) \]
+
+where \(\delta\) is the Dirac delta function and \(\mathbbm{1}\) is the indicator function.
+So basically, our approximator memorizes the function at a single point perfectly and guesses 
+that it equals zero everywhere else. Alone, this weak predictor is pretty terrible, but
+we can perform ``Dirac boosting'' by combining many such Dirac approximators \(D_i\) in the
+following way: given an input \(x\), we find the Dirac approximator whose center is closest
+to \(x\), and output that as the result.\footnote{
+  (Basically a \emph{k-nearest neighbors} regressor where \(k=1\).)
+} 
+The greater the number/density of Dirac approximators along the input space,
+the more accurate our boosted approximator becomes!\footnote{
+  Fun fact: Although there are cases where a Taylor expansion can perfectly recreate the
+  target function (e.g., \(f(x) = e^x\)), our ``Dirac boosting'' method cannot \emph{ever}
+  perfectly recreate \emph{almost any} function whose input space is over \(\mathbb{R}\), even if
+  we use an infinite number of Dirac approximators in our ensemble! More specifically,
+  it can never perfectly recreate any function \(f\) if
+  \[\lambda\left(\{x \mid f(x) \neq 0\}\right) > 0\]
+  where \(\lambda\) is the \emph{Lebesgue measure}\index{Lebesgue measure}.
+  This is because 
+  our Dirac ensemble can only be made up of a \emph{countable} number of approximators which
+  each only memorize a single output, and it can be shown (via, e.g., Cantor's diagonlization
+  argument) that the set of real numbers is a larger sort of infinity
+  (whose size is 
+  \emph{uncountably infinite}\index{sizes of infinity!uncountably infinite}) 
+  than the set of natural numbers (whose size is
+  \emph{countably infinite}\index{sizes of infinity!countably infinite}).
+}
+
+Even though we changed the algorithm by which we approximated our function (using our Dirac
+approximators instead of Taylor approximators), we still employed the \emph{meta}-algorithm
+of boosting to combine our weak predictors into a strong predictor. This should hopefully make
+the distinction between the two clear.
+
+\subsection{Where the analogy is left wanting.}\label{where-the-analogy-is-left-wanting}
+
+Now of course, the analogy isn't perfect. A Taylor expansion is performed on a known target
+function \(f\), but in a data science context, we don't have access to the actual
+function that is responsible for our data. We \emph{do} have a dataset, a set of samples from
+the actual function, which can serve as an \emph{approximation} of the true function.
+So the best we can do is to use the data to create such an approximation (our model). 
+
+Since the dataset is almost certain not to contain all of the intricacies of the underlying
+function, we normally don't want to make our model fit the data \emph{too} well
+(good ol' \emph{overfitting}\index{overfitting}). Instead, we tune our model so that it
+minimizes a
+\emph{loss function (or objective function)}\index{loss function}, 
+which we hope we've set up cleverly enough so that
+the model is a really good approximation of the underlying function when it reaches a minimum
+of the loss function (for example, by introducing terms in the loss function that punish the
+model for overfitting the dataset). We didn't specify an explicit loss function when
+improving our ``Taylor'' and ``Dirac'' ensemble examples since we could explicitly observe the
+actual function we were trying to fit.
+
+% Keeping in mind all these
+% \sout{caviar} caveats, we cam use the Taylor expansion as an example of 
+% ``making a strong predictor by ensembling weak predictors''.
+
+\subsection{Gradient boosting.}\label{gradient-boosting}
+
+
+
+Alright then, so what is gradient boosting? 
+% It's when we construct our \(i+1\)'th weak predictor
+% based on the residuals of the target value (serving as a sort of predictor for the gradient
+% of the loss function) and the value we predicted with our best-fit
+% ensemble of the first \(i\) weak predictors, then weight the \(i+1\)'th weak predictor so that
+% the ensemble of the first \(i+1\) weak predictors minimizes the loss as much as possible.
+
+% That was a bit of a mouthful, so let's break it down a bit. 
+To follow the usual algorithm
+on which gradient boosting is employed, we'll use decision trees.
+We have our model \(M(x)\), training examples \((x_a, y_a)\) and a loss function
+\(L(y_a, y_p)\), where \(y_p = M(x_a)\) is our current best prediction for \(y_a\).\footnote{
+  It's worth
+  remembering that the loss function can be as fancy as we'd like as long as its gradient
+  can be computed analytically from the actual and predicted values.
+  % For example, if we had target vectors and we only cared about being in the same direction
+  % (and magnitude didn't matter), the loss function could be the cosine of the angle between
+  % the two vectors:
+  % \(L(y_a, y_p) = \frac{y_a^Ty_p}{\lvert y_a \rvert \lvert y_p \rvert} + 1\)
+}
+We'll be creating various weak learners \(h_i(x)\), and we'll denote our ensembles of the first
+\(i\) weak learners (including \(i=0\)) as \(E_i(x)\). We decide that the way we're going
+to ensemble our weak learners is by a summation \(E_i(x) = \sum_{i} h_i(x)\),
+and we enter the rodeo.
+% for some \(\gamma_i\) for each learner that's learned during training 
+% (as shall be explained below).
+
+We start with a baseline prediction, the mean of \(y_a\), i.e. 
+\(M(x) \leftarrow E_0(x) = h_0(x) = \bar{y_a}\).
+Now, we're going to create and fit a new weak learner \(h_1(x)\). But since we're going to
+make our stronger learner via \(E_1(x) = E_0(x) + h_1(x)\), we can just fit \(h_1(x)\)
+to a sort of \emph{pseudo-residual determined by the loss function}, 
+\(y_{pr,1} = - \frac{dL}{dE_0} \Bigr|_{\left(x_a, y_a\right)}\) 
+for all \(\left(x_a, y_a\right)\) in our dataset. 
+We then fit \(h_1(x)\) to the dataset of
+pseudo-residuals \((x_a, y_{pr,1})\) as is appropriate for our weak learner \textemdash{}
+in the case of decision trees, we perform recursive partitioning until some 
+user-specified condition is met (e.g. any further partitioning would yield leaves with
+fewer than \(c\) entries, or the \href{https://en.wikipedia.org/wiki/Information_gain_ratio}
+{information gain ratio} of any such partition would be smaller
+than some threshold) and then taking the mean of each leaf as the predictor for any
+inputs that fall into that leaf at prediction time).
+% \footnote{
+%   If our weak learner were instead, say, \(h_i(x) = k_i \times x^i\), our method of fitting might
+%   instead be to pick \(k_i\) such that the mean-square-error over the examples is minimized.
+% }
+% Now, we want our new ensemble \(E_1(x) = E_0(x) + \gamma_1 h_1(x)\) to minimize \(L\) as much
+% as it can (or at least to improve the performance by at least a certain amount), so you find 
+% \(\gamma_1\) that \(\frac{dL}{dy_p(\gamma_1)} = 0\). Since we've made our loss function
+% easily differentiable by \(y_p\) and \(y_p\) has a simple relationship to 
+% (For tree-based models, you can perform this for each individual leaf.)
+% Now that you found \(\gamma_1\),
+Now that we've fit \(h_1(x)\) to the pseudo-residuals as best as we can, adding \(h_1\) to our
+previous best predictor will further decrease the loss function, so we 
+update our model \(M(x) \leftarrow E_1(x) = E_0(x) + h_1(x)\). 
+
+Now we're sort of at the same place we were at earlier, just with a slightly better model.
+So we can create a new weak learner \(h_2(x)\) by fitting it to the ``second-order''
+pseudo-residuals \(y_{pr,2} = - \frac{dL}{dM} \Bigr|_{\left(x_a, y_a\right)}\) 
+(where now \(M = E_1(x)\)),
+then find the constant multiplier that minimizes the
+main loss function, then we update our model \textemdash and on and on we go.
+
+Here, we can view the \((i+1)\)'th weak predictor as attempting 
+to approximate the \emph{gradient}
+of the loss function when the previous best predictor was used.
+We fit to the \emph{negative} of the derivative since we're trying to \emph{minimize}
+our loss function, so we want to correct toward the direction opposite the derivative
+(and since we're ensembling via addition, the ``opposite'' part comes into play
+at the pseudo-residual level).
+Since the gradient of the loss function determines how we create our weak learners/ensemble, 
+we call this method \textbf{gradient boosting}. And it apparently works wonders
+when used with decision trees as the weak predictors.\footnote{
+  For the right sorts of problems, when you tune it correctly!
+  }
+
+The expression for our pseudo-residuals seem to come out of nowhere, but let's
+consider \emph{actual} residuals for a moment: \(y_r = y_p - y_a\). When we fit
+our weak learner to try and predict the negative of these residuals \(\{-y_r\}\) 
+and add this to our ensemble, 
+we're taking a step in minimizing the mean-square-error
+of our predictor: \(L = MSE = \frac{1}{2} \left(y_p - y_a\right)^2\). And you can see that
+\(- \frac{d(MSE)}{dy_p} = -y_r\). So rather than stick to just this one type of residual,
+why not fit to the gradient of whatever loss function we'd like? 
+Hence the term and our expression for ``pseudo-residuals''.
+
+(Note: For further references and useful links, see this footnote.)\footnote{
+(The explanation provided by Abhishek Ghose in \href{https://www.quora.com/What-is-an-intuitive-explanation-of-Gradient-Boosting}
+{this Quora post} is quite good and helped me properly grasp
+the concept of gradient boosting. Other main reference was
+\href{http://blog.kaggle.com/2017/01/23/a-kaggle-master-explains-gradient-boosting/}
+{this Kaggle blog post}. \href{http://arogozhnikov.github.io/2016/07/05/gradient_boosting_playground.html}
+{This page} allows for an interactive demo of gradient-boosted decision trees in action.)
+}
+\\
+\\
+- DK, 5/17/18 (shoot, it's late again...)
+
 
 
 \chapter{Drafts and WIPs}\label{drafts-and-wips}
