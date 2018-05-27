@@ -22,6 +22,8 @@
       linkcolor = purple
     }
     \usepackage{titlesec}
+    \usepackage{enumitem} % be able to reference specific items in a list
+
     \titleformat{\chapter}{\bfseries\Huge}{\thechapter.}{1.5ex}{}
     \titlespacing{\chapter}{0pt}{10pt}{30pt}
 
@@ -370,42 +372,73 @@ And then it's simple to write out Bayes' Theorem as it's often written
 Using the Bayesian interpretation: At first we thought the probability
 that \(A\) occurs is \(P(A)\). After we saw that \(B\) happened, we
 re-evaluate the probability that \(A\) occurs with a scaling factor \(
-\frac {P(B \mid A)} {P(B)} \).
+\frac {P(B \mid A)} {P(B)} \), which answers the following question: considering I've
+seen \(B\) occur, how much \emph{more} likely did I observe \(B\) due to
+\(A\) also being the case (the numerator \(P(B \mid A)\)), versus my having observed
+\(B\) just because of how common/rare it is (the denominator, \(P(B)\))? To see
+why this scaling factor makes sense, let's consider some edge cases:
+
+\begin{itemize}
+  \tightlist
+  \item 
+    \emph{A and B are uncorrelated}: Then observing B is irrelevant when it comes
+    to predicting A. So our scaling factor should be 1. And in fact, the lack of 
+    correlation implies \(P(B \mid A) = P(B) \implies \frac {P(B \mid A)} {P(B)} = 1\).
+  \item
+    \emph{A precludes B}: Then via contrapositivity, if we saw B, A must not be the case.
+    So our scaling factor should be 0. And since A precludes B,
+    \(P(B \mid A) = 0 \implies \frac {P(B \mid A)} {P(B)} = 0\).
+  \item
+    \emph{B implies A (and no other outcome from \(\alpha\))}:
+    Then the total probability
+    must become 1, and the scaling factor must come out to be \(\frac {1} {P(A)}\).
+    We'll come back to this in a bit.
+\end{itemize}
 
 Also worth knowing the fancy terminology: 
 \begin{enumerate}
   \tightlist
   \item
-  the \textbf{\textit{a priori} probability} or just the \textbf{prior} 
-  \index{prior (Bayesian statistics)}
-  is what 
-  we thought would be the
-  probability that a random variable takes on a certain value before we
-  observed anything. So the \emph{a priori} probability (or just prior)
-  for the event \(A\) would be \(P(A)\). If we consider \(A\) to be a
-  random variable instead of an event, we're guessing the distribution of
-  \(A\) and so \(P(A)\) would be an \textbf{\textit{a priori} distribution}
-  (or again, just the prior). 
+    the \textbf{\textit{a priori} probability} or just the \textbf{prior} 
+    \index{prior (Bayesian statistics)}
+    is what 
+    we thought would be the
+    probability that a random variable takes on a certain value before we
+    observed anything. So the \emph{a priori} probability (or just prior)
+    for the event \(A\) would be \(P(A)\). If we consider \(A\) to be a
+    random variable instead of an event, we're guessing the distribution of
+    \(A\) and so \(P(A)\) would be an \textbf{\textit{a priori} distribution}
+    (or again, just the prior). 
   \item
-  the \textbf{\textit{a posteriori}
-  probability} or just the \textbf{posterior}
-  \index{posterior (Bayesian statistics)}
-  is what we think the
-  probability that a random variable takes on a certain value is after
-  observing something. In this case, the \emph{a posteriori} probability
-  (or just posterior) of the event \(A\) after observing \(B\) is
-  \(P(A \mid B)\). If we consider \(A\) to be a random variable instead of
-  an event, we're guessing the distribution of \(A\) after observing a
-  random variable/event B and so \(P(A \mid B)\) would be an
-  \textbf{\textit{a posteriori} distribution}, (or again, just the
-  posterior).
+    the \textbf{\textit{a posteriori}
+    probability} or just the \textbf{posterior}
+    \index{posterior (Bayesian statistics)}
+    is what we think the
+    probability that a random variable takes on a certain value is after
+    observing something. In this case, the \emph{a posteriori} probability
+    (or just posterior) of the event \(A\) after observing \(B\) is
+    \(P(A \mid B)\). If we consider \(A\) to be a random variable instead of
+    an event, we're guessing the distribution of \(A\) after observing a
+    random variable/event B and so \(P(A \mid B)\) would be an
+    \textbf{\textit{a posteriori} distribution}, (or again, just the
+    posterior).
 \end{enumerate}
-Now, in cases of inference, we normally have some data on the likelihood
-of one of the conditionals -\/- let's say \(P(B \mid A)\) to avoid
-flipping our equation around again -\/- via empirical counts. So we've
-already guessed some prior \(P(A)\), and we're trying to improve it by
+
+\subsection{Substitution to the rescue.}\label{subsitution-to-the-rescue}
+Now, in cases of inference via supervised learning, 
+we have some data on the probability of one of the observable variables
+\textemdash{} let's say we observe variables \(A \sim \alpha\) \textemdash{}
+and the labels/targets for the observed variables (let's say \(B ~ \beta\)).
+Then we can approximate \(P(B \mid A\)) and \(P(A)\) via empirical counts \textemdash{}
+and would want to fit a continuous function, e.g. a Gaussian, to \(P(A)\) to
+handle out-of-sample feature combinations.
+So we've already guessed some prior \(P(A)\), and we're trying to improve it by
 calculating the posterior \( P(A \mid B) \). But what if we don't know
-\( P(B) \)? Is our guessing and data collection all for naught!?
+\( P(B) \)? Do we need to also guess a function for \( P(B) \)? Well, that would
+involve another outside assumption which may or may not be true, and usually we want
+to make as few assumptions as possible and
+``let the data speak for itself''.
+So then is our guessing and data collection all for naught!?
 Thankfully, not so! The answer lies right under our noses -\/- or in
 this case, in our previous calculations.
 
@@ -425,17 +458,34 @@ Our summand is the same as the values we've estimated either by guessing
 (\(P(A)\)) or from our data (\(P(B \mid A)\))! With that, we can rewrite
 our earlier equation as
 
-\[ P(A \mid B) = \frac{P(A) \times P(B \mid A)} {\sum_{A \in \alpha} P(A) \times P(B \mid A)} \]
+\[ P(A \mid B) = 
+  \frac{P(A) \times P(B \mid A)} {\sum_{A' \in \alpha} P(A') \times P(B \mid A')} \]
 
 With that, we can crunch the numbers and perform Bayesian inference like
-a champ or have a machine do it for us like a prudent delegator. Though
-for our everyday activities, we often don't have the luxury of having
-someone/something checking our heuristics. So it's always worth trying
-to keep in mind that oftentimes, many different factors that you may not
-know or take into consideration can culminate in observations that
-surprise you -\/- there's a good reason you aren't told to constantly
-get yourself tested for a medical condition if you don't believe to be
-at risk!
+a champ or have a machine do it for us like a prudent delegator.
+\\
+\\
+Returning to our discussion of our scaling factor, we needed to show that if
+we're trying to predict \(P(A \mid B)\) via
+\[P(A \mid B) = P(A) \times \frac {P(B \mid A)} {P(B)} \]
+and B implies A (and nothing else from \(\alpha\), then the right-hand side should equal 1.
+
+Expanding P(B), we get
+\[ P(A \mid B) = 
+  \frac{P(A) \times P(B \mid A)} {\sum_{A' \in \alpha} P(A') \times P(B \mid A')} \]
+
+Via our implication, we have that \(P(B \mid A') = 0 \forall A' \neq A\).
+So the denominator simplifies to just \(P(A) \times P(B \mid A)\), which is exactly the
+numerator! So then \(\left(B \implies A\right) \implies P(A \mid B) = 1\) (which implies
+\( \frac {P(B \mid A)} {P(B)} = \frac {1} {P(A)} \)), as expected.
+% Though
+% for our everyday activities, we often don't have the luxury of having
+% someone/something checking our heuristics. So it's always worth trying
+% to keep in mind that oftentimes, many different factors that you may not
+% know or take into consideration can culminate in observations that
+% surprise you -\/- there's a good reason you aren't told to constantly
+% get yourself tested for a medical condition if you don't believe to be
+% at risk!
 \\
 \\
 - DK (4/24/18)
@@ -1194,7 +1244,7 @@ when used with decision trees as the weak predictors.\footnote{
   For the right sorts of problems, when you tune it correctly!
   }
 
-The expression for our pseudo-residuals seem to come out of nowhere, but let's
+The expression for our pseudo-residuals may seem to come out of nowhere, but let's
 consider \emph{actual} residuals for a moment: \(y_r = y_p - y_a\). When we fit
 our weak learner to try and predict the negative of these residuals \(\{-y_r\}\) 
 and add this to our ensemble, 
@@ -1222,52 +1272,207 @@ the concept of gradient boosting. Other main reference was
 
 (Avert your eyes!)
 
-% \section{Mutual information and conditional entropy.}\label{mutual-information-and-conditional-entropy}
+% TODO: Try and get from
+% Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
+% -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
+% -> molecular orbital theory -> Beer-Lambert Law and *absorption* of light in media
+% next,
+% what determines reflection vs transmittance (physics and light properties)
+% finally,
+% tie together to blackbody radiation and the ultraviolet catastrophe
+% (interest in blackbody radiation came from reading it in the app Quantum)
 
-% This makes describing the \textbf{mutual information between two random
-% variables \(X\) and \(Y\)} (or \textbf{information gain between two random variables})in terms of a KL divergence fairly intuitive. Just
-% running off the name, if X and Y were independent, you'd expect no
-% mutual information between them --- 
-% observing one variable wouldn't tell you anything about the other variable. 
-% In such a case, \(P(X,Y) = P(X)P(Y)\), and 
-% \( KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) = 0\). 
-% And in fact, one way of writing the mutual information 
-% between random variables X and Y is exactly
+% also before blackbody radiation, consider
+% Boltzmann distribution / partition function
+% approximation of multinomial distribution above with an exponential funciont
+% via the *Central Limit Theorem* (explain)
 
-% \[ I(X;Y) = KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) \]
-% \\
-% which I think is pretty neat.
-% \\
-% In fact, let's play this game of ``critical thinking'' a bit more. 
-% Just a second ago, we were talking about whether Y gives information about X
-% (or vice-versa -- let's stick with Y for now). If Y \emph{does} give information
-% about X and we've observed Y already, we'll be less surprised by the value of X
-% we do end up seeing. Hmm, surprise... Sounds like an extension to entropy is 
-% right in front of us! Let's go for it.
+% generator functions
+% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
 
-% We want the \textbf{conditional entropy} of a random variable Y with respect to X 
-% to have the relationship where
+% Boltzmann distribution (and statistics for for bosons and fermions) 
+% -> one example of a derivation of the equipartition theorem
+% -> classical Rayleigh-Jeans law -> UV catastrophe / blackbody radiation ()
 
-% \[ H(X) + H(Y|X)  \]
+% virial theorem
 
-% \[
-%   \begin{split}
-%       H(Y \mid X) &= E_{x \sim X}\left[H(Y)\right] \\
-%                   &= \sum_{x \in X} P(x) \times H(Y|X = x)
-%   \end{split}
-% \]
+% generator functions to handle cases where states have unequal probabilities of
+% occurring (a loaded die, for instance).
 
-% Let's expand \(H(Y|X = x)\):
+\section{The Boltzmann distribution}
 
-% \[
-%   H(Y| X = x) = \sum_{y \in Y} p(y|x) \times \log\left(\frac{1}{p(y|x)}\right)
-% \]
+I have an ultimate goal of having a good understanding as to why classical mechanics
+fails to predict blackbody radiation properly and leads to the so-called ultraviolet
+catastrophe. The situation involves analyzing the classical formulation of the
+Rayleigh-Jeans law, which relies on the classical equipartition theorem, which for specific
+cases can be derived from classical statistical mechanics.
+\\
+Eventually, we'd like to also take a look at \emph{why} particles absorb the frequencies
+they do, which involves understanding molecular orbital theory, and so the Schrodinger equation,
+and so the Hamiltonian, which implies Hamiltonian mechanics, which is apparently an improvement
+on Lagrangian mechanics, which is an application of the Lagrangian (which 
+we've talked about before at \ref{the-lagrangian-a-packaged-function} and so would be our
+jumping-off point).
+\\
+But first, counting.
 
-% Now we stick it back up above and play with it a bit:
+\subsection{Stating our problem.}
+
+Let's say we have a system with \(N\) \emph{indistinguishable}
+particles 
+(i.e., the particles are all of the same ``type'') 
+and a total energy
+\(E\) that can be swapped freely between the particles at increments of \(\Delta E\) (and
+\(E\) must be an integer multiple of \(\Delta E\)), say
+\(E = k\Delta E\). We presume that our system is in 
+thermal equilibrium and no energy or particles enter or exit the system (i.e. that the system
+is \textbf{closed}). Given this situation, how can we figure out the probability
+that this system is in a particular state?
 
 
-% And bam!
+Before we continue, we need to determine exactly what we mean by ``state''. We consider
+two different levels of a state's description:
+\begin{enumerate}
+  \tightlist
+  \item
+    \emph{macrostate}: This description only has a summarized view of the system. In this case,
+      it describes how many particles at each energy (in terms of a multiple of \(\Delta E\)).
+      \footnote{
+      The macrostate focuses on energy because of energy's importance in physical systems.
+      Minimizing some function of energy is often used to solve problems in Lagrangian and
+      Hamiltonian mechanics, and more generally in
+      \href{https://en.wikipedia.org/wiki/Calculus_of_variations}{the calculus of variations}
+      (which I hope to better understand and write about at some point).
+      }
+  \item 
+    \emph{microstate}: This description holds information not only about the macrostate,
+      but also about other parameters that would predict how the macrostate would evolve
+      (over time). In our case, in addition to the
+      energies of each particle, 
+      we'd need to know each particle's position and momentum to know which particles collide
+      with which other particles on the next ``timestep'' of the system's (\emph{dynamic})
+      equilibrium. In this case, since we know each particle's momentum, 
+      \emph{we also know each particle's energy.}
+\end{enumerate}
 
+We're interested in determining the probability that a system is in some particular
+\emph{macrostate}.
+
+\subsection{A lazy way out.}
+One way we could potentially figure out our macrostate distribution
+is by starting at some given
+microstate, and observe the system evolve over a really long time, recording the macrostates
+at every differential step in time. The assumptions we'd be making were that:
+\begin{enumerate}
+  \tightlist
+  \item
+    the entire 
+    microstate space is connected, i.e., 
+    that there is a path from any one microstate configuration
+    to any other microstate configuration (otherwise, we'd miss the macrostates
+    associated with the disconnected microstates); and that
+  \item
+    the proportion of times a macrostate appears in our record of the system's evolution
+    corresponds to the probability that the macrostate would occur. \footnote{
+      This is actually an important assumption \textemdash{} that observing one system for
+      a very long time tells us information about what a distribution of a large ensemble
+      of systems would look like, and vice-versa.
+      Such systems are called \href{https://en.wikipedia.org/wiki/Ergodicity}{ergodic systems}.
+
+      It's also important to remember that this is an \emph{assumption}. There are cases
+      where a system can be shown not to be ergodic.
+    }
+\end{enumerate}
+The specifics of how the simulation ran would also imply other assumptions, which will
+be discussed below. But we can approach it through
+more direct means.
+
+\subsection{Counting (is hard).}
+
+Let's try to count how many microstates correspond to each macrostate. Before we can
+do that, we need to determine all the valid macrostates.
+%  remembering that
+% we're considering indistinguishable particles. 
+We denote the number of particles with energy \(i\Delta E\) as \(n_i\) 
+(in terms of integer multiples of \(\Delta E\)) that particle \(i\)
+has as \(n_i\), then the valid macrostate configurations are
+vectors \(\vec{n} = (n_0, n_1, n_2, \cdots, n_N)\) such that %its first moment equals N:
+
+\[\sum_{i=0}^{N} i \times n_i = N, \quad \sum_{i=0}^{N} n_i = k\]
+
+Figuring out which vectors \(\vec{n}\) for which this holds is a bit difficult to describe
+cleanly. The problem can be described as a form of the
+\href{https://www.geeksforgeeks.org/dynamic-programming-set-7-coin-change/}
+{coin change problem}.\footnote{
+  Which is itself a specific form of the
+  \href{https://en.wikipedia.org/wiki/Knapsack_problem}{knapsack problem}.
+}
+\index{coin change problem}
+In our case, the coins have value \(1, 2, \cdots, N\), and we remove sets of cardinality
+greater than \(k\).\footnote{
+  In this case, we're allowing sets to contain duplicates of the same element.
+ }
+The remaining sets are distinct valid macrostates. We can get each
+set into the form of \(\vec{n}\) by setting \(n_i\) as the number of times \(i\) appears in
+the set, and setting \(n_0 := k - \sum_{i=1}^{N} n_i\).
+
+
+Now that we have valid macrostates, we can count how many \emph{different} 
+microstates yield a given
+macrostate. If all \(k\) particles were distinguishable, then every rearrangment of them
+would result in a distinguishable microstate that would correspond to the same macrostate,
+and so the number of microstates that make up a macrostate would be \(k!\) for any given
+macrostate.
+
+However, we're dealing with \emph{indistinguishable} particles, so we wouldn't notice if
+we swapped around particles at the same energy state \(i\). We have to divide out these
+redundant occurrences, because otherwise we're overcounting the \emph{number} of different
+microstates.
+There are \(n_i\) such particles at any given \(i\), and so the total number of different
+microstates for a given macrostate \(\vec{n}\) would be
+\[w_{\vec{n}} = \frac{k!}{\prod_{i=0}^{N}n_i}\]
+
+If we make the reasonable assumption that all distinguishable microstates are equally likely
+(after all, if none of them are more energetically favorable than any of the others, 
+why would there be favorites?),
+\(w_{\vec{n}}\) provides a way of \emph{weighting} the different macrostates \(\vec{n}\).
+
+
+
+
+\section{Generator functions: dealing with uneven probabilities.}
+
+\section{Central Limit Theorem}
+
+
+
+
+% Instead of
+% just counting the number of ways, 
+% where, after we've enumerated all the sets of ways of making change,
+
+% where
+
+% Alright, we first need to enumerate how many different valid macrostate configurations exist.
+% If we denote the energy (in terms of integer multiples of \(\Delta E\)) that particle \(i\)
+% has as \(n_i\), then the valid macrostate configurations are
+% vectors\footnote{Or tuples, if you prefer}
+%  \(\vec{n} = (n_1, n_2, \cdots, n_k)\) such that:
+
+% \[\sum_i n_i = N\]
+
+
+
+
+% Further assumptions include:
+
+
+% A key point is \emph{the assumption that any individual microstate has equal probability
+% of occurring}.
+
+
+Insight from \href{https://courses.physics.ucsd.edu/2017/Spring/physics4e/boltzmann.pdf}
+{this source}.
 
     % Add a bibliography block to the postdoc
     
