@@ -1268,42 +1268,13 @@ the concept of gradient boosting. Other main reference was
 \\
 - DK, 5/17/18 (shoot, it's late again...)
 
+\chapter{Physics.}\label{chapter:physics}
 
 
-\chapter{Drafts and WIPs}\label{drafts-and-wips}
-
-(Avert your eyes!)
-
-% TODO: Try and get from
-% Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
-% -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
-% -> molecular orbital theory -> Beer-Lambert Law and *absorption* of light in media
-% next,
-% what determines reflection vs transmittance (physics and light properties)
-% finally,
-% tie together to blackbody radiation and the ultraviolet catastrophe
-% (interest in blackbody radiation came from reading it in the app Quantum)
-
-% also before blackbody radiation, consider
-% Boltzmann distribution / partition function
-% approximation of multinomial distribution above with an exponential funciont
-% via the *Central Limit Theorem* (explain)
-
-% generator functions
-% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
-
-% Boltzmann distribution (and statistics for for bosons and fermions) 
-% -> one example of a derivation of the equipartition theorem
-% -> classical Rayleigh-Jeans law -> UV catastrophe / blackbody radiation ()
-
-% virial theorem
-
-% generator functions to handle cases where states have unequal probabilities of
-% occurring (a loaded die, for instance).
-
-% ^ all of the above first wondered about ~5/26/18
 
 \section{The Boltzmann distribution}
+
+
 
 I have an ultimate goal of having a good understanding as to why classical mechanics
 fails to predict blackbody radiation properly and leads to the so-called ultraviolet
@@ -1320,7 +1291,9 @@ we've talked about before at
 and so would be our
 jumping-off point).
 \\
-But first, counting.
+But first, counting. (And by the way, a lot of the insight I gained came from
+\href{https://courses.physics.ucsd.edu/2017/Spring/physics4e/boltzmann.pdf}
+{this source} (which isn't explicitly mentioned in this writeup itself).)
 
 \subsection{Stating our problem.}
 
@@ -1393,7 +1366,7 @@ The specifics of how the simulation ran would also imply other assumptions, whic
 be discussed below. But we can approach it through
 more direct means.
 
-\subsection{Counting (is hard).}
+\subsection{Counting (is hard).}\label{subsec:counting-is-hard}
 
 Let's try to count how many microstates correspond to each macrostate. Before we can
 do that, we need to determine all the valid macrostates.
@@ -1465,7 +1438,7 @@ to \(\vec{n}\) via a proportion:
 So we've figured out the probability of the \emph{system} being in some \emph{macrostate}.
 But what if we're interested in individual particles?
 What would be the probability that, given some total
-amount of energy in the system \(E_{{T}}\),
+amount of energy in the system \(E_{{T}}=D\Delta E\),
 a particle would be at energy level \(i\Delta E\)?
 
 Well, we know the probability of being in any particular macrostate, and within each
@@ -1480,7 +1453,7 @@ and we can have the expected number of particles in a particular energy level (a
 \[\left<n_i\right> = \left<n\right>(i) = N \times P(i)\]
 
 So what's the shape of \(P(i)\) (or \(\left<n\right>(i)\)) for large \(N\) and as 
-\(\Delta E \rightarrow 0\)?\footnote{
+\(\left(D,\Delta E\right) \rightarrow \left(\infty,0\right)\)?\footnote{
   The two limiting cases serve different purposes. We're trying to fill in our graph
   of (y = number of particles) vs (x = energy level). Large \(N\) makes the ordinate
   take on more continuous values (making it be better approximated by a continuous function),
@@ -1501,11 +1474,34 @@ the second particle can take its \(j\) \(\Delta E\)'s. That is, the probability 
 \(P(j \mid i) \approx P(j)\) and \(Pr[i,j] \approx P(i) \times P(j)\), implying that
 the energy levels of two individual particles are (approximately) \emph{independent}. 
 The approximation becomes more and more exact the more slices of energy there are, i.e.,
-the closer \(\Delta E\) is to zero, and when \(\Delta E = 0\), independence holds exactly
-(This is because 
-there would always be an infinite number of \(\Delta E\)'s to choose from, no matter
-how many had been taken up via assignment to previous particles \textemdash{} a weird thought,
-but technically true).
+the closer \(\Delta E\) is to zero, 
+and when \(\Delta E = dE\), independence holds exactly.\footnote
+{
+  This is because 
+  there would always be an infinite number of \(\Delta E\)'s to choose from, no matter
+  how many had been taken up via assignment to previous particles
+  (since \(D \rightarrow \infty\))\textemdash{} a weird thought,
+  but would technically be true.
+  \par
+  Worth noting that assuming that particle energy levels are 
+  completely independent is actually a bit crazy-making.
+  If any particle can be at any energy level in \(\left[0, E_T\right]\), then we can have, say,
+  two particles with energy level \(2E_T/3\) and exceed the total energy of the system!
+  Indeed, according to the model, we could change the total energy of the system by a factor of
+  \(N\). Or indeed, have it be zero.
+  \par
+  And in fact, having the step size be infinitesimal would mean
+  that \(idE = 0 \  \forall i \in \mathbb{N}\), so that every particle would have to have
+  an \emph{uncountably infinite} multiple of \(dE\) in order to have \emph{any} energy.
+  (Differentials are weird.
+  As is approximating a discrete situation with a continuous probability function.)
+  \par
+  All this to say, we should remember this an \emph{approximation} and we should
+  keep in mind how if we take the approximation to be true,
+  we're bending our problem statement in quite an exotic way.
+  Alas, this is the price we pay for clean derivation results.
+}\label{foot:independence-weirdness}
+
 So, in the limiting case, \(Pr[i,j] = P(i) \times P(j)\).
 
 
@@ -1565,12 +1561,21 @@ an upcoming assumption on the energy specifically:
 It's worth noting that this is actually a pretty big shift in frame. \(P(x)\) implies the energy
 is discretized by a step size \(\Delta E\) and has arguments \(x \in \mathbb{N}\) no matter
 how small \(\Delta E\) becomes. The equivalent point for \(P(x)\) in the function \(p\)
-is at \(E = x\Delta E\). That means unlike \(x\), as \(\Delta E \rightarrow 0\), the values
-\(E\) can take on cover more and more granular, to the point where \(E\) becomes arbitrarily
+is at \(E = x\Delta E\), that is,
+
+\[P(x; \Delta E) = C\times e^{-ax} \mapsto p(x\Delta E) = Ae^{-bx\Delta E} \]
+
+
+That means unlike \(x\), as \(\Delta E \rightarrow 0\), the values
+\(E\) can take on becomes more and more granular, 
+to the point where \(E\) can become arbitrarily
 close to any desired value.\footnote{
   Though technically, it can never be \emph{any} arbitrary value since the domain of \(E\)
   is always a subset of the rational numbers \(\mathbb{Q}\).
-}
+} Also, if an explicit upper bound of \(E_T\) isn't placed on the argument of \(p\)
+(which is not done in the original derivation of the Boltzmann distribution 
+and so will not be done here), then we're now allowing particles to
+(very improbably, but technically) be able to take on arbitrarily large energies!
 
 \subsection{A fork in the road.}
 
@@ -1585,20 +1590,21 @@ Now we can proceed with the derivation in two ways:
     In order for our exponential function to fit the probability distribution \emph{exactly},
     we needed the energies of two different particles be independent of each other,
     and in order for \emph{that} to have been the case we'd need to take \(\Delta E\) to 0.
-    However, it's worth keeping in mind that now we've contradicting our argument in
-    a different way now: 
-    \emph{our probability distribution \(p(E)\) impliies that our particles can have
-    arbitrarily large amounts of energy.} Of course, the probability is preposterously low,
-    but it is nonzero.
+    % However, it's worth keeping in mind that now we've contradicting our argument in
+    % a different way now: 
+    % \emph{our probability distribution \(p(E)\) impliies that our particles can have
+    % arbitrarily large amounts of energy.} Of course, the probability is preposterously low,
+    % but it is nonzero.
   \item
     \emph{Continue our analysis under the assumption that \(\Delta E\) is not a differential}:
     This technically aligns with how we understand physics today \textemdash{} i.e., that
     energy is quantized by the frequency of radiation,
-    \(\Delta E(\nu) = nh\nu\), with \(n \in \mathcal{R}\) 
-    and \(h\) is \textbf{Planck's constant}\index{Planck's constant},
+    \(\Delta E(\nu) = nh\nu\), with \(n \in \mathbb{R}\) 
+    and \(h\) as \textbf{Planck's constant}\index{Planck's constant},
     \(h \approx \SI{6.626}{J.s}\).
-    In this case, we'll have to accept that our probability function, having been derived
-    based on the assumption of continuous \(E\) (as described above), is only an approximation.
+    In this case, we'll have to accept that our argument,
+    having previously assumed continuous \(E\), 
+    doesn't take ``full advantage'' of that assumption.
 \end{enumerate}
 
 We'll do the continuous case first, as it leads us to the form of the actual Boltzmann function.
@@ -1671,6 +1677,11 @@ Awesome! We have the parameters for our probability distribution, and we have ou
 \[Pr[\text{particle in system has energy }E] 
         = p(E) = \frac{e^{-E/\left<E\right>}}{\left<E\right>}
 \]
+
+% So given that these microstates form the weighting for the macrostates,
+% what's the probability distribution of these macrostates?
+% Boltzmann used the calculus of variations (using the constraint that solutions must
+% maximize entropy (since we're at equilbrium)) to get kBT...
 
 If you use the result from the classical equipartition theorem\footnote{
   Which we'll hopefully go over later.
@@ -1753,16 +1764,20 @@ but we already saw that
   \left<x\right> &= -\frac{e^{-a}}{1 - e^{-a}} = \frac{1}{e^a - 1} \\
 \end{split}
 \]
-We'll see this form again later.
-More specifically, again remembering our mapping \(x\Delta E \mapsto E\),
-we'll see the following expression again:
+% We'll see this form again later.
+% More specifically, again remembering our mapping
+% \(x\Delta E \mapsto E, a \mapsto b\Delta E, C \mapsto A\),
+% we'll see the following expression again:
 
-\[\left<E\right> = \left<x\Delta E\right> = \frac{\Delta E}{e^{a\Delta E} - 1} \]
+% \[\left<E\right> = \left<x\Delta E\right> \\
+%       = \left<x\right>\times\Delta E = \frac{\Delta E}{e^{b\Delta E} - 1} \]
 
-and at that point, we'll be trying to derive \(\left<E\right>\) given \(a\) (and \(\Delta E\))
-rather than derive \(a\) given \(\left<E\right>\).
-\\
-Anyway, let's solve for \(a\):
+% and at that point, we'll be trying to derive \(\left<E\right>\) 
+% given \(b\) (as it's derived for the Boltzmann distribution)
+% and \(\Delta E\).
+% \\
+% Anyway, let's solve for \(a\):
+Now let's solve for \(a\):
 
 \[a = \ln{\left(1 + \frac{1}{\left<x\right>}\right)} \]
 
@@ -1782,62 +1797,84 @@ but alas, it's much less aesthetically pleasing than the Boltzmann distribution!
 
 \subsection{Bolting beyond Boltzmann.}
 
-% Mention the differences/different assumptions between 
-% Boltzmann vs. Bose-Einstein vs Fermi-Dirac
+All of these calculations have been made with the assumptions that:
+\begin{enumerate}
+  \tightlist
+  \item
+    Particles within the system can be distinguished from one another by the 
+    energy state they are in (and particles within the same energy level are
+    indistnguishable about each other); and
+  \item
+    Any number of our identical particles can occupy any energy state.
+\end{enumerate}
+
+These assumptions do not hold for particles in the regime of quantum mechanics.
+Specifically, in an ensemble of \emph{bosons}\index{boson} (particles with integer spin),
+within a particular macrostate,
+individual bosons can \emph{not} be distnguished from each other, even by energy level.
+That means there are \emph{no} distinguishable microstates \textemdash{} the most granular
+information you can get is from what we've been calling the macrostate
+(the vectors \(\vec{n}\) of dimension \(\frac{E_T}{\Delta E}\) we would calculate via
+solving the equivalent coin-change problem as mentioned in
+\ref{subsec:counting-is-hard}).
+Moving forward from there would eventually
+lead to the \textbf{Bose-Einstein distribution}\index{Bose-Einstein distribution}.\par
+
+If instead of bosons we're dealing with \emph{fermions}\index{fermion} (particles with
+\(\frac{1}{2}\)-integral spin), then the \emph{Pauli exclusion principle} also applies,
+meaning that our second assumption would \emph{also} be incorrect and only two such
+fermions could be in the same energy state.\footnote{
+  We could get the valid macrostates
+  by solving the coin-change problem where the are only two coins per denomination
+  (or solving it without the constraint then filtering out those sets with more than
+  two coins of the same denomination).
+}
+Moving forward from \emph{there} would
+eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distribution}.
+\\
+\\
+...Phew, that was exhausting!
+\\
+\\
+- DK, 5/29/18
 
 
-% where \(C\) is a normalization constant.
+\chapter{Drafts and WIPs}\label{drafts-and-wips}
 
-% Now let's define the function in terms of energy so we don't have to index by \(i\)
-% (which kind of becomes more confusing than helpful the less we talk about \(\Delta E\)'s):
+(Avert your eyes! Unless you're fine with drafts and WIPs \textemdash{} in which case, enjoy!)
 
-% \[Pr[\text{particle in system has energy }E] = p_{+}(E) = C\times e^{\frac{E}{E_0}}\]
+% TODO: Try and get from
+% Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
+% -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
+% -> molecular orbital theory -> Beer-Lambert Law and *absorption* of light in media
+% next,
+% what determines reflection vs transmittance (physics and light properties)
+% finally,
+% tie together to blackbody radiation and the ultraviolet catastrophe
+% (interest in blackbody radiation came from reading it in the app Quantum)
 
-% And you know, I think it's a \emph{tad} unlikely that a particle is more likely to be in high
-% energy levels than low ones (especially considering our calculations have shown a decrease in
-% probability as energy level increased), 
-% so let's first guess that the exponent is negative \textemdash{} if we're somehow wrong,
-% \(E_0\) will be negative:
+% also before blackbody radiation, consider
+% Boltzmann distribution / partition function
+% approximation of multinomial distribution above with an exponential funciont
+% via the *Central Limit Theorem* (explain)
 
-% \[Pr[\text{particle in system has energy }E] = p(E) = A\times e^{-\frac{E}{E_0}}\]
+% generator functions
+% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
 
-% OK then, how do we find \(E_0\)?
-% (Spoiler alert: the gut feeling of \(\left<E\right>\) is correct in this case.)
-% \\
-% Well, we want \(p(E)\) to fit our data as well as possible.
+% Boltzmann distribution (and statistics for for bosons and fermions) 
+% -> one example of a derivation of the equipartition theorem
+% -> classical Rayleigh-Jeans law -> UV catastrophe / blackbody radiation ()
 
+% virial theorem
 
-% Remember that all of this presumed a particular total amount of energy \(E_T\). The shape
-% of the distribution should change as \(E_T\) changes. How does it change?
+% generator functions to handle cases where states have unequal probabilities of
+% occurring (a loaded die, for instance).
 
-
-% TODO: Talk about distribution shape,
-% differences between Boltzmann vs Bose vs Fermi distributions
-
-
-% \(Pr[i+j]\) is proportional to the probability of any specific energy pair occurring,
-% e.g., \(i, j\). So then \(Pr[i+j] = A\times Pr[i,j]\)
-% ,
-% and we have \(\Delta E \rightarrow 0\). 
-
+% ^ all of the above first wondered about ~5/26/18
 
 
-% We've previously assumed that all microstates have equal probability of occurring.
-% This comes in handy here. 
-% As \(N \righarrow \infty\), and because we're dealing with
-% indistinguishable particles, \emph{we can map every energy pair
-% above to an \textbf{identical} microstate} \textemdash{} if the energy pair is \((a,b)\),
-
-
-
-
-
-
-
-% So given that these microstates form the weighting for the macrostates,
-% what's the probability distribution of these macrostates?
-% Boltzmann used the calculus of variations (using the constraint that solutions must
-% maximize entropy (since we're at equilbrium)) to get kBT...
+% why is the reduced mass of a system calculated
+% like the equivalent resistance of resistors in parallel? - 5/28/18
 
 
 \section{Generating functions: dealing with uneven probabilities.}\label{sec:generating-functions} % 5/27/18
@@ -1848,36 +1885,38 @@ but alas, it's much less aesthetically pleasing than the Boltzmann distribution!
 \section{Central Limit Theorem} % 5/27/18
 
 
-% why is the reduced mass of a system calculated
-% like the equivalent resistance of resistors in parallel? - 5/28/18
 
 
-% Instead of
-% just counting the number of ways, 
-% where, after we've enumerated all the sets of ways of making change,
+% \appendix
 
-% where
+% \chapter{Weird things about integrals.}\label{apx:weird-things-about-integrals}
 
-% Alright, we first need to enumerate how many different valid macrostate configurations exist.
-% If we denote the energy (in terms of integer multiples of \(\Delta E\)) that particle \(i\)
-% has as \(n_i\), then the valid macrostate configurations are
-% vectors\footnote{Or tuples, if you prefer}
-%  \(\vec{n} = (n_1, n_2, \cdots, n_k)\) such that:
+% In our derivation of the Boltzmann distribution, we reached the point where to derive
+% the exponential form, we needed to assume independence of energies among the particles 
+% in the system, an assumption which, 
+% as mentioned in the footnote at \ref{foot:independence-weirdness},
+% is a bit crazy-making (by exceeding the total energy of the system).
+% It can be even weirder than that when we think about what we consider the differential
+% \(dE\) to be.
+% \\
+% In standard analysis, differentials are not numbers, they are operators.
 
-% \[\sum_i n_i = N\]
-
-
-
-
-% Further assumptions include:
-
-
-% A key point is \emph{the assumption that any individual microstate has equal probability
-% of occurring}.
-
-
-Insight from \href{https://courses.physics.ucsd.edu/2017/Spring/physics4e/boltzmann.pdf}
-{this source}.
+% And if we don't subscribe to the tenets of
+% \emph{nonstandard analysis}\index{nonstandard analysis} wherein
+% there exist hyperreals which are larger than the countable infinity \(\aleph_0\)
+% and whose reciprocals are differentials (a potential extension of
+% number theory that is realized
+% if one takes \(\neg G\) from \emph{Godel's incompleteness theorem}
+% to be an axiom), then things become even \emph{more} ridiculous.
+% % [adapt the stuff below]
+% % Or, if we stick to talking about the discrete energy steps, if we say there are an
+% % infinite number of them, then no matter how large an energy step \(i\)
+% % we assign to each particle, \(\sum_{i=1}^{N} E_idE = 0 \neq E_T \), 
+% % so energy in the system completely disappears and all particles have
+% % \emph{zero} energy! Unless we have an \emph{infinite} number of particles.
+% % In which case, we would have that
+% % \(\lim_{N\rightarrow \infty}\sum_{i=1}^{N} E_idE = E_T \), but still 
+% % These are the questionable outcomes that com
 
     % Add a bibliography block to the postdoc
     
