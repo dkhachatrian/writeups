@@ -1843,6 +1843,151 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 
 (Avert your eyes! Unless you're fine with drafts and WIPs \textemdash{} in which case, enjoy!)
 
+
+\section{The Fourier and Laplace Transforms.}
+
+
+
+% good source (unfortunately discovered in the middle of the process of thinking up/writing up
+% an explanation): https://www.youtube.com/watch?v=zvbdoSeGAgI
+
+% Laplace trasnform *as phasors*!?
+% https://www.youtube.com/watch?v=6MXMDrs6ZmA
+
+General flow is:
+
+\begin{enumerate}
+  \item
+    Explore the Taylor series in terms of linear algebra (countably infinite basis vectors).
+    Consider where and how it lacks power (discrete vs continuous).
+    From this discrete case, extend to a continuous case
+    (\emph{un}countably infinite basis vectors!)
+  \item
+    Define \emph{linear independence} for vectors in function space, 
+    and use this to determine what our basis vectors can be.
+    Massage out pseudo-Laplace transforms.
+
+\end{enumerate}
+
+\subsection{Revisiting the Taylor series.}
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{But first, let's talk eigenfunctions.}
+
+In order to ``trust'' that the Fourier and Laplace transforms are capturing all of the
+``content'' of our input function
+
+
+\subsection{The Fourier transform and wiggles over time.}
+
+The Fourier transform is the way one maps a function
+\(f: t \mapsto y,\ t \in \mathbb{R}, \ y \in \mathbb{R}\)
+to its uniquely equivalent function \(F: \omega \mapsto z, \ z \in \mathbb{R}^2\).
+Looking at it more explicitly through the lens of linear algebra,
+if we say \(f\) came from a space \(\mathcal{F}_t\), i.e., \(f \in \mathcal{F}_t\), and
+likewise that \(F \in \mathcal{F}_\omega\), then the Fourier transform \(FT\) is a mapping
+\(FT: \mathcal{F}_t \mapsto \mathcal{F}_\omega\).\par
+
+The actual definition for the \textbf{Fourier transform}\index{Fourier transform} is
+\begin{equation}
+  F(\omega) = \frac{1}{2\pi} \int_{-\infty}^{\infty}e^{-i\omega t}f(t)dt
+\end{equation}\label{equation:fourier-transform}
+
+
+and can be derived from taking 
+the limit of the \emph{discrete-time Fourier series} of \(f(t)\) as the function's
+period \(T \rightarrow \infty\).\footnote{
+  Which we hope to discuss further at some point.
+}
+The inverse map, aptly named the
+\textbf{inverse Fourier transform}\index{inverse Fourier transform},
+is 
+
+\begin{equation}
+  f(t) = {2\pi} \int_{-\infty}^{\infty}e^{-it\omega}F(\omega)d\omega
+\end{equation}\label{equation:inverse-fourier-transform}
+
+Here we use \(i = \sqrt{-1}\).
+(We may flip-flop between \(i\) and \(j\) to denote \(\sqrt{-1}\).
+It should be clear from context.)\par
+
+OK, cool, but what does it mean? Well, first let's remember one of the neatest things
+you can prove using Taylor series, i.e. \emph{Euler's formula}\index{Euler's formula}:
+
+\[e^{ix} = \cos(x) + i\sin(x) \]
+
+% Also, the set of sine and cosine functions (and in fact any two sinusoids that are not
+% identical) are orthogonal, i.e.,
+% Also, any two non-identical sinusoidal functions are orthogonal, i.e.,
+Also, note that
+% \(\sin(\omega t)\) and \(\cos(\omega t)\)
+\(\sin(x)\) and \(\cos(x)\)
+% TODO: define orthogonality more clearly 
+% (integral is zero in product with anyone except itself)
+are mutually orthogonal\footnote{
+  That is to say,
+  % \[\int_{-1/\omega}^{1/\omega} \cos(\omega t)\sin(\omega t)dt = 0 \]
+  \(\int_T \cos(x)\sin(x)dx = 0 \)
+  over their aggregate period \(T\).
+  To be proven later. See in the meantime
+  \href{http://tutorial.math.lamar.edu/Classes/DE/PeriodicOrthogonal.aspx}{this resource}.
+},
+and in fact all sinusoidal functions
+\(\{\cos(ax) \mid a \in \mathbb{R}\}\) and \(\{\sin(bx) \mid b \in \mathbb{R}-\{0\}\}\)
+are mutually orthogonal.\footnote{
+  When \(b=0\), \(\sin(bx) = \sin(0) = 0 \forall x\) and so doesn't fit the definition 
+  of orthogonality since \(\int_{-\infty}^{\infty}sin(0x)sin(0x)dx = \int_T 0 dx = 0 \ngtr 0\).
+}
+That means that if we were to describe functions in a vector space, then each 
+sinusoidal function \(\cos(ax), a \geq 0\) and 
+\(\sin(bx), b > 0\) 
+would be linearly independent from one another.\footnote{
+  Only one ``half'' of \(\mathbb{R}\) is needed to capture all non-redundant information
+  as \(\cos(-x) = \cos(x)\) and \(\sin(-x) = -\sin(x)\).
+}
+\par
+
+All this points to a \emph{different basis} on which we can describe functions.
+The origina
+% every point in F(\omega) has some information about f across *all* of t
+% it's like having an infinite ``power series'' built
+% using the orthogonal functions cos(wt) and sin(wt).
+% We've already established that cos(wt) and sin(wt) are orthogonal,
+% So the only parts of f(t) that contributes to F(w) is the part that would
+% correspond to cos(wt) (or sin(wt)) in a ``frequency series'' of f.
+% I.E., if we could say that f(t) = 1 + a_1cos(wt) + a_2cos(2wt) + ...
+% then F(w) = \int cos(wt)f(t)dt = \int cos(wt) \times a_1cos(wt)dt
+
+
+
+% It's important to remember that this is a transformation of \emph{function to a function
+% with a different input space}, and not a transformation of our coordinate system.
+% There is no clear way of s
+
+% Considering that functions are themselves maps (from their input space to their output space),
+% the Fourier transform is a map of maps.
+% This may sound like voodoo magic, 
+% That is to say, the Fourier transform is a mapping for
+
+
+
+\subsection{The Laplace transform as a patch for the Fourier transform.}
+
+What if the Fourier transform explodes?
+For example, consider the function
+
+
+
 % TODO: Try and get from
 % Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
 % -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
@@ -1876,10 +2021,26 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % why is the reduced mass of a system calculated
 % like the equivalent resistance of resistors in parallel? - 5/28/18
 
+% What is up with the different ``forms'' of free energy? (Gibbs, Helmholtz, internal, enthalpy)
+
+% what causes water bubbles at e.g. the base of a waterfall? (``Cavitation''?)
+
+% harmonic mean vs geometric mean vs arithmetic mean: when is it appropriate to use which one?
 
 \section{Generating functions: dealing with uneven probabilities.}\label{sec:generating-functions} % 5/27/18
 
 % https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
+
+
+
+
+
+
+
+
+
+
+
 
 
 \section{Central Limit Theorem} % 5/27/18
