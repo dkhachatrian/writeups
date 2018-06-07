@@ -1305,7 +1305,9 @@ and a total energy
 \(E\) must be an integer multiple of \(\Delta E\)), say
 \(E = k\Delta E\). We presume that our system is in 
 thermal equilibrium and no energy or particles enter or exit the system (i.e. that the system
-is \textbf{closed}). Given this situation, how can we figure out the probability
+is \textbf{closed}, and more specifically a
+\emph{\href{https://en.wikipedia.org/wiki/Microcanonical_ensemble}{microcanonical ensemble}}.).
+Given this situation, how can we figure out the probability
 that this system is in a particular state?
 
 
@@ -1435,6 +1437,43 @@ to \(\vec{n}\) via a proportion:
 
 \subsection{Counting Is Hard II: Probability Strikes Back.}
 
+\emph{6/6/2018 Update:} It has come to my attention that
+\href{https://courses.physics.ucsd.edu/2017/Spring/physics4e/boltzmann.pdf}{my original main source}
+could have been a bit clearer by stating that the assumption of a system with
+total fixed total energy
+(a \emph{microcanonical ensemble}, which eventually reaches thermal equilibrium within itself)
+is appropriate for the discussion of the previous section,
+whereas a more ``relaxed'' assumption of a system with fixed \emph{temperature}
+\footnote{
+  Remember that temperature (``intuitively'', based on kinetic theory) 
+  is related to the average \emph{kinetic} energy
+  of particles in a system. Therefore, a fixed temperature only implies a fixed total
+  \emph{kinetic} energy within a system, not total energy (which could also include
+  potential energies of various forms).
+  \par
+  It's worth noting that in thermodynamics,
+  temperature is actually used as an
+  \href{https://en.wikipedia.org/wiki/Temperature\#Temperature_as_an_intensive_variable}{intensive variable of the system}, 
+  but it would take quite a while to justify/explicate that.
+  The above kinetic-theory way of thinking about temperature
+  should be good enough to explain where the ``extra'' energy
+  could come from in a system with fixed temperature.
+}
+(a \emph{canonical ensemble}, which reaches thermal equilibrium with the system's surroundings,
+an entity which can supply energy into the system)
+is more appropriate in the following discussion wherein we
+end up assuming independence of energies between particles inside the system 
+\textemdash{} they can independently ``get'' their energy from the system's surroundings
+and store it as potential energy, thereby ``gaining'' energy without violating the
+fixed temperature stipulation.
+(No wonder I needed to go through so much mental gymnastics to try and rationalize
+the independence step...)
+
+\par
+Currently the below explanation remains unchanged since this discovery.
+Once the section is adjusted, this note will no longer precede it.
+\\
+\\
 So we've figured out the probability of the \emph{system} being in some \emph{macrostate}.
 But what if we're interested in individual particles?
 What would be the probability that, given some total
@@ -1501,7 +1540,20 @@ and when \(\Delta E = dE\), independence holds exactly.\footnote
   we're bending our problem statement in quite an exotic way.
   Alas, this is the price we pay for clean derivation results.
 }\label{foot:independence-weirdness}
-
+% \footnote
+% {
+%   The assumption of independence can be made less crazy-making if we assume
+%   only fixed temperature
+%   (i.e., that the system is in thermal equilibrium with its surroundings)
+%   and not fixed total energy.
+%   In such a situation, individual particles could ``get'' their 
+%   energy from the surroundings and ``store'' it as potential energy of some sort,
+%   thereby allowing a method for particles to have energy states independent of each
+%   other (assuming that the effect of other particles in the system
+%   on a particle's potential energy is zero or negligible \textemdash{} which
+%   is true for situations like a system of traveling light particles
+%   or chemical particles with no (or mostly screened) charge in solution).
+% }
 So, in the limiting case, \(Pr[i,j] = P(i) \times P(j)\).
 
 
@@ -1692,9 +1744,88 @@ If you use the result from the classical equipartition theorem\footnote{
 \[p(E) = \frac{e^{-E/k_BT}}{k_BT}\]
 
 And \emph{that} is the \textbf{Boltzmann distribution}\index{Boltzmann distribution}
-in all its glory!
+in all its glory!\par
 
-\subsection{The discrete case: A battle of wits.}
+% Although it may seem like all this work to derive the Boltzmann distribution 
+% was done for a fairly meager cause
+% \textemdash{} just for a group of particles? \textemdash{}
+% its importance is tremendous.
+
+\subsection{The Boltzmann factor.}
+
+A convenient thing about the Boltzmann distribution is how simple it is to calculate
+the relative probabilities of a particle being in one state over another.
+If we have two states with energies \(E_1\) and \(E_2\), we can calculate their
+relative probability by taking their ratio (we'll keep the denominator
+of the function as \(\left<E\right>\) for now):
+
+\[
+\begin{split}
+  \frac{P(E_2)}{P(E_1)} &= \frac{\frac{e^{-E_2/\left<E\right>}}{\left<E\right>}}{\frac{e^{-E_1/\left<E\right>}}{\left<E\right>}} \\
+    &= \frac{e^{-E_2/\left<E\right>}}{e^{-E_1/\left<E\right>}} \\
+    &= e^{-(E_2-E_1)/\left<E\right>} \\
+    &= e^{-\Delta E/\left<E\right>}, \ \Delta E = E_2 - E_1
+\end{split}
+\]
+
+% If we substitute in \(\left<E\right> = k_BT\), we get
+
+% \[ \frac{P(E_2)}{P(E_1)} =  e^{-\Delta E/{k_BT}}, \ \Delta E = E_2 - E_1\]
+
+% Rearranging to solve for \(\Delta E\), we get:
+
+% \[ \Delta E = -k_BT\ln(\frac{P(E_2)}{P(E_1)}), \ \Delta E = E_2 - E_1\]
+
+% The above two forms are seen all around chemistry and biology, often with
+% \(\frac{P(E_2)}{P(E_1)}\) being written as some single dimensionless quantity
+% (for example, \(K_{eq}\) or \(Q\) in chemical equilibrium situations)
+
+
+
+The \emph{Boltzmann factor}\index{Boltzmann factor} is simply the relative probability
+of a certain state compared to the state corresponding to \(E = 0\)
+(however that may be described):
+
+\[
+\begin{split}
+  \frac{P(E)}{P(0)} &:= F(E) \\
+  &= \frac{\frac{e^{-E/\left<E\right>}}{\left<E\right>}}{\frac{e^{-0/\left<E\right>}}{\left<E\right>}} \\
+    &= e^{-E/\left<E\right>}
+\end{split}
+\]
+
+You'll see that the relative probability reflects the real-life observation that
+objects in the world are more likely to be found in low-energy states than high-energy
+ones (and so ``prefer'' low-energy states to high-energy ones). Note that a ratio
+of Boltzmann factors gives a ratio of relative probabilities of the two states:
+
+\[\frac{F(E_2)}{F(E_1)} = \frac{\frac{P(E_2)}{P(0)}}{\frac{P(E_1)}{P(0)}} \\
+            = \frac{P(E_2)}{P(E_1)}\]
+
+% For whatever reason, in statistical mechanics they like calculating probabilities
+% using Boltzmann factors explicitly rather than integrating over the probability distribution,
+% so rather than:
+
+% \[p(E) = \frac{e^{-E/k_BT}}{k_BT}\]
+
+% in (classical) statistical mechanics you'll often see:
+
+% \[p(E) = \frac{e^{-E/k_BT}}{\sum_i e^{-E_i/k_BT}}\]
+
+% where \(i\) enumerates through all possible microstates and
+% \(\sum_i e^{-E_i/k_BT}\) is given the grandiose-sounding name
+% \emph{partition function}\index{partition function!classical form}.
+% \sout{(And that's the very least of the grandiose-sounding names.)
+% \par
+
+% Although we calculated the Boltzmann distribution for an ensemble of particles,
+% the choice of the word ``particle'' was largely just for convenience. We can make the
+% same argument and use the Boltzmann distribution 
+% for an ensemble of \emph{anything} if they follow the assumptions we made above.
+
+
+
+\subsection*{The discrete case: A battle of wits.}
 
 Alright, now the discrete case. For ease of notation, we will work with \(P(x)\) instead of
 \(p(E)\) \textemdash{} again, the mapping between the two is \(E \mapsto x\Delta E\), so it
@@ -1743,8 +1874,9 @@ In the same vein, we evaluate
 \[\begin{split}
   \frac{d}{da}\ln{\sum_{x=0}^{\infty} e^{-ax}} &=
   \frac{\frac{d}{da}\sum_{x=0}^{\infty} e^{-ax}} {\sum_{x=0}^{\infty} e^{-ax}} \\
-              &= \frac{-\sum_{x=0}^{\infty}xe^{-ax}} {\sum_{x=0}^{\infty} e^{-ax}} \\
-              &= -\left<x\right> \\
+  &= \frac{\sum_{x=0}^{\infty}\frac{d}{da} e^{-ax}} {\sum_{x=0}^{\infty} e^{-ax}} \\
+      &= \frac{-\sum_{x=0}^{\infty}xe^{-ax}} {\sum_{x=0}^{\infty} e^{-ax}} \\
+      &= -\left<x\right> \\
 \end{split}
 \]
 
@@ -1758,9 +1890,9 @@ but we already saw that
 
 \[\begin{split}
   \left<x\right> &= -\frac{d}{da}\ln{\left(1 - e^{-a}\right)^{-1}} \\
-             &= -\left(1 - e^{-a}\right) \times \frac{d}{da}\left(1 - e^{-a}\right)^{-1} \\
-             &= -\left(1 - e^{-a}\right) \times \left(-\left(1 - e^{-a}\right)^{-2}\right) 
-              \times \left(e^{-a}\right) \\ 
+      &= -\left(1 - e^{-a}\right) \times \frac{d}{da}\left(1 - e^{-a}\right)^{-1} \\
+      &= -\left(1 - e^{-a}\right) \times \left(-\left(1 - e^{-a}\right)^{-2}\right) 
+      \times \left(e^{-a}\right) \\ 
   \left<x\right> &= -\frac{e^{-a}}{1 - e^{-a}} = \frac{1}{e^a - 1} \\
 \end{split}
 \]
@@ -1792,7 +1924,8 @@ and so our probability distribution becomes:
 \]
 
 The form is reminscent of solutions to various simple steady-state problems \textemdash{} 
-but alas, it's much less aesthetically pleasing than the Boltzmann distribution!
+but alas, it's much less aesthetically pleasing and much less
+convenient to manipulate/work with than the Boltzmann distribution!
 \sout{Yet another reason why quantum phenomena can be unpleasant to some.}
 
 \subsection{Bolting beyond Boltzmann.}
@@ -1854,6 +1987,9 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % Laplace trasnform *as phasors*!?
 % https://www.youtube.com/watch?v=6MXMDrs6ZmA
 
+
+
+
 General flow is:
 
 \begin{enumerate}
@@ -1871,11 +2007,242 @@ General flow is:
 
 \subsection{Revisiting the Taylor series.}
 
+Previously, we've discussed the Taylor series centered around a fixed point \(a\):
+\begin{equation}
+\begin{split}
+  f(x) &\approx \sum_{n=0}^{k}\frac{f^{(n)}(a)}{n!}(x-a)^n  \\
+       &= \sum_{n=0}^{k}F_D(n; a) (x-a)^n \text{ where } F_D(n;a) = \frac{f^{(n)}(a)}{n!} \\
+       &= p(x;a,k)
+\end{split}
+\end{equation}\label{equation:taylor-series}
+
+The rationale for the expression we choose for \(F_D(n;a)\) 
+is that \(p(x;a,k)\) will have identical \(i\)'th order derivatives with \(f(x)\) at \(a\)
+for \(k \in \{0, 1, \cdots, k\}\), i.e., that
+\[p^{(i)}(x=a) = f^{(i)}(x=a) \ \forall \ i \in \{0, 1, \cdots, k \}    \]
+
+So as \(k\) becomes larger and larger, \(p(x;a,k)\) acts more and more like \(f(x)\)
+at \(x=a\),
+which we hope makes it ``act'' more and more like \(f(x)\)
+in a neighborhood around \(a\).\footnote
+{
+  This doesn't always work perfectly for all functions. For example,
+  \(f(x) = 
+  \begin{cases}
+    0 & x = 0 \\
+    e^{1/x^2} & x \neq 0
+  \end{cases}
+  \)
+  has \(f^{(i)}(0) = 0 \ \forall i \in \mathbb{N}\), 
+  so its Taylor series centered at \(x=0\) yields \(p(x) = 0\),
+  which certainly doesn't capture how \(f\) acts outisde the origin!
+}
+Letting \(k \rightarrow \infty\) makes \(p(x;a,k)\) ``act'' \emph{exactly}
+like \(f(x)\) at \(x=a\).
+For some functions \(f\), 
+we can show that \(p(x) = f(x) \ \forall x\in \mathbb{R}\) for \emph{all} 
+inputs of the function
+by taking the limit of \href{https://math.stackexchange.com/a/2136695}{Lagrange remainders}.
+The most notable functions for this are \(f(x) \in \{e^x,\cos(x),\sin(x)\}\).\par
+
+% But what if we looked at the Taylor series a different way, through the lens of linear algebra?
+% To make notation a bit less cumbersome, let's have \(F_D(n) := F_D(n; a = 0)\) and
+% \(
+%   p_T(x) = \lim_{k\rightarrow \infty}P(x;a=0,k)
+%         =\lim_{k\rightarrow \infty}\sum_{n=0}^{k}F_D(n) x^n
+% \).\par
+
+\subsection{Discrete function spaces.}
+
+Now let's go on a seemingly random \sout{secant} tangent.\par
+Consider some random polynomial \(p(x;k)\) of order no greater than \(k\).
+We could describe it as weighted sum of monomials, where the coefficients
+of the monomial \(x^n\) is given by the function \(A(n)\):
+
+\[p(x;k) = \sum_{n=0}^{k}A(n) x^n\]
+What does this remind us of?\par
+Well, it kinda looks like a linear combination of vectors, doesn't it?
+\\
+\\
+Consider a \(k\)-dimensional vector space with the basis
+\(B = \{e_n \mid n \in \{0, 1, \cdots, k\}\}\).
+If we wanted to describe some vector in this space, we could do so as a linear
+combination of the basis vectors:
+\[ \vec{v}_A = \sum_{n=0}^{k}A(n) e_n = [A_0, A_1, \cdots, A_k]\]
+
+That alone is kind of boring. What becomes more interesting is if we can create an
+\emph{isomorphism} between this
+(to be honest, kinda bland) \(k\)-dimensional vector space and something
+more interesting. If we think of a neat, valid isomorphism for our basis vectors,
+some other neat consequences should follow. \par
+Well, what if we make the mapping \(e_n \leftrightarrow x^n\) (for \(x \in \mathbb{R}\))?
+This is a valid mapping, because we can describe the set of
+\(\{x^n \mid n \in \{0, 1, \cdots, k\}\}\) as linearly independent, in that
+there's no way to make a weighted sum of other monomials \(x^b, b\neq n\)
+identical to \(x^n\) for all \(x\) in our domain of interest.\par
+Let's keep this going. What would \(\vec{v}_A\) mean on the other side of our
+isomorphism?
+\[ \vec{v}_A = [A_0, A_1, \cdots, A_k] = \sum_{n=0}^{k}A(n) e_n
+  \longleftrightarrow \sum_{n=0}^{k}A(n)x^n = p_A(x)  \]
+
+where \(p_A(x)\) is the (no greater than \(k\)'th-order) whose coefficients
+are enumerated by \(A(n)\). This means that if we agree on a valid ``encoding'' process
+\textemdash{}
+in this case, that we'll describe \(p_A(x)\) as a weighted sum of monomials \(x^n\)
+\textemdash{}
+then we can go from function to vector and vice-versa.
+When we let \(k \rightarrow \infty\), we're allowing our vectors, described by \(A(n)\),
+to describe the space of all possible polynomials \(P^\infty\).\par
 
 
 
 
+Worth noting is that there's no reason why we \emph{have} to choose the function \(x^n\)
+in our mapping
+\(e_n \leftrightarrow x^n\)
+. We can choose \emph{any} function where it makes sense to say
+that the functions for different \(n\) are linearly independent of each other.
+For example, we could choose to have the mapping
+\[e_n \leftrightarrow e^{nx}\]
+since the set 
+\(\{e^nx \mid n \in \{0, 1, \cdots, k\}\}\)
+is linearly independent.\footnote
+{
+  In fact, since \(e^nx = \left(\sum_{k=0}^{\infty}\frac{x^k}{k!}\right)^n\), we could view
+  \(e^{nx}\) as a(n oddly) weighted combination of \(x^0, x^n, x^{2n}, \cdots\),
+  implicitly describing an infinite-degree polynomial with potentially only a finite
+  number of coefficients.
+}
+The more-or-less complete freedom in choosing our basis mapping will prove useful,
+as some ``encodings'' (i.e. some sets of basis functions)
+will be more useful in some contexts than others.
+The main caveat is that subset of function space implied by your basis mapping
+is always limited as to what functions it can
+``encode'' fully and/or concisely 
+\textemdash{} if you choose the mapping \(e_n \leftrightarrow e^{nx}\),
+there is no \(A(n)\) such that \(\sum_{n=0}^{k}A(n)e^{nx} = x \), so we're definitely not
+spanning \(P^\infty\) with this new mapping and if you're interested
+in simple finite-degree polynomials, you're probably better off
+with our earlier encoding.\footnote
+{
+  Worth noting is that trying to create a mapping that can recreate \emph{all}
+  functions is not the best idea.
+  Recall that if we designate an input \(x\) in some domain \(D_x\)
+  and some output \(y\) in some domain \(D_y\),
+  then a \textbf{function}\index{function} \(f \in \mathcal{P}(D_x \times D_y)\)
+  is simply a set of ordered pairs \((x,y)\)
+  where each \(x\) appears only once in the set.
+  (Here \(\mathcal{P}\) denotes the \emph{powerset} operator
+  and \(\times\) the \emph{Cartesian product} operator.)
+  So there are \emph{many} wacky functions one could make and basically no
+  hope in accounting for all of them in a simple-to-describe basis.
+}
 
+\subsection{Equipping our vector space.}
+
+% Now here's something trickier: how do we map a \textbf{metric}, or a function describing
+% the ``distance'' between two points, so that it captures how close a function is
+% to a point outside our function subspace? After all, not all functions can be described as
+% a sum of the natural-order monomials \(x^n, n \in \mathbb{R}\), so how do we choose
+% the point that matches it the best? Well, that depends on what we're aiming for.
+% If we only care about the polynomial \(p\) associated with our function
+% having identical derivatives to the target function \(f\) at some point \(x=a\),
+% we could have the metric associated with each point be 
+% \(\sum_i|f^{(i)}(a) - p^{(i)}(a)|\)
+Here's something trickier: how do we perform a projection on a function that's 
+outside our subspace? That is to say, how would we actually \emph{calculate} the
+function \(A(n)\)?\par
+Well, so far we haven't touched on that. We've defined a vector space, but we
+haven't defined a \emph{norm} \(|\cdot|\) or
+an
+\emph{inner product} \(\left<\cdot, \cdot\right>\) for our vector space meant to represent,
+in this case, polynomials.
+% http://mathworld.wolfram.com/InnerProduct.html
+% http://mathworld.wolfram.com/SchwarzsInequality.html
+which 
+we'd want to have capture ``how much'' of one vector is along in another vector would
+be used to calculate our coefficients \(A(n)\) by supplying \(e_n\) as one of the
+inputs to our inner product.
+Well, that depends on what our metric is for considering two
+functions to be ``close''
+% \begin{verbatim}
+%   Need to figure out how metrics change.
+
+%   ...?
+% \end{verbatim}
+
+
+
+\subsection{Re-revisiting the Taylor series.}
+
+Let's consider the Taylor series again,
+where we'll set \(a:=0\) and let \(k \rightarrow \infty\):
+
+\begin{equation}
+  \begin{split}
+    f(x) &\approx \sum_{n=0}^{\infty}F_D(n) x^n \text{ where } F_D(n) = \frac{f^{(n)}(0)}{n!} \\
+         &= p(x)
+  \end{split}
+\end{equation}
+
+Relating the Taylor series to our vector-space isomorphism,
+setting \(A(n) := F_D(n)\) picks a point \(\vec{p}\) in our vector space \(P^k\) that corresponds
+to the polynomial \(p\) which is ``closest'' to \(f\)
+in the sense that \(p\)'s value and first \(k\)'th derivatives agree with \(f\)'s at \(x=0\).
+It's almost like \(p\) is \(f\)'s ``\emph{projection}'' onto \(P^k\) under our chosen
+definition of ``closeness''.\par
+Our point \(p\) \textemdash{} and as such, our function that captures the
+coordinates of \(p\), \(A(n)\) \textemdash{}
+definitely has to be related to our definition of ``closeness''.
+In this case, the metric we're minimizing is
+\(\sum_i|f^{(i)}(0) - p^{(i)}(0)|\).
+If our definition of closeness was instead, say, that they have identical definite integrals
+\( \int_{x=0}^{1}f(x)dx = \int_{x=0}^{1}p(x)dx \),
+we'd have a different ``closest'' point in our vector space.
+This also shows that the metric of ``closeness'' we use determines whether there is a
+\emph{unique} \(A(n)\) for \(f(x)\) in a given function space. If we're considering the space
+of polynomials, there is only one point that satisfies the ``equal derivatives at \(a\)''
+constraint, but many that satisfy the ``equal definite integral over \([0,1]\)'' constraint.
+
+
+
+% % Let's say if can find some isomo
+% % where the basis vector
+% % \(e_n\) corresponds to the coefficient of \(x^n\) for
+% % \(n \in \{0, 1, \cdots, k\}\).
+% % The set \(B = \{e_n \mid n \in \{0, 1, \cdots, k\}\}\)
+% % is in fact a valid basis,
+% % because there's no way to make a weighted sum of other monomials \(x^b, b\neq n\)
+% % identical to \(x^n\) for all \(x\)
+% % and therefore no way to create one basis vector from a linear combination of the others.
+% % Then \(B\) forms a basis for the vector space in question.
+% Let's call this vector space \(P^k\), for the space of all \textbf{p}olynomials with order
+% no greater than \(k\) with domain \(\mathbb{R}\).\par
+% If \(P^k\) contains all \(k\)'th order polynomials, how is
+% \(p(x;k)\) represented?
+% It's represented by the (zero-indexed) vector whose \(n\)'th index equals \(A(n)\) for all
+% \(n \in \{0, 1, \cdots, k\}\), because in such a case, the vector is described by
+% \[ \sum_{n=0}^{k}A(n) e_n = \vec{v} \]
+% If we allow \(e_n\) to ``assume'' its identity as the monomial \(x^n\), then we get
+% \[\sum_{n=0}^{k}A(n) e_n = \vec{v} \longrightarrow \sum_{n=0}^{k}A(n) x^n = p(x;k)\]
+
+% \(A(n)\) encodes exactly the coefficients needed that get us to \(p(x;k)\).
+% It just so happens that if we have some function \(f(x)\), the point in \(P^k\)
+% that has identical derivatives to \(f(x)\) at \(x=0\) is the point reached by
+% setting the coefficients via \(F_D(n) = \frac{f^{(n)}(0)}{n!}\).
+% Letting \(k\) grow larger means that we're choosing a polynomial
+% from a larger and larger space of polynomials
+% (which is itself a subset of all possible functions\footnote
+% {
+%   Recall that if we designate an input \(x\) in some domain \(D_x\)
+%   and some output \(y\) in some domain \(D_y\),
+%   then a \textbf{function}\index{function} \(f \in \mathcal{P}(D_x \times D_y)\)
+%   is simply a set of ordered pairs \((x,y)\)
+%   where each \(x\) appears only once in the set.
+%   (Here \(\mathcal{P}\) denotes the \emph{powerset} operator
+%   and \(\times\) the \emph{Cartesian product} operator.)
+%   So there are \emph{many} wacky functions one could make.
+% })
 
 
 
