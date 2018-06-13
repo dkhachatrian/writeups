@@ -30,7 +30,7 @@
     \titlespacing{\chapter}{0pt}{10pt}{30pt}
 
 
-
+    \usepackage{textcomp} % lets \texttildelow -> ~
 
 
 
@@ -39,7 +39,12 @@
 
     \usepackage{bbm} % allow for fancy-case of numbers
 
+    \usepackage{xparse}
+  % see https://tex.stackexchange.com/questions/29973/more-than-one-optional-argument-for-newcommand
 
+    \NewDocumentCommand{\innerprod}{O{\cdot} O{\cdot}}{\ensuremath{\left<#1,#2\right>}}
+    \NewDocumentCommand{\domain}{m}{\ensuremath{\mathbbm{#1}}}
+    \NewDocumentCommand{\norm}{O{\cdot}}{\ensuremath{\left\lVert#1\right\rVert}}
 
 
 
@@ -1976,6 +1981,336 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 
 (Avert your eyes! Unless you're fine with drafts and WIPs \textemdash{} in which case, enjoy!)
 
+% 6/8/18
+% Relationship between carrier frequency and information/data rate?
+% Some links:
+% https://forums.anandtech.com/threads/is-there-a-relationship-between-information-data-rate-and-carrier-frequency.2051027/
+% https://en.wikipedia.org/wiki/Shannon%E2%80%93Hartley_theorem
+
+
+
+
+% TODO: Try and get from
+% Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
+% -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
+% -> molecular orbital theory -> Beer-Lambert Law and *absorption* of light in media
+% next,
+% what determines reflection vs transmittance (physics and light properties)
+% finally,
+% tie together to blackbody radiation and the ultraviolet catastrophe
+% (interest in blackbody radiation came from reading it in the app Quantum)
+
+% also before blackbody radiation, consider
+% Boltzmann distribution / partition function
+% approximation of multinomial distribution above with an exponential funciont
+% via the *Central Limit Theorem* (explain)
+
+% generator functions
+% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
+
+% Boltzmann distribution (and statistics for for bosons and fermions) 
+% -> one example of a derivation of the equipartition theorem
+% -> classical Rayleigh-Jeans law -> UV catastrophe / blackbody radiation ()
+
+% virial theorem
+
+% generator functions to handle cases where states have unequal probabilities of
+% occurring (a loaded die, for instance).
+
+% ^ all of the above first wondered about ~5/26/18
+
+
+% why is the reduced mass of a system calculated
+% like the equivalent resistance of resistors in parallel? - 5/28/18
+
+% What is up with the different ``forms'' of free energy? (Gibbs, Helmholtz, internal, enthalpy)
+
+% what causes water bubbles at e.g. the base of a waterfall? (``Cavitation''?)
+
+% harmonic mean vs geometric mean vs arithmetic mean: when is it appropriate to use which one?
+
+% why do accelerating charges radiate energy?
+% What sort of waves are emitted by moving matter? (Matter waves.)
+% What is the *speed* of matter waves? Are they waves in a classical sense or a quantum sense?
+
+
+\section{Integral transforms.}
+
+While this certainly won't answer all questions about integral transforms, it can hopefully
+shed some light on ``where'' integral transforms come from.\par
+tl;dr: they can be thought of as changes of basis in a particular function space,
+with the basis vectors chosen based on what best fits the problem at hand.
+However, our transformation matrix (the kernel) is necessarily ``infinite-dimensional''
+in order to span the function space, so finding the inverse transformation matrix
+(and therefore the inverse (integral) transform) is nontrivial.
+% Like how a transformation on a vector \(T(x)\) can be modeled as matrix-vector multiplication
+% \(T_Mx\), the integral transform is like a continuous, infinite-dimensional matrix-vector
+% multiplication (with the function we're transforming as the vector and the
+% kernel of the transform being the matrix). Just as not all ``regular'' transformations are
+% invertible (the matrix representation needs to be non-singular), 
+% not all transforms have an inverse operation
+% (the kernel, our ``infinite-dimensional matrix'', may be singular),
+% and discovering the inverse transform is generally nontrivial.
+
+\subsection{Short refresher on vector spaces.}
+
+(In the following discussion,
+may be lazy and drop the \(\vec{\cdot}\) arrow where we believe the fact
+that it's a vector is clear.)
+
+We're already pretty comfortable with the idea of describing vectors as a linear combination
+of basis vectors. If we have some vector space \(V \subseteq \mathbb{R}^n\),
+% some \(\vec{v} := \left[v_1, v_2, \cdots, v_n\right]^T \in V\),
+some \(\vec{v} \in V\),
+and
+a basis \(\{\vec{b}_1, \vec{b}_2, \cdots, \vec{b}_n\}\) for \(V\), we can write
+\(v\) as a linear combination of basis vectors:
+
+\[\vec{v} = \sum_{i=1}^{n} a_i\vec{b}_i \]
+
+% or, if we build a matrix out of the basis vectors via 
+% \(D = 
+% \begin{bmatrix}
+%   e_1 & e_2 & \dots & e_n 
+% \end{bmatrix}
+% \)
+% and stack our coefficients into a vectors \(a = \left[a_1, a_2, \cdots, a_n\right]\),
+% then we can write
+
+% \[\vec{v} = aB\]
+
+Let's emphasize the fact that we chose \emph{a} basis for \(V\)
+and in most cases there is no such thing as \emph{the} basis for \(V\), since a
+\textbf{basis}\index{basis!in linear algebra} (of a vector space \(V\))
+is just a set of linearly independent vectors that span \(V\).
+(We'll refer back to linear independence in a bit.)\par
+
+Going back to \(\vec{v}\), if we agree of the basis of \(V\) we're working with,
+we can fully ``encode'' \(v\) via an n-tuple where the \(i\)'th location holds \(a_i\),
+the scalar coefficient by which we multiply the basis vector \(\vec{b}_i\).
+In that sense, we can say that \(\vec{v} = \left[a_1, a_2, \cdots, a_n\right]\).
+But we can always choose some \emph{other} basis
+\(\{\vec{\beta}_1, \vec{\beta}_2, \cdots, \vec{\beta}_n\}\)
+with which to express \(v\), in which case we'd (almost certainly) need different coefficients
+\(\alpha_1, \alpha_2, \cdots, \alpha_n\) in order construct the same vector.
+We haven't changed the \emph{vector spaces}, we've only changed how we represent points
+\emph{in} our vector space.\par
+
+\subsubsection*{Tangent: The ``meaning'' of vectors.}
+
+So, what are we doing when we change bases? What does a vector of
+\(\left[1, 0, 0, \cdots, 0\right]\) mean anyway?
+Arguably, the answer can be given in a ``hippie''-sort of way:
+\textit{``It means, like, whatever you want it to, man\texttildelow''}\par
+
+As an example, think of how one can solve a linear system of equations,
+say of three variables x, y, and z,
+using a matrix.
+Often, you'd represent an equation by a row vector comprised of
+the \emph{coefficients} of the three variables,
+augmented by the scalar value they equal. That implies that
+a left-hand-side row vector \([1, 0, 0]\) ``maps to'' the expression \(x\),
+\([1,0,0] \mapsto x\). That's exactly why you know you're done when you have a 
+diagonal of ones on the left-hand-side of the augmented matrix, for example the row
+\(
+\left[
+\begin{array}{ccc|c}
+1 & 0 & 0 & a
+\end{array}
+\right]
+\)
+would mean that \(x=a\).
+But if there's some better way to encode the equations, we could always choose
+one of those instead, e.g.
+\([1,0,0] \mapsto \frac{x+y}{2}\), 
+\([0,1,0] \mapsto \frac{y+z}{2}\),
+\([0,0,1] \mapsto \frac{x+z}{2}\).
+It's all in \emph{your} hands \texttildelow\par
+
+\subsubsection*{Back to bases, and inner products.}
+
+All that said, when we change our basis from
+\(\{\vec{b}_1, \vec{b}_2, \cdots, \vec{b}_n\}\)
+to 
+\(\{\vec{\beta}_1, \vec{\beta}_2, \cdots, \vec{\beta}_n\}\),
+we can think of it as changing our mapping of basis vectors from 
+\(e_i \mapsto b_i\)
+to
+\(e_i \mapsto \beta_i\)
+where \(e_i\) is our standard basis vector for the \(i\)'th coordinate, 
+\(e_i \in V, \, e_i[j] = \delta(i,j)\).
+\par
+
+But that's only part of the story. How do we describe \(\vec{v}\)
+with our new basis? That is to say, how do we find the mapping for our coefficients
+\(\{a_1, a_2, \cdots, a_n\} \mapsto \{\alpha_1, \alpha_2, \cdots, \alpha_n\}\)
+so that they ``encode'' the same point \(\vec{v}\) in the vector space, i.e. that
+\[\sum_{i=1}^{n}\alpha_i\vec{\beta}_i \]
+and
+\[\sum_{i=1}^{n}a_i\vec{b}_i\]
+refer to the same point in the vector space?\par
+
+Well, so far we have no way of measuring ``how much'' of one vector is in another.
+To make this clearer, consider two vectors \(\vec{v}\) and \(\vec{w}\), both in \(V\).
+We want to create an operation that allows us to describe \(v\) as an addition of two vectors,
+one ``parallel'' to \(w\) and one ``orthogonal'' to \(w\)
+(both in the intuitive senses of the word):
+
+\[\vec{v} = \vec{v}_{v\parallel w} + \vec{v}_{v\perp w}\]
+ 
+
+If we have an operation that gets us one of the two component vectors, we can
+always define the other as a subtraction from the resultant vector.
+Turns out, we focus on similarity more (what a pleasant thought)!
+More specifically, we need to 
+define an \textbf{inner product} \innerprod{} over the vector space \(V\),
+which is just an operation that that takes in two elements from \(V\) and returns a scalar,
+and which also follows four key properties:
+\begin{itemize}
+  \tightlist
+  \item
+    Symmetry: \innerprod[u][v] = \innerprod[v][u]
+  \item
+    Linearity: \(\alpha \in \domain{R} 
+          \rightarrow \innerprod[\alpha u][v] = \alpha \innerprod[u][v]\)
+  \item
+    Distributivity:
+      \(\innerprod[u+v][w] = \innerprod[u][w] + \innerprod[v][w]\)
+  \item
+    Positive Definiteness:
+      \(\innerprod[v][v] \geq 0. \innerprod[v][v] = 0 \rightarrow v = \vec{0}\)
+\end{itemize}
+
+A vector space with an associated inner product is called an \textbf{inner product space}.
+We can choose \emph{any} operation that fulfills these four requirements to be our
+definition of an inner product! There are some standard ones though.
+In the case of vectors in \(\domain{R^n}\), the standard is
+\(\innerprod[u][v] = \sum_{i=1}^{n}u_i v_i \).
+With our definition of an inner product in hand, we can have that
+
+\[\vec{v}_{v\parallel w} = \frac{\innerprod[v][w]}{\norm[w]} \hat{w} \]
+
+where \(\hat{w}\) is the unit vector in the direction of \(w\) and the 
+\textbf{norm}\index{norm}
+of the vector \(w\)
+is defined via the inner product \(\norm[w] := \sqrt{\innerprod[w][w]}\).
+The remaining component \(\vec{v}_{v\perp w}\) is \textbf{orthogonal} to \(w\),
+meaning \(\innerprod[\vec{v}_{v\perp w}][w] = 0\).
+\par 
+
+Conveniently, if \(\vec{w}\) is already of unit magnitude, 
+then \(\norm[w] = 1, \hat{w} = \vec{w}\), and
+\(\vec{v}_{v\parallel w} = \innerprod[v][w]\vec{w}\).
+That is, the ``amount/number'' of a 
+unit vector \(w\) inside \(v\) is simply \innerprod[u][v].
+And if the unit vector \(w\) is a basis vector \(b_i\), then 
+\(\vec{v}_{v\parallel w}\) is 
+that basis vector, scaled by \innerprod[v][b_i]!\footnote{
+  ``!'' used to denote excitement, not factorialization.
+}
+\par
+
+Now we can finally answer our question! 
+If we want to describe the same vector \(\vec{v}\)
+in terms of a new basis \(\{\vec{\beta}_i\}\) 
+we can calculate the coefficients \(\{\alpha_i\}\)
+simply by calculating \(\frac{\innerprod[v][\beta_i]}{\norm[\beta_i]}\)
+(with both \(v\) and \(\{\beta_i\}\) represented
+in terms of a common basis
+\textemdash{} presumably the standard basis \(\{e_i\}\) \textemdash{}
+as needed in order to calculate the inner product).
+
+\subsection{Functions, function spaces, and operators.}
+
+Now what if I told you that a function is just a vector?
+More accurately, a function \emph{can be viewed}
+as an element of a \textbf{function space} (which needs qualification \textemdash{}
+e.g. ``the space of all continuous functions'' \(\domain{C}^0\)), 
+with specific coefficients
+based on the choice of \emph{basis functions} we use to span the function space in question.
+
+% Well, so far we have no way of measuring ``similarity'' between two vectors, where here
+% two vectors are similar when they point in the same ``direction'' in vector space.
+% Vector spaces, in and of themselves, do not have a requirement that there be such a notion.
+% But if we \emph{define} an operation that can gives us a scalar ``score'' of the similarity
+% between two vectors, we'd be in business.
+% First we'll define an operation that \emph{is} sensitive
+% The operation we define, called the \textbf{inner product}, \emph{will} be sensitive
+% to vector magnitudes in order to fulfill the requirements needed for som
+
+% inner product & orthogonality, inner product with basis vector -> coefficients
+
+% invert the transformation? Depends on the mapping (may not be one-to-one)
+
+% A set of coordinates in a vector space only have ``meaning'' 
+% in as much as your axes have meaning.
+% Consider a Cartesian system with two axes \(x\) and \(y\) and coordinates \(\left(x,y\right)\).
+% Does the coordinate \(\vec{p} = \left(x_0, y_0\right)\) have any intrinsic meaning?
+% Not unless the axes do, right?
+% So far, all it ``means'' is that \(\vec{p}\) ``goes'' an amount \(x_0\) in the x-direction
+% (whatever \(x\) is)
+% and an amount \(y_0\) in the y-direction (whatever \(y\) is).
+% But we \emph{give} meaning to the axes \(x\) and \(y\).
+% Say that we designate an \emph{origin}, with coordinates (0,0).
+% Then we can assign the meanings:
+% \begin{itemize}
+%   \tightlist
+%   \item
+%     \(x \leftarrow \) the horizontal displacement from the origin
+%   \item
+%     \(y \leftarrow \) the vertical displacement from the origin
+% \end{itemize}
+
+% Equivalently, we can assign meanings to \emph{a specific point} along an axis:
+
+% \begin{itemize}
+%   \tightlist
+%   \item
+%     \(\left(1,0\right) \leftarrow \) the point corresponding to being 
+%     from the origin by 1 unit to the right
+%   \item
+%     \(\left(0,1\right) \leftarrow \) the point corresponding to being displacement vertically
+%     from the origin by 1 unit
+% \end{itemize}
+
+% Then  horizontal and vertical displacements from 
+% a particular point, designated the \emph{origin} with coordinates (0,0)
+% \textemdash{}
+% \emph{then} we can ascribe a particular ``meaning'' from \(\vec{p}\).
+
+% They only have ``meaning'' once we decide that
+% Then the coordinates of a vector
+% We're changing which way we vectors are the simplest
+% to represent. A vector 
+% The ``simplest'' basis to work with is an
+% orthogonal (and orthonormal) basis consisting of
+% one-hot vectors, i.e., a set of vectors \(\{e_1, e_2, \cdots, e_n\}\)
+% where
+% \(e_i[j] = \delta(i,j)\),
+% but it's by no means the only one.
+% \par
+
+% OK, but how do we change bases, i.e., how do we get from the 
+
+
+% But what does it mean to be orthogonal? So far, the word is meaningless. In fact,
+% the notion of ``similarity'' is meaningless so far as well, outside of saying
+% whether or not two vectors are linearly dependent or linearly independent. as we only
+% have a way of determining linear dependence/independence.
+% For that matter, we don't 
+% However, if we define some operation to measure some sense of ``similarity'' 
+% between points in our vector space,
+% % In fact, saying that \(\vec{v} := \left[v_1, v_2, \cdots, v_n\right]^T \) means
+% % nothing without saying 
+
+% % \[v `  \]
+
+\subsection{Functions, function spaces, and operators.}
+
+
+
+
+
 
 \section{The Fourier and Laplace Transforms.}
 
@@ -2355,44 +2690,6 @@ For example, consider the function
 
 
 
-% TODO: Try and get from
-% Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
-% -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
-% -> molecular orbital theory -> Beer-Lambert Law and *absorption* of light in media
-% next,
-% what determines reflection vs transmittance (physics and light properties)
-% finally,
-% tie together to blackbody radiation and the ultraviolet catastrophe
-% (interest in blackbody radiation came from reading it in the app Quantum)
-
-% also before blackbody radiation, consider
-% Boltzmann distribution / partition function
-% approximation of multinomial distribution above with an exponential funciont
-% via the *Central Limit Theorem* (explain)
-
-% generator functions
-% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
-
-% Boltzmann distribution (and statistics for for bosons and fermions) 
-% -> one example of a derivation of the equipartition theorem
-% -> classical Rayleigh-Jeans law -> UV catastrophe / blackbody radiation ()
-
-% virial theorem
-
-% generator functions to handle cases where states have unequal probabilities of
-% occurring (a loaded die, for instance).
-
-% ^ all of the above first wondered about ~5/26/18
-
-
-% why is the reduced mass of a system calculated
-% like the equivalent resistance of resistors in parallel? - 5/28/18
-
-% What is up with the different ``forms'' of free energy? (Gibbs, Helmholtz, internal, enthalpy)
-
-% what causes water bubbles at e.g. the base of a waterfall? (``Cavitation''?)
-
-% harmonic mean vs geometric mean vs arithmetic mean: when is it appropriate to use which one?
 
 \section{Generating functions: dealing with uneven probabilities.}\label{sec:generating-functions} % 5/27/18
 
