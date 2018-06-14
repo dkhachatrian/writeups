@@ -45,7 +45,7 @@
     \NewDocumentCommand{\innerprod}{O{\cdot} O{\cdot}}{\ensuremath{\left<#1,#2\right>}}
     \NewDocumentCommand{\domain}{m}{\ensuremath{\mathbbm{#1}}}
     \NewDocumentCommand{\norm}{O{\cdot}}{\ensuremath{\left\lVert#1\right\rVert}}
-
+    \NewDocumentCommand{\abs}{m}{\ensuremath{\left|#1\right|}}
 
 
     \usepackage{makeidx} % allows for indexing
@@ -2220,7 +2220,8 @@ in terms of a common basis
 \textemdash{} presumably the standard basis \(\{e_i\}\) \textemdash{}
 as needed in order to calculate the inner product).
 
-\subsection{Functions, function spaces, and operators.}
+
+\subsection{Functions, function spaces.}
 
 Now what if I told you that a function is just a vector?
 More accurately, a function \emph{can be viewed}
@@ -2228,6 +2229,323 @@ as an element of a \textbf{function space} (which needs qualification \textemdas
 e.g. ``the space of all continuous functions'' \(\domain{C}^0\)), 
 with specific coefficients
 based on the choice of \emph{basis functions} we use to span the function space in question.
+
+\subsubsection{Power series and discrete function spaces.}
+
+
+As a stepping stone, let's consider an n'th-degree power series:
+
+\[p(x;n) = \sum_{i=0}^{n}a_n x^n \]
+
+We're looking at a weighted sum of monomials. 
+What does this remind us of?\par
+
+Well, it kinda looks like a linear combination of vectors, doesn't it?\par
+
+To show the mapping, we can map the natural basis vector:
+\[\vec{e}_i \mapsto x^i \]
+
+If we agree to this basis,
+our function \(p(x;n)\) is fully described by the coefficients \(a_i\):
+
+\[p(x;n) = \left[a_1, a_2, \cdots, a_n\right]\]
+
+So we have \(p(x;n)\) as a vector
+in the vector space of all polynomials
+of degree no greater than \(n\).
+Let's call this vector space of functions
+(or \emph{function space}) \(P^n\).
+Then \(p(x;n) \in P^n\).
+\par
+
+
+But what's stopping us from
+letting \(n \rightarrow \infty\)?
+Let's let loose.
+If we do, we get the normal, ``full'' power series\footnote{
+A quick aside on \textbf{power series}\index{power series}:
+when dealing with the ``full'' (infinite-order) power series,
+we should consider radii of convergence if we want our 
+power series to represent a desired fucntion.
+Many vectors \(\{a_i\}\) map to functions that diverge
+pretty much anywhere besides \(x=0\). 
+This may sound exotic, but it pops up in ``mundane'' functions.
+The seemingly innocuous vector 
+\(\left[1, 1, 1, \cdots\right]\) corresponds
+to \(f(x) = \frac{1}{1-x}\) only within a radius of
+convergence of \(\abs{x} < 1\) 
+\textemdash{} outside that radius, the function explodes. If we instead had a vector
+\(\left[1, 2, 3, \cdots \right]\), and our function will
+blow up quite quickly for \(x=0\).\par
+
+But we needn't always care whether or not the function it
+represents converges if all that interests us 
+are the monomials' coefficients. 
+When we're viewing a power series just as a sequence of
+coefficients 
+(with operations that reflect
+polynomial arithmetic), we refer to it as a
+\textbf{formal power series}
+\index{power series!formal power series}.
+The way polynomial multiplication works allows us to
+solve potentially really tricky problems by creating a
+(finite or infinite) power series with the appropriate
+coefficients, exponentiating the power series,
+and reading off the coefficient of a particular monomial.
+More on that in \ref{sec:generating-functions}.
+}:
+
+\[p(x) = \sum_{i=0}^{\infty}a_n x^n\]
+
+
+When we start playing with infinity, we have to start
+being a bit more clever.
+Our previously used ``vector as an \(n\)-tuple''
+representation of a function \(f\) becomes a \emph{bit}
+unreasonable. Even if we've agreed on our basis mapping
+\(\{e_i \mapsto b_i(x)\}\)
+and we know exactly what the coefficient \(a_i\)
+for the \(i\)'th basis vector is for all \(i \in \domain{N}\),
+we can't literally sit here and list them all out manually:
+\(\vec{f} = \left[a_0, a_1, a_2, \cdots \right]\). \par
+
+But how about this? 
+Instead of encoding \(f\) into our vector space as a \emph{tuple}
+\(f \mapsto \vec{f} = \left[a_0, a_1, \cdots \right]\), 
+how about we encode 
+\(f\) as \emph{another function \(A_f(k)\) which
+outputs the appropriate coefficient for the \(k\)'th index of
+our (infinite-dimensional) vector}?
+Then if we ever need the value at the \(i\)'th index of our
+encoding, instead of indexing a tuple (\(\vec{f}[i]\)),
+we just call our coefficient-encoding function \(A_f(i)\).
+As long as there \emph{is} an underlying function that
+can give us \(A_f(k)\), we're good. Let's come back to that 
+in a moment.\par
+
+\subsection{An inner product for our function space.}
+
+Currently we have a vector space.
+But we \emph{don't} yet have an inner product space.
+What would be a sensible inner product,
+a sensible measure of (norm-sensitive) ``similarity''
+between functions?\par
+
+Well, these are functions over a variable \(x\).
+Let's hearken back to ye olde days of first-year calculus.
+Back then, we would construct Taylor-series approximations \(T\) 
+of some original function \(f\) around
+a point \(x=c\) and proclaim that \(T\) is ``similar'' to \(f\)
+at and in some neighborhood around that point \(c\). 
+Why? (Let's say \(T\) was a \(k\)'th-order approximation.)
+Well, because we specifically
+constructed \(T\) so that
+\[\forall \ i \in \{0, 1, \cdots, k\}, T^{(i)}(c) = f^{(i)}(c)\]
+\textemdash{} i.e., so that \(T\) matched \(f\)'s slope, concavity, etc., around \(x=c\)
+\textemdash{}
+we expect the \emph{output} of T to be approximately the same
+as the \emph{output} of f around \(x=c\), even for wacky 
+original functions \(f\).\footnote{
+  This breaks down with ``pathological''
+  functions such as
+  \(f(x) = 
+  \begin{cases}
+    0 & x = 0 \\
+    e^{1/x^2} & x \neq 0
+  \end{cases}
+  \),
+  which has \(f^{(i)}(0) = 0 \ \forall i \in \domain{N}\)
+  and therefore has a Taylor series of exactly \(T(x) = 0\)
+  if centered around \(c = 0\) \textemdash{} hardly how \(f\)
+  acts outside the origin!
+  But in this situation we can only grumble about these sorts of functions,
+  called \emph{non-analytic functions},
+  and explicitly exclude them from our analysis.
+}
+All this to say, in choosing the inner product for functions
+in a particular space,
+we probably want to measure the ``responses'' of these
+functions to the input variable(s) they permit.
+Keeping this in mind and looking back at the requirements to
+be an inner product, we can see that a reasonable choice
+is an integral over the domain of \(x\) if \(x\) is continuous:
+
+\[\innerprod[f][g] = \int_{Dom(x)} f(x)g(x) dx \]
+
+or, if \(x\) is a discrete variable, then a summation instead:
+
+\[\innerprod[f][g] = \sum_{x_i \in Dom(x)} f(x)g(x) \]
+
+Note that an inner product space only has one inner product.
+Part of the description of a function space is the domain 
+of the input variable, which would determine which form
+of the inner product would be appropriate.\par
+
+Now this definition of an inner product would be great 
+\textemdash{}
+we'd have a way of describing any function in terms of 
+our desired basis by doing an integral!
+\textemdash{}
+\emph{if}
+we can get it to converge.
+Hardly a guarantee: take \(f(x) = x^0, g(x) = x^2\)
+(both natural unit vectors in 
+our current basis of polynomial space!)
+and \(x \in \domain{R}\) as just one example.
+But let's not give up on it just yet \textemdash{}
+we may just be able to make things work with another basis!
+
+\subsection{Beyond the countable, and picking a basis.}
+
+It would help if
+we expanded our horizons a bit.
+I mean, getting to have \(x^i,\ i \in \domain{N}\)
+is great and all, but we're definitely not spanning nearly
+as much of our function space (say the space of smooth
+(i.e., infinitely differentiable) functions, 
+\(\domain{C}^\infty\)) as we could.
+I mean, I can't even fully encode \(x^\pi\) or \(x^e\) 
+with such a puny basis! And I like both \(\pi\) and \(e\)!
+\sout{And especially pie! \textit{Mmmm... Pie.}}\par
+
+Enough belly-aching. We're now going to expand our
+set of basis functions to be \emph{continuous}:
+\[B_{P+} = \{x^i \mid i \in [1, \infty)\} \] 
+
+Now we can handle \(x^\pi\) and \(x^e\) quite easily.
+But we still can't describe \emph{every} function (namely,
+any functions which contain \(x^i, i < 1\)).
+And we're probably still in trouble with using our
+inner product \textemdash{} outside of \(\abs{x} < 1\),
+we're probably exploding.\par
+
+Alright, let's not be so negative! Or wait... 
+Actually, let's be negative!
+
+\[B_{P} = \{x^{-i} \mid i \in [1, \infty)\} \] 
+
+Alright, \emph{this} looks promising! Now if we restrict
+the domain of our input variable to 
+something like \(x \in [1, \infty)\),
+our inner product
+won't explode just by taking the norm of a basis vector.
+This is promising, but there may be an even more useful
+set of basis functions to use \textemdash{} it's kind of
+lame to have to start at \(x=1\). What if we're modeling
+something over time? We don't want to just chop
+off the first horizontal unit's worth of data if we 
+could help it! \par
+
+Before we get carried away, we should realize what these
+changes of basis mean. You'll notice that in our switch
+from \(B_{P+}\) to \(B_{P}\), we lost the ability to
+fully/easily encode \(x^\pi\) and \(x^e\), and we
+had to change our allowed input domain from \((-1,1)\)
+to \([1, \infty)\). So when we change our basis, it
+isn't without consequence. We end up
+\emph{changing the part of function space we can describe}. 
+Put in a way that may sound almost tautological,
+\emph{different sets of basis functions
+describe different (potentially disjoint) sets of functions}.
+This is worth keeping in mind as we finally talk about
+integral transforms.
+
+\subsection{The integral transform: a concatenation of inner products.}
+
+So what is an integral transform?
+You could make your own if you wanted to!
+(Whether or not it would be useful is another question.)
+Essentially all it is is \emph{a bunch of inner products
+over a set of previously selected basis functions}.
+As we talked about before, taking inner products of
+a vector \(\vec{v}\)
+with basis vectors \(\{\vec{b_i}\}\)
+and dividing by the norm of the basis vector
+provides us the coefficients needed to describe \(\vec{v}\)
+in the vector space spanned by \(\{\vec{b_i}\}\).
+Going back to functions again, 
+we can say that \emph{the integral transform
+produces from the input function \(f(x)\)
+the vector representation of \(f\),
+in the form of the coefficient-generating function \(A_f(n)\),
+in the function space spanned by a set of basis functions
+\(\{K(x;n)\}\)}. In mathematical form,
+
+\[A_f(n) = \innerprod[K(x;n)][f(x)] 
+  = \int_{Dom(x)} K(x;n) f(x) dx \]
+
+You're free to choose whatever set of basis functions
+\(\{K(x;n)\}\) you'd like, and have the size of this set
+(measured by \(n\)) be whatever you'd like.
+Since the choice of \(K(x;n)\) is at the core of
+the integral transform (it determines what functions you
+can represent and in what way they're represented),
+\(K(x;n)\) is called the 
+\textbf{kernel}\index{kernel!in integral transforms}
+of the transform.\footnote{
+  Which is unrelated to the kernel, i.e. nullspace, of a matrix in linear algebra\par
+  ...Yeah, I know, it would have been nice if they were a
+  bit more creative with the names. 
+  \sout{I mean, ``nullspace''
+  was perfectly good for what it was describing \textemdash{}
+  why'd they have to go and call it the ``kernel'' too?
+  All it succeeded in doing was make me try to understand
+  the connection between these two kernels in vain until
+  I realized there was no connection and they're just
+  named the same thing.}
+  I found it confusing too.
+}
+With a properly restricted input domain and properly
+chosen kernel, the mapping between \(f\) and \(A_f\)
+is one-to-one, implying both the uniqueness of \(A_f\)
+\emph{and} a possible to ``invert'' the transform
+back into the form of the original function!\par
+
+You'll notice that in the above definition of the transform,
+I didn't divide by the norm of the basis vectors.
+Technically, if we want \(A_f\) to capture the \emph{projections}
+of \(f\) onto the basis functions, we would indeed need
+to divide through by the norm:
+
+\[\begin{split}
+  \vec{f} &= \frac{\innerprod[K(x;n)][f(x)]}{\norm[K(x;n)]} \\
+  &= \frac {\int_{Dom(x)} K(x;n) f(x) dx } {\sqrt{\int_{Dom(x)} K(x;n)^2 dx }}
+\end{split}
+\]
+
+Personally, I kind of like this form a little bit more, mainly
+because its seemingly out-of-nowhere form might prompt a student
+to ask ``What's up with that denominator?''. Which
+may lead to a discussion about 
+this pretty interesting way of thinking of functions,
+which may help demystify the Transforms\textsuperscript{TM} 
+that otherwise appear to be delivered from on high.
+Alas, in this case, laziness prevails.
+See, because the denominator is invariant to the input function
+\(f(x)\), all coefficient-generating functions \(A_f\) for
+\emph{every} function is off by the same factor
+\(1/\sqrt{\int_{Dom(x)} K(x;n)^2 dx}\) at any particular \(n\).
+But if they're \emph{all} off by the exact same factor at the
+exact same locations,
+the coefficient-generating functions will be unique
+whether you correct by that factor or not.
+And so often they don't until/unless they perform an
+inverse transform, 
+at which point they make up for the difference.
+
+\subsection{The Laplace Transform: a differential equations-friendly integral transform.}
+
+% ``natural'' basis of function space would probably be {x^i}
+% as we can describe pretty much any function 
+% (to a pretty close approximation)
+% as a Taylor series, which uses a countable subset
+% of {x^i}
+% And in fact, exp() cos() sin() are all exactly encoded
+% in a Taylor series.
+
+
+
+
 
 % Well, so far we have no way of measuring ``similarity'' between two vectors, where here
 % two vectors are similar when they point in the same ``direction'' in vector space.
@@ -2305,7 +2623,7 @@ based on the choice of \emph{basis functions} we use to span the function space 
 
 % % \[v `  \]
 
-\subsection{Functions, function spaces, and operators.}
+% \subsection{Functions, function spaces, and operators.}
 
 
 
