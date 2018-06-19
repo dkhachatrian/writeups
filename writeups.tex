@@ -49,7 +49,7 @@
     \NewDocumentCommand{\abs}{m}{\ensuremath{\left|#1\right|}}
     \NewDocumentCommand{\fancy}{m}{\ensuremath{\mathcal{#1}}}
     \NewDocumentCommand{\normexpanded}{}{}
-
+    \NewDocumentCommand{\gcf}{m}{\ensuremath{\text{gcf}\left(#1\right)}}
 
     \usepackage{makeidx} % allows for indexing
     \makeindex
@@ -730,7 +730,6 @@ We'll see this continuous form return when considering
 the norms of continuous functions. (It's almost as if
 functions are vectors or something...)
 
-
 \subsection{Functions, function spaces.}
 
 Now what if I told you that a function is just a vector?
@@ -739,7 +738,7 @@ as an element of a \textbf{function space} (which needs qualification \textemdas
 e.g. ``the space of all continuous functions'' \(\domain{C}^0\)), 
 with specific coefficients
 based on the choice of \emph{basis functions} we use to span the function space in question.
- 
+
 \subsubsection{Power series and discrete function spaces.}
 
 
@@ -891,6 +890,245 @@ Part of the description of a function space is the domain
 of the input variable, which would determine which form
 of the inner product would be appropriate.\par
 
+Before we continue, we should consider what we're going to
+consider the ``domain'' of the input variable for a function.
+More specifically, over what interval should we integrate
+a periodic function: all of \(\domain{R}\) or just one period's
+worth \(T\)?
+The ``better'' option might become clearer if we consider
+the \textbf{metric}\index{metric}, or \textbf{distance function},
+induced by our norm (which was in term induced by our
+inner product).\footnote{
+  Note that the inner product ``induces'' a norm
+  because if the inner product and norm of a vector space
+  are defined independently of each other,
+  we suddenly have inconsistent notions of ``similarity''
+  and ``length''. Likewise for norms and metrics
+  with ``lengths'' and ``distances''.
+  \href{http://people.math.gatech.edu/~heil/books/metricbrief.pdf}{This document}
+  seems promising in explaining why these ``inducements''
+  make sense \textemdash{} we will report back and
+  update this when it's been read.
+}
+When an inner product is defined, the metric 
+induced on our inner product space is
+
+\[d(x,y) = \norm[x-y] = \sqrt{\innerprod[x-y][x-y]} \]
+
+Now, say we have \(f = \cos(t)\) and \(g\) as a sawtooth
+wave of period, amplitude, and phase equal to \(f\)
+(i.e., \(g(t) = Saw(t; T = 2\pi, A = 1, \phi = 0)\).
+What would be the distance between our functions if
+we decide to integrate over all of \(t\) for which
+they're defined?
+
+\[d(f,g) = \sqrt{\int_{t = -\infty}^{\infty} \left(\cos(t) - Saw(t; 2\pi, 1, 0)\right)^2 dt} \rightarrow \infty \]
+
+Ouch. I mean sure, the sawtooth doesn't perfectly match
+the sinusoid, but do they really feel \emph{infinitely apart}
+from each other? I don't know about you, but these two
+functions feel a lot closer to each other than, say,
+\(\cos(t)\) and \(\sin(t)\). What can we do to fix it?\par
+
+Well, when you think about it, \emph{all} of the information
+about both of our functions 
+is contained in the interval \([0, 2\pi)\).
+Really, it would be more appropriate to say that our
+functions are defined over an interval of length \(2\pi\),
+e.g.,
+\(t \mod 2\pi \) (where \(t \in \domain{R}\)), and that
+we're just making copies of our functions outside of
+the defined interval as a ``courtesy'' more than
+anything. If you don't perform the modulo operation,
+you end up with weirdness \textemdash{} if there's only
+\(2\pi\) radians in a circle, how do you get the
+\((x,y)\) coordinate (read: sine or cosine) of the
+point \(3\pi\) radians into the circle? We immediately
+say ``Oh that's just \(-1,0\)'', but that's just because
+we've been sort of ``programmed'' to perform the modulo
+operation without realizing what we're doing.
+And the
+fact that we usually tile \(\domain{R}\) 
+with our periodic function
+reinforces the idea that \(\cos(3\pi) = -1\) makes sense, when
+really what makes sense is that we've defined the cosine function
+over an interval (say \([0, 2\pi)\)), \(3\pi \mod 2\pi = \pi\),
+and \(\cos(\pi) = -1\).\par
+
+All this to say, it feels like if we want to compare periodic
+functions with identical periods, we should compare
+only over one period (which captures all the ``content''
+of the functions) instead of amplifying the difference an
+infinite number of times over a repeatedly tiled domain:
+
+\[
+\begin{split} d(f,g) &= \sqrt{\int_{t = 0}^{2\pi} \left(\cos(t) - Saw(t; 2\pi, 1, 0)\right)^2 dt} \\
+  &= \sqrt{4 \times \left(\frac{5\pi}{12} + \frac{4}{\pi} - 2\right)} \\
+  &< \infty
+\end{split}
+\]
+
+which just feels a whole lot more reasonable.
+In general then, if two functions are periodic with the same period \(T\),
+we would have the inner product be
+
+\[\innerprod[f][g] = \int_{t=-T/2}^{T/2} f(t)g(t) dt \]
+
+with the norm and metric updated accordingly.
+This would seem to break the inner product for aperiodic functions.
+But what is an aperiodic function but a periodic function with
+infinite period \sout{and one less space}?
+Simply let \(T \rightarrow \infty\) in these cases.
+% What about if you have different periods?
+% Well, we want 
+% Well, we want to stay
+% in our vector space, which means some sort of ``average
+% value over all possible phases'' scheme is out of the picture
+% since there is no way to create a phase-shifted periodic function
+% out of a linear combination of basis functions without explicitly
+% adding basis functions unless we just happen to ``luck out''\footnote{
+%   As an example, remember that \(\sin(\omega t + \phi) = \sin(\omega t)\cos(\phi) + \cos(\omega t)\sin(\phi)\),
+%   which is not a linear combination of sines and cosines.
+% }. So we're stuck with the same starting phase for both.
+% Then we'll just take \(T\) to be the maximum of the periods of
+% the functions in question.
+
+\subsubsection{Aside on cross-correlations.}
+
+What if \(f\) and \(g\) have different periods? 
+\emph{Then} how would you measure the similarity between them?\par
+% OK, but what if we \emph{did} allow phase shifts?
+% \emph{Then} how would you measure the similarity between two functions
+% if the periods of the two functions \(f\) and \(g\) are different?
+Well, in that case we'd probably want to know how ``similar''
+the two are for a phase shift for each function \(\phi_f\) and \(\phi_g\),
+where we'd have \(\phi_X = 1\) be a phase shift corresponding to a full
+period of the function \(X\).\footnote
+{
+  Note that at the very least for sinusoidal waves, we can
+  describe a phase-shifted periodic function as a linear combination
+  of two non-shifted functions. That is to say, the statement
+  \(\exists b_1, b_2 \left(a\sin(\omega t + \phi) = b_1\cos(\omega t) + b_2\sin(\omega t)\right)\) is true.
+}
+Interestingly, only the \emph{relative} phase shift 
+\(\left(\phi_f - \phi_g\right) \mod 1 := \phi \)
+matters \textemdash{} when you're integrating over a full period,
+it doesn't matter where you start.
+So then we can calculate the ``similarity'' between two periodic
+functions as a function of phase difference between them:
+
+\[ \begin{split}
+  CC(s; F(s), G(s)) &:= 
+    \int_{\phi = 0}^{1} F(s + \phi) G(s) d\phi \\
+    &= \int_{\phi = 0}^{1} F(s) G(s + \phi) d\phi
+\end{split}
+\]
+
+% where we define a variable \(s_{\cdot}\) so that for a function \(x(t)\)
+% with period \(T\), \(s_x = \frac{t}{T}\).
+% This normalizes the units so that \(F(s)\) and \(G(s)\) 
+where we've defined \(F\) and \(G\) such that 
+\(F(s) = f(sT_f)\)
+and
+\(G(s) = g(sT_g)\). That is, we \emph{normalize} our input variable
+across all functions so that \(s\) reports how many periods into
+the function we are. 
+This assumes a measure where we weight a differential phase shift
+\(d\phi\) equally between the two functions, despite the same
+magnitude of phase shift requiring ``more'' of the original
+input variable in one function (the function with the larger period)
+than the other.\par
+
+While I feel the above form makes more intuitive sense (though
+it may take a bit of work to intuitively understand \(s\) and \(\phi\) since
+we need to decouple these variables from the original input variables
+in our minds), 
+we often
+instead see things in terms of periods and time.
+Given two periodic functions with periods \(T_1\) and \(T_2\),
+any arithmetic combination (sum or product) of them yields
+another periodic function of period \(T = \frac{T_1 T_2}{\gcf{T_1, T_2}}\). With this, we can continue:
+
+\[ \begin{split}
+  CC(t; f(t), g(t)) &:= 
+    \int_{\tau = 0}^{T} f(t + \tau) g(t) d\tau \\
+    &= \int_{\tau = 0}^{T} f(t) g(t + \tau) d\tau
+\end{split}
+\]
+
+Note that the \(CC\) function is slightly different depending
+on whether we're using our normalized input variable \(s\) or
+our unnormalized input variable \(t\) (they \emph{are}
+from different domains, after all). The latter
+requires some ``tiling'' of our periodic functions in
+\(t\)'s domain
+in order to compare all possible relative phase shifts.\par
+
+It would be fine if we kept things like this (the form suggests
+an intuition), but often people just immediately jump to
+aperiodic functions and so suddenly take limits to infinity\footnote
+{
+  The most common bounds given are
+  \([0, \infty)\) or \(\domain{R}\) depending on where
+  the function is defined \textemdash{} we'll show the most
+  commonly seen one (over \(\domain{R}\)), though it pains us slightly.
+  The pain is because sending both \(T_f\) and \(T_g\) to \(\infty\)
+  makes it extremely difficult to consider what changes when we
+  shift \(g\) instead of \(f\) \textemdash{} the darn thing
+  looks exactly the same, after all!
+}:
+
+\[ \begin{split}
+  CC(t; f(t), g(t)) &:= 
+    \int_{\tau = -\infty}^{\infty} f(t + \tau) g(t) d\tau \\
+    &= \int_{\tau = -\infty}^{\infty} f(t) g(t + \tau) d\tau
+\end{split}
+\]
+
+This is called the \textbf{cross-correlation}\index{cross-correlation}
+operator
+and can be used to determine ``how much'' of an aperiodic 
+function defined over \domain{R} is in another aperiodic function 
+defined over \domain{R}. Hopefully, now that we discussed it
+from its more natural situation with periodic functions,
+it makes more sense! \par
+
+And I suppose to answer our initial question,
+we would have to integrate over \(s\) (or \(t\)) so that
+our final value is a scalar (i.e. that our inner product maps
+to a field). In \(s\) form:
+
+\[ \innerprod[f(t)][g(t)] =
+\int_{s=0}^{1}CC\left(s; F\left(s\right), G\left(s\right)\right) ds = 
+\int_{s=0}^{1} \int_{\phi = 0}^{1} F(s + \phi) G(s) d\phi ds
+\]
+
+and in \(t\) form:
+
+\[ \begin{split}
+  \innerprod[f(t)][g(t)] &= \int_{t=0}^{T} CC(t; f(t), g(t)) dt \\
+  &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t + \tau) g(t) d\tau dt \\
+  &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t) g(t + \tau) d\tau dt
+\end{split}
+\]
+
+though as far as I'm aware, this value isn't used all that
+often (people seem to usually stick to the autocorrelation). \par
+
+We can define another very useful operator
+(the \emph{convolution} operator)
+by taking the above equation and tweaking it seemingly innocuously
+\textemdash{} which ends up being the \emph{Hermitian adjoint}
+of the cross-correlation operator\footnote{
+  Something I hope to actually understand the meaning of soon.
+} \textemdash{}
+but that equation comes far more naturally from consider
+\href{https://stats.stackexchange.com/a/332127}{the addition of two random variables}
+and would send us on an (even more) obtuse tangent from our talk of
+vector spaces and inner products. 
+
+\subsubsection*{Inner product wrap-up.}
+
 Now this definition of an inner product would be great 
 \textemdash{}
 we'd have a way of describing any function in terms of 
@@ -909,7 +1147,7 @@ we may just be able to make things work with another basis!
 
 It would help if
 we expanded our horizons a bit.
-I mean, getting to have \(x^i,\ i \in \domain{N}\)
+I mean, getting to use \(\{x^i \mid i \in \domain{N}\}\)
 is great and all, but we're definitely not spanning nearly
 as much of our function space (say the space of smooth
 (i.e., infinitely differentiable) functions, 
@@ -1320,27 +1558,172 @@ have to divide our differential by any factor:
 \[x(t) \propto 
   \int_{f=-\infty}^{\infty} e^{2\pi ift} X(f) df \]
 
-This definitely is the ``nicer'' option, but it required
+This line of reasoning did get us to the factor we needed
+(and suggested a ``nicer'' option to boot), but it required
 to interpret the math to reach it. Physical intuitions
 of mathematical operations are wonderful, but it would
 be shocking if there weren't a way to get to the answer
 while ``sticking to math''.
-Well, such methods exist, but it involves considering
-how to construct unitary operators over a Hilbert space
-(and the revelation that we usually ``intuitively''
-think of functions as elements of a Hilbert space),
-with a nice helping of complex analysis.
-I hope to get the chance to learn them properly myself.
-When that's the case, we'll expand this section
-more mathematical rigor.\par
+% Well, such methods exist, but it involves considering
+% how to construct unitary operators over a Hilbert space
+% (and the revelation that we usually ``intuitively''
+% think of functions as elements of a Hilbert space).
+% I hope to get the chance to give such explanations
+% once I learn them properly myself.
+% When that's the case, we'll expand this section
+% more mathematical rigor.\par
 
-All this to say, inverse transforms are tricky things
+% All this to say, inverse transforms are tricky things
+% to find! After all, such a task amounts to inverting
+% an infinite-dimensional transformation matrix \textemdash{}
+% would be a shock if it \emph{were} simple!
+
+\paragraph{An appeal to norms.}
+
+Well, what about norms? I made such a big hullabaloo about
+it earlier. Why don't we use them here? \par
+
+Say our basis function \(e^{-i\omega t}\) is a periodic function
+with period \(T = 2\pi\).\footnote
+{
+  Remember Euler's formula: \(e^{ix} = \cos(x) + i\sin(x)\).
+  The periodicity of the complex exponential \(e^{ix}\) is then
+  the period of the sum of the two sinusoidal functions.
+  Since they both have the same period \(T = 2\pi\),
+  so too does \(e^{ix}\).
+} What is its norm? 
+(Remember that for complex numbers, we use an 
+\(L^2\) norm and consider \(z\)'s domain isomorphic to 
+\(\domain{R}^2\), so that \(\abs{z} = \abs{x + iy}
+= \sqrt{\abs{x}^2 + \abs{y}^2}\).)
+
+
+\[\begin{split}
+  \norm[e^{-i\omega t}] &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{e^{-i\omega t}}^2 d(\omega t)} \\
+  &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{\cos(\omega t) + i\sin(\omega t)}^2 d(\omega t)} \\
+  &= \sqrt{\int_{\omega t=0}^{2\pi}
+  \left(
+    \left(\cos(\omega t)^2 + \sin(\omega t)^2\right)^{1/2}
+    \right)^2 
+    d(\omega t)} \\
+  &= \sqrt{\int_{\omega t=0}^{2\pi} 1 d(\omega t)} \\
+  &= \sqrt{2\pi}
+\end{split}\]
+
+This is regardless of one's choice in \(\omega\) or \(t\) and
+so is the same even if the the exponent didn't have the
+negative sign.
+(The result of the integral is
+also not too suprising when you consider the phasor interpretation of the complex exponential function).
+So then our basis functions for \emph{both} the Fourier
+transform \emph{and} the inverse Fourier transform have
+norms of \(\sqrt{2\pi}\). Then it would probably be better
+to divide through by the relevant norm in both directions, no?
+
+\[\fancy{F}(f(t)) = F(\omega)
+  = \frac{1}{2\pi} \int_{t=-\infty}^{\infty} e^{-i\omega t} f(t) dt\]
+
+\[\fancy{F}^{-1}(F(\omega)) = f(t)
+  = \frac{1}{2\pi} \int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) d\omega\]
+
+Dividing through by the norm has had the added consequence
+of preserving inner products of two functions \(f\) and \(g\)
+before and after our transform, i.e., 
+\(\innerprod[f][g] = \innerprod[\fancy{F}(f)][\fancy{F}(g)]\).
+This makes the transform as we defined it just now a
+\textbf{unitary operator}\index{unitary operator} over
+our function space (which, through our choice of inner product,
+is a Hilbert space and so has a notion of ``unitary operator'').
+Intuitively, a unitary operator doesn't squash or stretch
+the norms of the objects it operates on. For a more easily
+graspable example, the linear transformation \(T\)
+on \(\domain{C}\)
+corresponding to a rotation in the counterclockwise direction
+by an angle \(\phi\) is an example of a unitary operator.
+If we find another unitary operator \(T^{-1}\) 
+that ``undoes'' \(T\), then everything ends up exactly where
+it used to be. And that's exactly what we just did,
+but with functions 
+over an uncountably infinite-dimensional vector space!
+Pretty neat, huh?
+
+\subsubsection{The Laplace transform: just a slightly augmented Fourier transform.}
+
+Now, not all functions \(f(t)\)
+are \(L^1\)-integrable over their domain
+at first, so the Fourier transform wouldn't work on those. 
+But what if we actively tried to squish our 
+function down with our basis functions? Specifically,
+let's squash it by an exponentially decaying function.
+That would mean allowing \(s\) of our basis functions 
+to have a real component to them and so be complex.
+Say \(s = r + i\omega\)
+All we'd need to do is choose an \(r\) large enough to
+make the following integral converge:
+
+\[ \fancy{L}(f(t)) = F(s) = \int_{t \in Dom(t)} e^{-(r + i\omega)t} f(t) dt \]
+
+This would be our \textbf{Laplace transform}. It amounts
+to the same sort of winding action described in the Fourier
+transform, except that we're also squashing all the vectors
+we eventually sum (and so the resultant vector)
+by a factor of \(e^{-rt}\). Since it's so similar to
+the Fourier transform, we can use the same idea as
+before to get the inverse transform: wind the output
+of the forward transform in the opposite direction
+(i.e., clockwise). We just will also need to de-squashify
+our values by now stretching each of our points by
+\(e^{rt}\), but besides that, we'd be set to migrate
+over our inverse transform from our analysis of the Fourier
+transform:
+
+\[ \fancy{L}^{-1}(F(s)) = f(t) = \frac{1}{2\pi} \int_{\omega = -\infty}^{\infty} e^{i\omega t} e^{rt} f(t) d\omega \]
+
+where we have that factor of \(1/2\pi\) because of the reasons
+we've discussed before.\par
+
+Some people like to be real fancy and describe the above
+as a path integral in the complex plane that covers the
+same path we've implicitly described above:
+
+\[ \fancy{L}^{-1}(F(s)) = f(t) = \frac{1}{2\pi i} \int_{s = r - i\infty}^{r + i\infty} e^{st} f(t) ds \]
+
+You'll notice a factor of \(1/i\) pop out of seemingly
+nowhere.
+Well, when we integrate over a domain \(D\),
+our resulting value is expressed with the domain we integrated
+over as our ``reference point''. This works great if
+we're integrating over one domain and going to
+that same domain (say, integrating over \(\omega \in \domain{R}\)
+and ending up with a function of \(t \in \domain{R}\)).
+But if we integrate along the imaginary axis, our result
+will be in reference to an axis \emph{perpendicular} to
+our target domain of \(t \in \domain{R}\), specifically
+to an axis that is oriented \(\pi/2\) radians counterclockwise
+compared to the axis we desire. So we stick
+a \(1/i = i^{-1}\), a root of unity corresponding
+to a clockwise rotation of a point in the
+complex plane by\(\pi/2\) radians 
+when thought of as an operator (and applied via multiplication),
+to orient our output to the axis we want, that is, the
+real numbers.
+\\
+\subsection{Exiting the rollercoaster.}
+Well, that was quite a ride.
+And this was to derive a relatively \emph{straightforward}
+inverse transform \textemdash{}
+inverse transforms are tricky things
 to find! After all, such a task amounts to inverting
-an infinite-dimensional transformation matrix \textemdash{}
-would be a shock if it \emph{were} simple!
+an infinite-dimensional transformation matrix
+(set by our choice of basis functions and therefore our choice
+of kernel).
+It would be a shock if such a 
+monumental task \emph{were} simple!\par
+
+In any case, I think that's enough for now.
 \\
 \\
-- DK, 6/18/18
+- DK, 6/19/18
 
 \newpage
 
@@ -2835,6 +3218,26 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 
 
 
+
+\section{Generating functions: dealing with uneven probabilities.}\label{sec:generating-functions} % 5/27/18
+
+% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Central Limit Theorem} % 5/27/18
+
+
 % TODO: Try and get from
 % Lagrangian -> Lagrangian mechanics -> Hamiltonian mechanics
 % -> the Hamiltonian in quantum mechanics -> the Schrodinger equation
@@ -2879,895 +3282,1283 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % What is the *speed* of matter waves? Are they waves in a classical sense or a quantum sense?
 
 
-\section{Integral transforms.}
 
-While this certainly won't answer all questions about integral transforms, it can hopefully
-shed some light on ``where'' integral transforms come from.\par
-tl;dr: they can be thought of as changes of basis in a particular function space,
-with the basis vectors chosen based on what best fits the problem at hand.
-However, our transformation matrix (the kernel) is necessarily ``infinite-dimensional''
-in order to span the function space, so finding the inverse transformation matrix
-(and therefore the inverse (integral) transform) is nontrivial.
-% Like how a transformation on a vector \(T(x)\) can be modeled as matrix-vector multiplication
-% \(T_Mx\), the integral transform is like a continuous, infinite-dimensional matrix-vector
-% multiplication (with the function we're transforming as the vector and the
-% kernel of the transform being the matrix). Just as not all ``regular'' transformations are
-% invertible (the matrix representation needs to be non-singular), 
-% not all transforms have an inverse operation
-% (the kernel, our ``infinite-dimensional matrix'', may be singular),
-% and discovering the inverse transform is generally nontrivial.
 
-\subsection{Short refresher on vector spaces.}
 
-(In the following discussion,
-may be lazy and drop the \(\vec{\cdot}\) arrow where we believe the fact
-that it's a vector is clear.)
 
-We're already pretty comfortable with the idea of describing vectors as a linear combination
-of basis vectors. If we have some vector space \(V \subseteq \mathbb{R}^n\),
-% some \(\vec{v} := \left[v_1, v_2, \cdots, v_n\right]^T \in V\),
-some \(\vec{v} \in V\),
-and
-a basis \(\{\vec{b}_1, \vec{b}_2, \cdots, \vec{b}_n\}\) for \(V\), we can write
-\(v\) as a linear combination of basis vectors:
+% \section{Integral transforms.}
 
-\[\vec{v} = \sum_{i=1}^{n} a_i\vec{b}_i \]
+% While this certainly won't answer all questions about integral transforms, it can hopefully
+% shed some light on ``where'' integral transforms come from.\par
+% tl;dr: they can be thought of as changes of basis in a particular function space,
+% with the basis vectors chosen based on what best fits the problem at hand.
+% However, our transformation matrix (the kernel) is necessarily ``infinite-dimensional''
+% in order to span the function space, so finding the inverse transformation matrix
+% (and therefore the inverse (integral) transform) is nontrivial.
+% % Like how a transformation on a vector \(T(x)\) can be modeled as matrix-vector multiplication
+% % \(T_Mx\), the integral transform is like a continuous, infinite-dimensional matrix-vector
+% % multiplication (with the function we're transforming as the vector and the
+% % kernel of the transform being the matrix). Just as not all ``regular'' transformations are
+% % invertible (the matrix representation needs to be non-singular), 
+% % not all transforms have an inverse operation
+% % (the kernel, our ``infinite-dimensional matrix'', may be singular),
+% % and discovering the inverse transform is generally nontrivial.
 
-% or, if we build a matrix out of the basis vectors via 
-% \(D = 
-% \begin{bmatrix}
-%   e_1 & e_2 & \dots & e_n 
-% \end{bmatrix}
+% \subsection{Short refresher on vector spaces.}
+
+% (In the following discussion,
+% may be lazy and drop the \(\vec{\cdot}\) arrow where we believe the fact
+% that it's a vector is clear.)
+
+% We're already pretty comfortable with the idea of describing vectors as a linear combination
+% of basis vectors. If we have some vector space \(V \subseteq \mathbb{R}^n\),
+% % some \(\vec{v} := \left[v_1, v_2, \cdots, v_n\right]^T \in V\),
+% some \(\vec{v} \in V\),
+% and
+% a basis \(\{\vec{b}_1, \vec{b}_2, \cdots, \vec{b}_n\}\) for \(V\), we can write
+% \(v\) as a linear combination of basis vectors:
+
+% \[\vec{v} = \sum_{i=1}^{n} a_i\vec{b}_i \]
+
+% % or, if we build a matrix out of the basis vectors via 
+% % \(D = 
+% % \begin{bmatrix}
+% %   e_1 & e_2 & \dots & e_n 
+% % \end{bmatrix}
+% % \)
+% % and stack our coefficients into a vectors \(a = \left[a_1, a_2, \cdots, a_n\right]\),
+% % then we can write
+
+% % \[\vec{v} = aB\]
+
+% Let's emphasize the fact that we chose \emph{a} basis for \(V\)
+% and in most cases there is no such thing as \emph{the} basis for \(V\), since a
+% \textbf{basis}\index{basis!in linear algebra} (of a vector space \(V\))
+% is just a set of linearly independent vectors that span \(V\).
+% (We'll refer back to linear independence in a bit.)\par
+
+% Going back to \(\vec{v}\), if we agree of the basis of \(V\) we're working with,
+% we can fully ``encode'' \(v\) via an n-tuple where the \(i\)'th location holds \(a_i\),
+% the scalar coefficient by which we multiply the basis vector \(\vec{b}_i\).
+% In that sense, we can say that \(\vec{v} = \left[a_1, a_2, \cdots, a_n\right]\).
+% But we can always choose some \emph{other} basis
+% \(\{\vec{\beta}_1, \vec{\beta}_2, \cdots, \vec{\beta}_n\}\)
+% with which to express \(v\), in which case we'd (almost certainly) need different coefficients
+% \(\alpha_1, \alpha_2, \cdots, \alpha_n\) in order construct the same vector.
+% We haven't changed the \emph{vector spaces}, we've only changed how we represent points
+% \emph{in} our vector space.\par
+
+% \subsubsection*{Tangent: The ``meaning'' of vectors.}
+
+% So, what are we doing when we change bases? What does a vector of
+% \(\left[1, 0, 0, \cdots, 0\right]\) mean anyway?
+% Arguably, the answer can be given in a ``hippie''-sort of way:
+% \textit{``It means, like, whatever you want it to, man\texttildelow''}\par
+
+% As an example, think of how one can solve a linear system of equations,
+% say of three variables x, y, and z,
+% using a matrix.
+% Often, you'd represent an equation by a row vector comprised of
+% the \emph{coefficients} of the three variables,
+% augmented by the scalar value they equal. That implies that
+% a left-hand-side row vector \([1, 0, 0]\) ``maps to'' the expression \(x\),
+% \([1,0,0] \mapsto x\). That's exactly why you know you're done when you have a 
+% diagonal of ones on the left-hand-side of the augmented matrix, for example the row
+% \(
+% \left[
+% \begin{array}{ccc|c}
+% 1 & 0 & 0 & a
+% \end{array}
+% \right]
 % \)
-% and stack our coefficients into a vectors \(a = \left[a_1, a_2, \cdots, a_n\right]\),
-% then we can write
+% would mean that \(x=a\).
+% But if there's some better way to encode the equations, we could always choose
+% one of those instead, e.g.
+% \([1,0,0] \mapsto \frac{x+y}{2}\), 
+% \([0,1,0] \mapsto \frac{y+z}{2}\),
+% \([0,0,1] \mapsto \frac{x+z}{2}\).
+% It's all in \emph{your} hands \texttildelow\par
 
-% \[\vec{v} = aB\]
+% \subsubsection*{Back to bases, and inner products.}
 
-Let's emphasize the fact that we chose \emph{a} basis for \(V\)
-and in most cases there is no such thing as \emph{the} basis for \(V\), since a
-\textbf{basis}\index{basis!in linear algebra} (of a vector space \(V\))
-is just a set of linearly independent vectors that span \(V\).
-(We'll refer back to linear independence in a bit.)\par
+% All that said, when we change our basis from
+% \(\{\vec{b}_1, \vec{b}_2, \cdots, \vec{b}_n\}\)
+% to 
+% \(\{\vec{\beta}_1, \vec{\beta}_2, \cdots, \vec{\beta}_n\}\),
+% we can think of it as changing our mapping of basis vectors from 
+% \(e_i \mapsto b_i\)
+% to
+% \(e_i \mapsto \beta_i\)
+% where \(e_i\) is our standard basis vector for the \(i\)'th coordinate, 
+% \(e_i \in V, \, e_i[j] = \delta(i,j)\).
+% \par
 
-Going back to \(\vec{v}\), if we agree of the basis of \(V\) we're working with,
-we can fully ``encode'' \(v\) via an n-tuple where the \(i\)'th location holds \(a_i\),
-the scalar coefficient by which we multiply the basis vector \(\vec{b}_i\).
-In that sense, we can say that \(\vec{v} = \left[a_1, a_2, \cdots, a_n\right]\).
-But we can always choose some \emph{other} basis
-\(\{\vec{\beta}_1, \vec{\beta}_2, \cdots, \vec{\beta}_n\}\)
-with which to express \(v\), in which case we'd (almost certainly) need different coefficients
-\(\alpha_1, \alpha_2, \cdots, \alpha_n\) in order construct the same vector.
-We haven't changed the \emph{vector spaces}, we've only changed how we represent points
-\emph{in} our vector space.\par
+% But that's only part of the story. How do we describe \(\vec{v}\)
+% with our new basis? That is to say, how do we find the mapping for our coefficients
+% \(\{a_1, a_2, \cdots, a_n\} \mapsto \{\alpha_1, \alpha_2, \cdots, \alpha_n\}\)
+% so that they ``encode'' the same point \(\vec{v}\) in the vector space, i.e. that
+% \[\sum_{i=1}^{n}\alpha_i\vec{\beta}_i \]
+% and
+% \[\sum_{i=1}^{n}a_i\vec{b}_i\]
+% refer to the same point in the vector space?\par
 
-\subsubsection*{Tangent: The ``meaning'' of vectors.}
+% Well, so far we have no way of measuring ``how much'' of one vector is in another.
+% To make this clearer, consider two vectors \(\vec{v}\) and \(\vec{w}\), both in \(V\).
+% We want to create an operation that allows us to describe \(v\) as an addition of two vectors,
+% one ``parallel'' to \(w\) and one ``orthogonal'' to \(w\)
+% (both in the intuitive senses of the word):
 
-So, what are we doing when we change bases? What does a vector of
-\(\left[1, 0, 0, \cdots, 0\right]\) mean anyway?
-Arguably, the answer can be given in a ``hippie''-sort of way:
-\textit{``It means, like, whatever you want it to, man\texttildelow''}\par
-
-As an example, think of how one can solve a linear system of equations,
-say of three variables x, y, and z,
-using a matrix.
-Often, you'd represent an equation by a row vector comprised of
-the \emph{coefficients} of the three variables,
-augmented by the scalar value they equal. That implies that
-a left-hand-side row vector \([1, 0, 0]\) ``maps to'' the expression \(x\),
-\([1,0,0] \mapsto x\). That's exactly why you know you're done when you have a 
-diagonal of ones on the left-hand-side of the augmented matrix, for example the row
-\(
-\left[
-\begin{array}{ccc|c}
-1 & 0 & 0 & a
-\end{array}
-\right]
-\)
-would mean that \(x=a\).
-But if there's some better way to encode the equations, we could always choose
-one of those instead, e.g.
-\([1,0,0] \mapsto \frac{x+y}{2}\), 
-\([0,1,0] \mapsto \frac{y+z}{2}\),
-\([0,0,1] \mapsto \frac{x+z}{2}\).
-It's all in \emph{your} hands \texttildelow\par
-
-\subsubsection*{Back to bases, and inner products.}
-
-All that said, when we change our basis from
-\(\{\vec{b}_1, \vec{b}_2, \cdots, \vec{b}_n\}\)
-to 
-\(\{\vec{\beta}_1, \vec{\beta}_2, \cdots, \vec{\beta}_n\}\),
-we can think of it as changing our mapping of basis vectors from 
-\(e_i \mapsto b_i\)
-to
-\(e_i \mapsto \beta_i\)
-where \(e_i\) is our standard basis vector for the \(i\)'th coordinate, 
-\(e_i \in V, \, e_i[j] = \delta(i,j)\).
-\par
-
-But that's only part of the story. How do we describe \(\vec{v}\)
-with our new basis? That is to say, how do we find the mapping for our coefficients
-\(\{a_1, a_2, \cdots, a_n\} \mapsto \{\alpha_1, \alpha_2, \cdots, \alpha_n\}\)
-so that they ``encode'' the same point \(\vec{v}\) in the vector space, i.e. that
-\[\sum_{i=1}^{n}\alpha_i\vec{\beta}_i \]
-and
-\[\sum_{i=1}^{n}a_i\vec{b}_i\]
-refer to the same point in the vector space?\par
-
-Well, so far we have no way of measuring ``how much'' of one vector is in another.
-To make this clearer, consider two vectors \(\vec{v}\) and \(\vec{w}\), both in \(V\).
-We want to create an operation that allows us to describe \(v\) as an addition of two vectors,
-one ``parallel'' to \(w\) and one ``orthogonal'' to \(w\)
-(both in the intuitive senses of the word):
-
-\[\vec{v} = \vec{v}_{v\parallel w} + \vec{v}_{v\perp w}\]
+% \[\vec{v} = \vec{v}_{v\parallel w} + \vec{v}_{v\perp w}\]
  
 
-If we have an operation that gets us one of the two component vectors, we can
-always define the other as a subtraction from the resultant vector.
-Turns out, we focus on similarity more (what a pleasant thought)!
-More specifically, we need to 
-define an \textbf{inner product} \innerprod{} over the vector space \(V\),
-which is just an operation that that takes in two elements from \(V\) and returns a scalar,
-and which also follows four key properties:
-\begin{itemize}
-  \tightlist
-  \item
-    Symmetry: \innerprod[u][v] = \innerprod[v][u]
-  \item
-    Linearity: \(\alpha \in \domain{R} 
-          \rightarrow \innerprod[\alpha u][v] = \alpha \innerprod[u][v]\)
-  \item
-    Distributivity:
-      \(\innerprod[u+v][w] = \innerprod[u][w] + \innerprod[v][w]\)
-  \item
-    Positive Definiteness:
-      \(\innerprod[v][v] \geq 0. \innerprod[v][v] = 0 \rightarrow v = \vec{0}\)
-\end{itemize}
-
-A vector space with an associated inner product is called an \textbf{inner product space}.
-We can choose \emph{any} operation that fulfills these four requirements to be our
-definition of an inner product! There are some standard ones though.
-In the case of vectors in \(\domain{R^n}\), the standard is
-\(\innerprod[u][v] = \sum_{i=1}^{n}u_i v_i \).
-With our definition of an inner product in hand, we can have our \textbf{projection}\index{projection}
-
-\begin{equation}
-\vec{v}_{v\parallel w} = \frac{\innerprod[v][w]}{\norm[w]} \hat{w}
-\end{equation}\label{equation:projection}
-
-where \(\hat{w}\) is the unit vector in the direction of \(w\) and \(\norm{w}\)
-is the
-\textbf{norm} (which we'll discuss in a moment)
-of the vector \(w\).
-The remaining component \(\vec{v}_{v\perp w}\) is \textbf{orthogonal} to \(w\),
-meaning \(\innerprod[\vec{v}_{v\perp w}][w] = 0\).
-\par 
-
-Conveniently, if \(\vec{w}\) is already of unit magnitude, 
-then \(\norm[w] = 1, \hat{w} = \vec{w}\), and
-\(\vec{v}_{v\parallel w} = \innerprod[v][w]\vec{w}\).
-That is, the ``amount/number'' of a 
-unit vector \(w\) inside \(v\) is simply \innerprod[u][v].
-And if the unit vector \(w\) is a basis vector \(b_i\), then 
-\(\vec{v}_{v\parallel w}\) is 
-that basis vector, scaled by \innerprod[v][b_i]!\footnote{
-  ``!'' used to denote excitement, not factorialization.
-}
-\par
-
-Now we can finally answer our question! 
-If we want to describe the same vector \(\vec{v}\)
-in terms of a new basis \(\{\vec{\beta}_i\}\) 
-we can calculate the coefficients \(\{\alpha_i\}\)
-simply by calculating \emph{the projection of \(\vec{v}\)
-onto each of the basis vectors \(\vec{\beta_i}\)}
-\(\frac{\innerprod[v][\beta_i]}{\norm[\beta_i]}\)
-(with both \(v\) and \(\{\beta_i\}\) represented
-in terms of a common basis
-\textemdash{} presumably the natural basis \(\{e_i\}\) \textemdash{}
-as needed in order to calculate the inner product).
-
-\subsubsection*{Wait, what's a norm?}
-
-A \textbf{norm}\index{norm} is a measure of the ``size''
-of a vector in a vector space.
-One of the most common norms seen
-in linear algebra is
-the \(L^2\) norm 
-(the \(L\) may be named after \textbf{L}ebesgue), 
-given in the discrete form by
-\[\norm[w]_2 := \left(\sum_{i} \abs{w_i}^2\right)^{1/2}\]
-
-This corresponds to the notion of
-length/distance that is physically intuitive to us,
-i.e. the Euclidean distance (where absolute values 
-\(\abs{\cdot}\) around the inputs
-are usually not explicitly written because each term
-is raised to an even power and so are not strictly necessary).
-Most likely, if no explict definition of a norm is given,
-the \(L^2\) norm is probably implied.\par
-We can generalize quite readily to the \(L^p\) norm:
-\[\norm[w]_p := \left(\sum_{i} \abs{w_i}^p\right)^{1/p}\]
-
-The above works for discrete vectors. 
-For continuous vectors (which we'll be thinking about in a bit),
-we can adapt our definition of a norm
-by switching from summation to
-integration (let's say \(w(n)\) gives the coefficient at
-``index'' \(n\)):
-\[\norm[w]_p = \left(\int_{n \in Dom(n)} \abs{w(n)}^p dn\right)^{1/p} \]
-
-We'll see this continuous form return when considering
-the norms of continuous functions. (It's almost as if
-functions are vectors or something...)
-
-\subsection{Functions, function spaces.}
-
-Now what if I told you that a function is just a vector?
-More accurately, a function \emph{can be viewed}
-as an element of a \textbf{function space} (which needs qualification \textemdash{}
-e.g. ``the space of all continuous functions'' \(\domain{C}^0\)), 
-with specific coefficients
-based on the choice of \emph{basis functions} we use to span the function space in question.
-
-\subsubsection{Power series and discrete function spaces.}
-
-
-As a stepping stone, let's consider an n'th-degree power series:
-
-\[p(x;n) = \sum_{i=0}^{n}a_n x^n \]
-
-We're looking at a weighted sum of monomials. 
-What does this remind us of?\par
-
-Well, it kinda looks like a linear combination of vectors, doesn't it?\par
-
-To show the mapping, we can map the natural basis vector:
-\[\vec{e}_i \mapsto x^i \]
-
-If we agree to this basis,
-our function \(p(x;n)\) is fully described by the coefficients \(a_i\):
-
-\[p(x;n) = \left[a_1, a_2, \cdots, a_n\right]\]
-
-So we have \(p(x;n)\) as a vector
-in the vector space of all polynomials
-of degree no greater than \(n\).
-Let's call this vector space of functions
-(or \emph{function space}) \(P^n\).
-Then \(p(x;n) \in P^n\).
-\par
-
-
-But what's stopping us from
-letting \(n \rightarrow \infty\)?
-Let's let loose.
-If we do, we get the normal, ``full'' power series\footnote{
-A quick aside on \textbf{power series}\index{power series}:
-when dealing with the ``full'' (infinite-order) power series,
-we should consider radii of convergence if we want our 
-power series to represent a desired fucntion.
-Many vectors \(\{a_i\}\) map to functions that diverge
-pretty much anywhere besides \(x=0\). 
-This may sound exotic, but it pops up in ``mundane'' functions.
-The seemingly innocuous vector 
-\(\left[1, 1, 1, \cdots\right]\) corresponds
-to \(f(x) = \frac{1}{1-x}\) only within a radius of
-convergence of \(\abs{x} < 1\) 
-\textemdash{} outside that radius, the function explodes. If we instead had a vector
-\(\left[1, 2, 3, \cdots \right]\), and our function will
-blow up quite quickly for \(x=0\).\par
-
-But we needn't always care whether or not the function it
-represents converges if all that interests us 
-are the monomials' coefficients. 
-When we're viewing a power series just as a sequence of
-coefficients 
-(with operations that reflect
-polynomial arithmetic), we refer to it as a
-\textbf{formal power series}
-\index{power series!formal power series}.
-The way polynomial multiplication works allows us to
-solve potentially really tricky problems by creating a
-(finite or infinite) power series with the appropriate
-coefficients, exponentiating the power series,
-and reading off the coefficient of a particular monomial.
-More on that in \ref{sec:generating-functions}.
-}:
-
-\[p(x) = \sum_{i=0}^{\infty}a_n x^n\]
-
-
-When we start playing with infinity, we have to start
-being a bit more clever.
-Our previously used ``vector as an \(n\)-tuple''
-representation of a function \(f\) becomes a \emph{bit}
-unreasonable. Even if we've agreed on our basis mapping
-\(\{e_i \mapsto b_i(x)\}\)
-and we know exactly what the coefficient \(a_i\)
-for the \(i\)'th basis vector is for all \(i \in \domain{N}\),
-we can't literally sit here and list them all out manually:
-\(\vec{f} = \left[a_0, a_1, a_2, \cdots \right]\). \par
-
-But how about this? 
-Instead of encoding \(f\) into our vector space as a \emph{tuple}
-\(f \mapsto \vec{f} = \left[a_0, a_1, \cdots \right]\), 
-how about we encode 
-\(f\) as \emph{another function \(A_f(k)\) which
-outputs the appropriate coefficient for the \(k\)'th index of
-our (infinite-dimensional) vector}?
-Then if we ever need the value at the \(i\)'th index of our
-encoding, instead of indexing a tuple (\(\vec{f}[i]\)),
-we just call our coefficient-encoding function \(A_f(i)\).
-As long as there \emph{is} an underlying function that
-can give us \(A_f(k)\), we're good. Let's come back to that 
-in a moment.\par
-
-\subsection{An inner product for our function space.}
-
-Currently we have a vector space.
-But we \emph{don't} yet have an inner product space.
-What would be a sensible inner product,
-a sensible measure of (norm-sensitive) ``similarity''
-between functions?\par
-
-Well, these are functions over a variable \(x\).
-Let's hearken back to ye olde days of first-year calculus.
-Back then, we would construct Taylor-series approximations \(T\) 
-of some original function \(f\) around
-a point \(x=c\) and proclaim that \(T\) is ``similar'' to \(f\)
-at and in some neighborhood around that point \(c\). 
-Why? (Let's say \(T\) was a \(k\)'th-order approximation.)
-Well, because we specifically
-constructed \(T\) so that
-\[\forall \ i \in \{0, 1, \cdots, k\}, T^{(i)}(c) = f^{(i)}(c)\]
-\textemdash{} i.e., so that \(T\) matched \(f\)'s slope, concavity, etc., around \(x=c\)
-\textemdash{}
-we expect the \emph{output} of T to be approximately the same
-as the \emph{output} of f around \(x=c\), even for wacky 
-original functions \(f\).\footnote{
-  This breaks down with ``pathological''
-  functions such as
-  \(f(x) = 
-  \begin{cases}
-    0 & x = 0 \\
-    e^{1/x^2} & x \neq 0
-  \end{cases}
-  \),
-  which has \(f^{(i)}(0) = 0 \ \forall i \in \domain{N}\)
-  and therefore has a Taylor series of exactly \(T(x) = 0\)
-  if centered around \(c = 0\) \textemdash{} hardly how \(f\)
-  acts outside the origin!
-  But in this situation we can only grumble about these sorts of functions,
-  called \emph{non-analytic functions},
-  and explicitly exclude them from our analysis.
-}
-All this to say, in choosing the inner product for functions
-in a particular space,
-we probably want to measure the ``responses'' of these
-functions to the input variable(s) they permit.
-Keeping this in mind and looking back at the requirements to
-be an inner product, we can see that a reasonable choice
-is an integral over the domain of \(x\) if \(x\) is continuous:
-
-\[\innerprod[f][g] = \int_{Dom(x)} f(x)g(x) dx \]
-
-or, if \(x\) is a discrete variable, then a summation instead:
-
-\[\innerprod[f][g] = \sum_{x_i \in Dom(x)} f(x)g(x) \]
-
-Note that an inner product space only has one inner product.
-Part of the description of a function space is the domain 
-of the input variable, which would determine which form
-of the inner product would be appropriate.\par
-
-Now this definition of an inner product would be great 
-\textemdash{}
-we'd have a way of describing any function in terms of 
-our desired basis by doing an integral!
-\textemdash{}
-\emph{if}
-we can get it to converge.
-Hardly a guarantee: take \(f(x) = x^0, g(x) = x^2\)
-(both natural unit vectors in 
-our current basis of polynomial space!)
-and \(x \in \domain{R}\) as just one example.
-But let's not give up on it just yet \textemdash{}
-we may just be able to make things work with another basis!
-
-\subsection{Beyond the countable, and picking a basis.}
-
-It would help if
-we expanded our horizons a bit.
-I mean, getting to have \(x^i,\ i \in \domain{N}\)
-is great and all, but we're definitely not spanning nearly
-as much of our function space (say the space of smooth
-(i.e., infinitely differentiable) functions, 
-\(\domain{C}^\infty\)) as we could.
-I mean, I can't even fully encode \(x^\pi\) or \(x^e\) 
-with such a puny basis! And I like both \(\pi\) and \(e\)!
-\sout{And especially pie! \textit{Mmmm... Pie.}}\par
-
-Enough belly-aching. We're now going to expand our
-set of basis functions to be \emph{continuous}:
-\[B_{P+} = \{x^i \mid i \in [1, \infty)\} \] 
-
-Now we can handle \(x^\pi\) and \(x^e\) quite easily.
-But we still can't describe \emph{every} function (namely,
-any functions which contain \(x^i, i < 1\)).
-And we're probably still in trouble with using our
-inner product \textemdash{} outside of \(\abs{x} < 1\),
-we're probably exploding.\par
-
-Alright, let's not be so negative! Or wait... 
-Actually, let's be negative!
-
-\[B_{P} = \{x^{-i} \mid i \in [1, \infty)\} \] 
-
-Alright, \emph{this} looks promising! Now if we restrict
-the domain of our input variable to 
-something like \(x \in [1, \infty)\),
-our inner product
-won't explode just by taking the norm of a basis vector.
-This is promising, but there may be an even more useful
-set of basis functions to use \textemdash{} it's kind of
-lame to have to start at \(x=1\). What if we're modeling
-something over time? We don't want to just chop
-off the first horizontal unit's worth of data if we 
-could help it! \par
-
-Before we get carried away, we should realize what these
-changes of basis mean. You'll notice that in our switch
-from \(B_{P+}\) to \(B_{P}\), we lost the ability to
-fully/easily encode \(x^\pi\) and \(x^e\), and we
-had to change our allowed input domain from \((-1,1)\)
-to \([1, \infty)\). So when we change our basis, it
-isn't without consequence. We end up
-\emph{changing the part of function space we can describe}. 
-Put in a way that may sound almost tautological,
-\emph{different sets of basis functions
-describe different (potentially disjoint) sets of functions}.
-This is worth keeping in mind as we finally talk about
-integral transforms.
-
-
-\subsection{The integral transform: a concatenation of inner products.}
-
-So what is an integral transform?
-You could make your own if you wanted to!
-(Whether or not it would be useful is another question.)
-Essentially all it is is \emph{a bunch of inner products
-over a set of previously selected basis functions}.
-As we talked about before, taking inner products of
-a vector \(\vec{v}\)
-with basis vectors \(\{\vec{b_i}\}\)
-and dividing by the norm of the basis vector
-provides us the coefficients needed to describe \(\vec{v}\)
-in the vector space spanned by \(\{\vec{b_i}\}\).
-Going back to functions again, 
-we can say that \emph{the integral transform
-produces from the input function \(f(x)\)
-the vector representation of \(f\),
-in the form of the coefficient-generating function \(A_f(n)\),
-in the function space spanned by a set of basis functions
-\(\{K(x;n)\}\)}. In mathematical form,
-
-\[A_f(n) = \innerprod[K(x;n)][f(x)] 
-  = \int_{Dom(x)} K(x;n) f(x) dx \]
-
-You're free to choose whatever set of basis functions
-\(\{K(x;n)\}\) you'd like, and have the size of this set
-(measured by \(n\)) be whatever you'd like.
-Since the choice of \(K(x;n)\) is at the core of
-the integral transform (it determines what functions you
-can represent and in what way they're represented),
-\(K(x;n)\) is called the 
-\textbf{kernel}\index{kernel!in integral transforms}
-of the transform.\footnote{
-  Which is unrelated to the kernel, i.e. nullspace, of a matrix in linear algebra\par
-  ...Yeah, I know, it would have been nice if they were a
-  bit more creative with the names. 
-  \sout{I mean, ``nullspace''
-  was perfectly good for what it was describing \textemdash{}
-  why'd they have to go and call it the ``kernel'' too?
-  All it succeeded in doing was make me try to understand
-  the connection between these two kernels in vain until
-  I realized there was no connection and they're just
-  named the same thing.}
-  I found it confusing too.
-}
-With a properly restricted input domain and properly
-chosen kernel, the mapping between \(f\) and \(A_f\)
-is one-to-one, implying both the uniqueness of \(A_f\)
-\emph{and} a possible to ``invert'' the transform
-back into the form of the original function!\footnote{
-  Technically, not entirely true.
-  Two functions \(f\) and \(g\) would have identical encodings
-  (\(A_f = A_g\)) if \(f\) and \(g\)
-  differ at only a countable set of points \(S\),
-  i.e., that the Lebesgue measure of \(S\) is 0.
-  This is because we're using an integral as our inner product
-  \textemdash{}
-  we're performing a ``simple'' integral over the input domain,
-  implying the use of the Lebesgue measure,
-  and since \(S\) would has a Lebesgue measure of zero,
-  it doesn't affect the output of the inner product at all.
-  So it isn't foolproof, but it works if you restrict
-  the portion of function space so as to not have
-  these sorts of ``antagonistic'' examples in them.
-}\par
-
-You'll notice that in the above definition of the transform,
-I didn't divide by the norm of the basis vectors.
-Technically, if we want \(A_f\) to capture the \emph{projections}
-of \(f\) onto the basis functions, we would indeed need
-to divide through by the norm
-(expansion assumes an \(L^2\) norm):
-
-\[\begin{split}
-  \vec{f} &= \frac{\innerprod[K(x;n)][f(x)]}{\norm[K(x;n)]} \\
-  &= \frac {\int_{Dom(x)} K(x;n) f(x) dx } {\sqrt{\int_{Dom(x)} K(x;n)^2 dx }}
-\end{split}
-\]
-
-Personally, I kind of like this form a little bit more, mainly
-because its seemingly out-of-nowhere form might prompt a student
-to ask ``What's up with that denominator?''. Which
-may lead to a discussion about 
-this pretty interesting way of thinking of functions,
-which may help demystify the Transforms\textsuperscript{TM} 
-that otherwise appear to be delivered from on high.
-However, in this case, simplicity prevails.
-See, because the denominator is invariant to the input function
-\(f(x)\), all coefficient-generating functions \(A_f\) for
-\emph{every} function is off by the same factor
-\(1/\sqrt{\int_{Dom(x)} K(x;n)^2 dx}\) at any particular \(n\).
-But if they're \emph{all} off by the exact same factor at the
-exact same locations,
-the coefficient-generating functions will be unique
-whether you correct by that factor or not.
-This is good, because many times the norm will contain
-factors which would complicate the transform's output.
-And so often they don't until/unless they perform an
-inverse transform, 
-at which point they make up for the difference.
-We'll argue through an example of this in a moment.
-
-\subsection{The Laplace Transform: a differential equations-friendly integral transform.}
-
-One of the most common integral transforms one comes across,
-often in the context of differential equations,
-is the Laplace Transform, often written with 
-\(t\)'s and \(s\)'s instead of \(x\)'s and \(n\)'s as
-I had done above:
-
-\[\mathcal{L}(f(t)) = F(s) = \int_{t=0}^{\infty}e^{-st}f(t)dt\]
-
-Considering this from a function space perspective,
-we're choosing to describe a function \(f(t)\)
-using the set of basis functions \(\{e^{-st}\}\).
-So the kernel of the Laplace transform is \(K(s,t) = e^{-st}\),
-chosen because exponential functions turn on Easy Mode
-for integration/differentiation, making them
-incredibly useful for certain classes of
-differential equations (which anyone who has 
-taken a differential equations course is probably 
-already familiar with). Not only
-that, they have an associated inverse transform!
-(More on that in a moment.)
-The transform gives us the (unscaled)
-coefficient-generating function \(F(s)\),
-which, given an \(s\), computes the (function space's)
-inner product of \(f(t)\) 
-with the appropriate basis vector \(K(s,t)\), and therefore
-the (not properly rescaled) coefficient of \(f\) at the index \(s\)
-in the chosen basis \(\{e^{-st}\}\).\par
-
-Technically, we haven't fully specified the transform yet.
-As with any transform, the domain of the input variable 
-(in this case, \(t\)) and the basis we've chosen
-(specified by both the kernel \(K(s,t)\) and the domain of
-the ``indexing'' variable, \(s\)) determine which functions
-we can describe, because we need the inner product 
-\innerprod[K(s,t)][f(t)] to converge.\par
-
-As it turns out, there are two variations on a theme here:
-imaginary vs complex domains.
-Let's start with the one I personally find more interesting.
-
-\subsubsection{The Fourier transform: Orthogonal Bases.}
-
-If we want to transform a function \(f(t)\) that's defined
-for \(t \in (-\infty, \infty)\), we need \(f(t)\) to be a member
-of \(L^1\) space; i.e. that \(f(t)\) be \(L^1\)-integrable; 
-i.e. (less cryptically) we need the \(L^1\) norm of \(f(t)\)
-to converge:
-\[\norm[f(t)]_1 = 
-  \int_{t=-\infty}^{\infty} \abs{f(t)} dt < \infty \]
-
-If this condition is met, then we would want to constrict
-\(s\) to be an imaginary number, which we'll parametrize
-i.e. \(s \in S = (-i\infty, i\infty)\) 
-where \(i := \sqrt(-1)\).
-To make the path explicit, we can have \(s = i\omega\),
-in which case we'd have \(\omega \in (-\infty, \infty)\).\par
-
-What does that make our kernel look like?
-In parametrized form, we have \(K(\omega) = e^{i\omega t}\).
-But wait, we know from Euler's formula
-(provable using Taylor series) that
-\[e^{i\omega t} = \cos{\omega t} + i\sin{\omega t} \]
-
-that is, \(e^{i\omega t}\) involves a rotation around 
-the unit circle in the real-imaginary plane 
-(counterclockwise if \(\omega t\) is positive,
-clockwise if it's negative).\footnote
-{
-  What's especially neat is
-  that it can be shown that the two functions that ``comprise''
-  \(e^{i\omega t}\), 
-  \(\{\cos{\omega t} \mid \omega \in \Omega_{C} = (0, \infty) \}\) and 
-  \(\{\sin{\omega t} \mid \omega \in \Omega_{S} = [0, \infty) \}\) are 
-  \emph{mutually orthogonal} functions, i.e. that
-  for a period \(T\) over the implied resultant waves
-  for the integrands below,
-  \begin{itemize}
-    % \tightlist
-    \item
-      \(\int_{T}\cos{\omega_1t}\cos{\omega_2t} > 0 \implies \omega_1 = \omega_2\)
-    \item
-      \(\int_{T}\sin{\omega_1t}\sin{\omega_2t} > 0 \implies \omega_1 = \omega_2\)
-    \item
-    \(\forall 
-      (\omega_1, \omega_2) \in \Omega_{C} \times \Omega_{S}, 
-    \int_{T}\cos{\omega_1t}\sin{\omega_2t} = 0 \)
-  \end{itemize}
-  So we can view \(e^{i\omega t}\) as ``packaging together''
-  these mutually orthogonal basis functions into one nice,
-  easily integrable/differentiable function.\par
-
-  The cosine function is even (\(\cos(-x) = \cos(x)\)) and
-  the sine function is odd (\(\sin(-x) = -\sin(x)\)), so
-  changing \(\Omega_{C}\) and \(\Omega_{S}\) to 
-  \((-\infty, \infty)\) would gain no new information.
-  (And in fact, the \emph{cosine} integral transform and
-  \emph{sine} integral transform need not be over \domain{R}.)
-  However, \(e^{i\omega t}\), being the sum of an even function
-  and an odd function, is neither even nor odd and so
-  has no simple symmetry and
-  \(\{e^{i\omega t} \mid \omega \in (-\infty, \infty)\}\)
-  are all linearly independent.
-}
-So when we perform the integral transform:
-
-\[\fancy{F}(f(t)) = F(\omega) 
-  \propto \innerprod[e^{-i\omega t}][f(t)]
-  = \int_{t=-\infty}^{\infty} e^{-i\omega t} f(t) dt\]
-
-(we'll explain the \(\propto\) in a bit)
-we can interpret the (probably complex-valued) coefficient
-``indexed'' by \(\omega\) as answering the following
-(very long-winded) question:\par
-
-Let's say
-I coiled output of \(f(t)\), 
-starting from \(t=-t'\) and going until \(t=t'\),
-around the complex unit circle clockwise\footnote{
-  ``Clockwise'' because the exponent of \(e^{-i\omega t}\)
-  has a negative sign at the front.
-}
-with a winding angular frequency of \(\omega\). I'd end
-up somewhere in the complex plane, say at a point \(p(t')\).
-Where would I end up as I use more and more of
-\(f(t)\), i.e., what is \(\lim_{t' \rightarrow \infty} p(t')\)?
-\par
-
-This doesn't necessarily help us in performing the transform
-itself (called the \textbf{Fourier transform}),
-and it may be harder to wrap one's head around it
-compared to the (potentially) more straightforward
-``\(F(\omega)\) is the inner product between the input function
-and the basis function indexed by \(\omega\)''.
-But this complex-plane rotation interpretation is
-incredibly important in just about any topic involving
-the \emph{phasor} interpretation of (sinusoidal) waves. 
-For example, the above question
-pegs \(\omega\) as a frequency of rotation. If we observed
-a circuit element's 
-voltage response to a signal over time as \(f(t)\),
-then the Fourier transform of that signal 
-\(\fancy{F}(f(t)) = F(\omega)\) shows how the circuit element
-respond to the \emph{frequencies} of the signal.
-This \emph{transfer function} becomes useful in determining
-what wave content is amplified/preserved/attenuated when
-passing through the element, among other things.\par
-
-Perhaps more importantly for the moment, this gives us
-an intuitive way of determining the form of the 
-\emph{inverse Fourier transform}.
-Remember, we said that
-by coiling \(f(t)\) around the complex unit circle clockwise
-with a winding frequency of \(\omega\), we got \(F(\omega)\).
-How would we undo such an operation?\par
-Well, how about taking \(F(\omega)\) and rotating it
-\emph{counterclockwise}?
-\[f(t) \propto 
-  \int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) d\omega \]
-
-We're \emph{almost} there, but notice the use of \(\propto\)
-and not \(=\).
-As it turns out, the proportionality constant is \(1/2\pi\).
-The constant comes out a bit more naturally if one arrives
-at the Fourier transform by taking the limit of
-the Fourier series,
-but we can still make sense of it.
-We'll try to make sense of it in a few ways:
-
-\paragraph{An appeal to physical intuition: ``natural'' units.}
-
-In our phasor interpretation of the Fourier trasnform,
-we pegged \(\omega\) as a frequency of rotation.
-More specifically, it is an \emph{angular} frequency of rotation,
-where one full revolution around the unit circle
-(in the real-imaginary plane)
-has a period of \(2\pi\).\par
-
-Let's continue to ``interpret'' the inputs of our functions
-by considering \(f(t)\). In particular, let's say \(f(t)\)
-is a periodic function in time \(t\) with period \(T\). 
-We already said we're converting to a function based
-on frequency (currently, angular frequency).
-In terms of units,
-the simplest way to convert from time to frequency?
-Well, just inversion, no?
-
-\[t \mapsfrom \frac{1}{t} := f \]
-
-where \(f\) is the \emph{temporal frequency} of the function.
-With such a transformation, \(f=1\) corresponds to
-a winding frequency such that a time-interval
-of \(\Delta t = 1\) corresponds to one revolution around
-the unit circle (in the real-imaginary plane).
-It's like there's the same ``density'' between the two units,
-i.e., \(df = dt\).
-That just \emph{feels} right, doesn't it?
-\par
-
-But as it stands, we \emph{don't} have such a setup.
-Instead we have \(\omega = 2\pi\) corresponding to
-a wrap of \(\Delta t = 1\) around the unit circle.
-So we kind of have to go through ``more'' \(\omega\)
-to wrap all of \(t\). 
-So it's like if we were comparing
-differential amounts of \(t\) with \(\omega\), we'd have
-
-\[d\omega = 2\pi dt\]
-
-rather than our cleaner \(df = dt\).\par
-But if we're going back to a domain in \(t\) 
-via an inverse transform, we don't
-want our unit's ``thickness'' to have dilated by \(2\pi\)
-\textemdash{} that'd be a different function (with a period
-larger than our original by a factor of \(2\pi\))!
-So we need to change our thickness of \(d\omega\) to match
-that of \(dt\):
-
-\[  dt = \frac{d\omega}{2\pi} \]
-
-and so
-
-\[\begin{split}
-  f(t) &=
-  \int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) \frac{d\omega}{2\pi} \\
-  &= \frac{1}{2\pi}\int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) d\omega
-\end{split}\]
-
-A much cleaner way of having this all work out
-is to have our transform map directly to the unit that just
-``feels'' right, i.e., the temporal frequency.
-That would mean making a \(\Delta f = 1\) correspond to
-our phasor spinning around the unit circle exactly once.
-This is easily done by pulling out the period of \(2\pi\)
-out of our frequency unit and sticking it as a constant
-in the exponennt, i.e., changing our basis function
-for our original transform:
-
-\[e^{-i\omega t} \mapsto e^{-2\pi ift} \]
-
-making our Fourier transform be
-
-\[\fancy{F}(x(t)) = X(f) 
-  = \int_{t=-\infty}^{\infty} e^{-2\pi ift} x(t) df\]
-
-where we've denoted the function as \(x\)
-to avoid confusion with the temporal frequency \(f\).
-Now because our unit's ``thicknesses'' are equal,
-the ``size'' of the domain of \(t\) and the size of the
-domain of \(f\) are equal, so when we perform the
-inverse transform and integrate over \(f\), we don't
-have to divide our differential by any factor:
-
-\[x(t) \propto 
-  \int_{f=-\infty}^{\infty} e^{2\pi ift} X(f) df \]
-
-This definitely is the ``nicer'' option, but it required
-to interpret the math to reach it. Physical intuitions
-of mathematical operations are wonderful, but it would
-be shocking if there weren't a way to get to the answer
-while ``sticking to math''.
-Well, such methods exist, but it involves considering
-how to construct unitary operators over a Hilbert space
-(and the revelation that we usually ``intuitively''
-think of functions as elements of a Hilbert space).
-I hope to get the chance to give such explanations
-once I learn them properly myself.
-When that's the case, we'll expand this section
-more mathematical rigor.\par
-
-All this to say, inverse transforms are tricky things
-to find! After all, such a task amounts to inverting
-an infinite-dimensional transformation matrix \textemdash{}
-would be a shock if it \emph{were} simple!
-
-\paragraph{An appeal to (and amendment of) norms in function spaces over complex numbers.}
-
-Another way to think about it is to go back to the idea of
-dividing through by the norm of a function.
-We previously defined our norm in function space to
-be over all values for which the input is defined, which led
-to functions defined on \(\domain{R}\) to have the following norm if it converges:
-
-\[\norm[f] = \innerprod[f][f] = \sqrt{\int_{t=-\infty}^{\infty} \abs{f}^2 dt}\]
-
-The choice of this sort of \(L^2\) norm over our function space
-means that the function space we're working with is a
-\textbf{Hilbert space}\index{Hilbert space}, an inner product
-space that reflects many phenomena of reality when
-interpreted in physics/engineering.\par
-Now, we run into a problem if we try to calculate
-the norm of a periodic function, say \(e^{i\omega t}\):\footnote{Remember that, staying consistent
-with the \(L^2\) norm, a complex
-number has magnitude
-
-\[\abs{z} = \abs{x + iy} = \left(\abs{x}^2 + \abs{y}^2\right)^{1/2} \]}
-
-
-\[\norm[e^{i\omega t}] = \sqrt{\int_{t=-\infty}^{\infty} \abs{e^{i\omega t}}^2 dt} \rightarrow \infty \]
-
-But that just feels wrong, doesn't it? This ``length'' doesn't
-really capture how this function responds to its input \(t\).
-It makes even less sense if we compare the distance between
-two basis vectors 
-\(f(t) = e^{i\omega_2 t}, g(t) = e^{i\omega_1 t}\):\footnote
-{
-  The \textbf{distance}\index{distance!in inner product spaces}
-  between two vectors is implicitly defined when an
-  inner product is defined, via
-
-  \[d(x,y) = \innerprod[x-y][x-y] \]
-}
-
-\[d(f, g) = \sqrt{\int_{t=-\infty}^{\infty} \abs{a - b} dt} \rightarrow \infty\]
-
-
-or even the distance between two constant functions 
-\(f(t) = a, g(t) = b\):
-
-\[d(f, g) = \sqrt{\int_{t=-\infty}^{\infty} \abs{(a - b) dt}} \rightarrow \infty\]
-
-I mean, sure, they're not the same vector, but are they really
-\emph{infinitely} far apart?\par
-
-This suggests a change in how we define our inner product,
-because it's clearly busted at the moment.
-
-% ... my period argument doesn't really work...
-
-\paragraph{Unitary operators over Hilbert spaces.}
-
-This 
+% If we have an operation that gets us one of the two component vectors, we can
+% always define the other as a subtraction from the resultant vector.
+% Turns out, we focus on similarity more (what a pleasant thought)!
+% More specifically, we need to 
+% define an \textbf{inner product} \innerprod{} over the vector space \(V\),
+% which is just an operation that that takes in two elements from \(V\) and returns a scalar,
+% and which also follows four key properties:
+% \begin{itemize}
+%   \tightlist
+%   \item
+%     Symmetry: \innerprod[u][v] = \innerprod[v][u]
+%   \item
+%     Linearity: \(\alpha \in \domain{R} 
+%           \rightarrow \innerprod[\alpha u][v] = \alpha \innerprod[u][v]\)
+%   \item
+%     Distributivity:
+%       \(\innerprod[u+v][w] = \innerprod[u][w] + \innerprod[v][w]\)
+%   \item
+%     Positive Definiteness:
+%       \(\innerprod[v][v] \geq 0. \innerprod[v][v] = 0 \rightarrow v = \vec{0}\)
+% \end{itemize}
+
+% A vector space with an associated inner product is called an \textbf{inner product space}.
+% We can choose \emph{any} operation that fulfills these four requirements to be our
+% definition of an inner product! There are some standard ones though.
+% In the case of vectors in \(\domain{R^n}\), the standard is
+% \(\innerprod[u][v] = \sum_{i=1}^{n}u_i v_i \).
+% With our definition of an inner product in hand, we can have our \textbf{projection}\index{projection}
+
+% \begin{equation}
+% \vec{v}_{v\parallel w} = \frac{\innerprod[v][w]}{\norm[w]} \hat{w}
+% \end{equation}\label{equation:projection}
+
+% where \(\hat{w}\) is the unit vector in the direction of \(w\) and \(\norm{w}\)
+% is the
+% \textbf{norm} (which we'll discuss in a moment)
+% of the vector \(w\).
+% The remaining component \(\vec{v}_{v\perp w}\) is \textbf{orthogonal} to \(w\),
+% meaning \(\innerprod[\vec{v}_{v\perp w}][w] = 0\).
+% \par 
+
+% Conveniently, if \(\vec{w}\) is already of unit magnitude, 
+% then \(\norm[w] = 1, \hat{w} = \vec{w}\), and
+% \(\vec{v}_{v\parallel w} = \innerprod[v][w]\vec{w}\).
+% That is, the ``amount/number'' of a 
+% unit vector \(w\) inside \(v\) is simply \innerprod[u][v].
+% And if the unit vector \(w\) is a basis vector \(b_i\), then 
+% \(\vec{v}_{v\parallel w}\) is 
+% that basis vector, scaled by \innerprod[v][b_i]!\footnote{
+%   ``!'' used to denote excitement, not factorialization.
+% }
+% \par
+
+% Now we can finally answer our question! 
+% If we want to describe the same vector \(\vec{v}\)
+% in terms of a new basis \(\{\vec{\beta}_i\}\) 
+% we can calculate the coefficients \(\{\alpha_i\}\)
+% simply by calculating \emph{the projection of \(\vec{v}\)
+% onto each of the basis vectors \(\vec{\beta_i}\)}
+% \(\frac{\innerprod[v][\beta_i]}{\norm[\beta_i]}\)
+% (with both \(v\) and \(\{\beta_i\}\) represented
+% in terms of a common basis
+% \textemdash{} presumably the natural basis \(\{e_i\}\) \textemdash{}
+% as needed in order to calculate the inner product).
+
+% \subsubsection*{Wait, what's a norm?}
+
+% A \textbf{norm}\index{norm} is a measure of the ``size''
+% of a vector in a vector space.
+% One of the most common norms seen
+% in linear algebra is
+% the \(L^2\) norm 
+% (the \(L\) may be named after \textbf{L}ebesgue), 
+% given in the discrete form by
+% \[\norm[w]_2 := \left(\sum_{i} \abs{w_i}^2\right)^{1/2}\]
+
+% This corresponds to the notion of
+% length/distance that is physically intuitive to us,
+% i.e. the Euclidean distance (where absolute values 
+% \(\abs{\cdot}\) around the inputs
+% are usually not explicitly written because each term
+% is raised to an even power and so are not strictly necessary).
+% Most likely, if no explict definition of a norm is given,
+% the \(L^2\) norm is probably implied.\par
+% We can generalize quite readily to the \(L^p\) norm:
+% \[\norm[w]_p := \left(\sum_{i} \abs{w_i}^p\right)^{1/p}\]
+
+% The above works for discrete vectors. 
+% For continuous vectors (which we'll be thinking about in a bit),
+% we can adapt our definition of a norm
+% by switching from summation to
+% integration (let's say \(w(n)\) gives the coefficient at
+% ``index'' \(n\)):
+% \[\norm[w]_p = \left(\int_{n \in Dom(n)} \abs{w(n)}^p dn\right)^{1/p} \]
+
+% We'll see this continuous form return when considering
+% the norms of continuous functions. (It's almost as if
+% functions are vectors or something...)
+
+% \subsection{Functions, function spaces.}
+
+% Now what if I told you that a function is just a vector?
+% More accurately, a function \emph{can be viewed}
+% as an element of a \textbf{function space} (which needs qualification \textemdash{}
+% e.g. ``the space of all continuous functions'' \(\domain{C}^0\)), 
+% with specific coefficients
+% based on the choice of \emph{basis functions} we use to span the function space in question.
+
+% \subsubsection{Power series and discrete function spaces.}
+
+
+% As a stepping stone, let's consider an n'th-degree power series:
+
+% \[p(x;n) = \sum_{i=0}^{n}a_n x^n \]
+
+% We're looking at a weighted sum of monomials. 
+% What does this remind us of?\par
+
+% Well, it kinda looks like a linear combination of vectors, doesn't it?\par
+
+% To show the mapping, we can map the natural basis vector:
+% \[\vec{e}_i \mapsto x^i \]
+
+% If we agree to this basis,
+% our function \(p(x;n)\) is fully described by the coefficients \(a_i\):
+
+% \[p(x;n) = \left[a_1, a_2, \cdots, a_n\right]\]
+
+% So we have \(p(x;n)\) as a vector
+% in the vector space of all polynomials
+% of degree no greater than \(n\).
+% Let's call this vector space of functions
+% (or \emph{function space}) \(P^n\).
+% Then \(p(x;n) \in P^n\).
+% \par
+
+
+% But what's stopping us from
+% letting \(n \rightarrow \infty\)?
+% Let's let loose.
+% If we do, we get the normal, ``full'' power series\footnote{
+% A quick aside on \textbf{power series}\index{power series}:
+% when dealing with the ``full'' (infinite-order) power series,
+% we should consider radii of convergence if we want our 
+% power series to represent a desired fucntion.
+% Many vectors \(\{a_i\}\) map to functions that diverge
+% pretty much anywhere besides \(x=0\). 
+% This may sound exotic, but it pops up in ``mundane'' functions.
+% The seemingly innocuous vector 
+% \(\left[1, 1, 1, \cdots\right]\) corresponds
+% to \(f(x) = \frac{1}{1-x}\) only within a radius of
+% convergence of \(\abs{x} < 1\) 
+% \textemdash{} outside that radius, the function explodes. If we instead had a vector
+% \(\left[1, 2, 3, \cdots \right]\), and our function will
+% blow up quite quickly for \(x=0\).\par
+
+% But we needn't always care whether or not the function it
+% represents converges if all that interests us 
+% are the monomials' coefficients. 
+% When we're viewing a power series just as a sequence of
+% coefficients 
+% (with operations that reflect
+% polynomial arithmetic), we refer to it as a
+% \textbf{formal power series}
+% \index{power series!formal power series}.
+% The way polynomial multiplication works allows us to
+% solve potentially really tricky problems by creating a
+% (finite or infinite) power series with the appropriate
+% coefficients, exponentiating the power series,
+% and reading off the coefficient of a particular monomial.
+% More on that in \ref{sec:generating-functions}.
+% }:
+
+% \[p(x) = \sum_{i=0}^{\infty}a_n x^n\]
+
+
+% When we start playing with infinity, we have to start
+% being a bit more clever.
+% Our previously used ``vector as an \(n\)-tuple''
+% representation of a function \(f\) becomes a \emph{bit}
+% unreasonable. Even if we've agreed on our basis mapping
+% \(\{e_i \mapsto b_i(x)\}\)
+% and we know exactly what the coefficient \(a_i\)
+% for the \(i\)'th basis vector is for all \(i \in \domain{N}\),
+% we can't literally sit here and list them all out manually:
+% \(\vec{f} = \left[a_0, a_1, a_2, \cdots \right]\). \par
+
+% But how about this? 
+% Instead of encoding \(f\) into our vector space as a \emph{tuple}
+% \(f \mapsto \vec{f} = \left[a_0, a_1, \cdots \right]\), 
+% how about we encode 
+% \(f\) as \emph{another function \(A_f(k)\) which
+% outputs the appropriate coefficient for the \(k\)'th index of
+% our (infinite-dimensional) vector}?
+% Then if we ever need the value at the \(i\)'th index of our
+% encoding, instead of indexing a tuple (\(\vec{f}[i]\)),
+% we just call our coefficient-encoding function \(A_f(i)\).
+% As long as there \emph{is} an underlying function that
+% can give us \(A_f(k)\), we're good. Let's come back to that 
+% in a moment.\par
+
+% \subsection{An inner product for our function space.}
+
+% Currently we have a vector space.
+% But we \emph{don't} yet have an inner product space.
+% What would be a sensible inner product,
+% a sensible measure of (norm-sensitive) ``similarity''
+% between functions?\par
+
+% Well, these are functions over a variable \(x\).
+% Let's hearken back to ye olde days of first-year calculus.
+% Back then, we would construct Taylor-series approximations \(T\) 
+% of some original function \(f\) around
+% a point \(x=c\) and proclaim that \(T\) is ``similar'' to \(f\)
+% at and in some neighborhood around that point \(c\). 
+% Why? (Let's say \(T\) was a \(k\)'th-order approximation.)
+% Well, because we specifically
+% constructed \(T\) so that
+% \[\forall \ i \in \{0, 1, \cdots, k\}, T^{(i)}(c) = f^{(i)}(c)\]
+% \textemdash{} i.e., so that \(T\) matched \(f\)'s slope, concavity, etc., around \(x=c\)
+% \textemdash{}
+% we expect the \emph{output} of T to be approximately the same
+% as the \emph{output} of f around \(x=c\), even for wacky 
+% original functions \(f\).\footnote{
+%   This breaks down with ``pathological''
+%   functions such as
+%   \(f(x) = 
+%   \begin{cases}
+%     0 & x = 0 \\
+%     e^{1/x^2} & x \neq 0
+%   \end{cases}
+%   \),
+%   which has \(f^{(i)}(0) = 0 \ \forall i \in \domain{N}\)
+%   and therefore has a Taylor series of exactly \(T(x) = 0\)
+%   if centered around \(c = 0\) \textemdash{} hardly how \(f\)
+%   acts outside the origin!
+%   But in this situation we can only grumble about these sorts of functions,
+%   called \emph{non-analytic functions},
+%   and explicitly exclude them from our analysis.
+% }
+% All this to say, in choosing the inner product for functions
+% in a particular space,
+% we probably want to measure the ``responses'' of these
+% functions to the input variable(s) they permit.
+% Keeping this in mind and looking back at the requirements to
+% be an inner product, we can see that a reasonable choice
+% is an integral over the domain of \(x\) if \(x\) is continuous:
+
+% \[\innerprod[f][g] = \int_{Dom(x)} f(x)g(x) dx \]
+
+% or, if \(x\) is a discrete variable, then a summation instead:
+
+% \[\innerprod[f][g] = \sum_{x_i \in Dom(x)} f(x)g(x) \]
+
+% Note that an inner product space only has one inner product.
+% Part of the description of a function space is the domain 
+% of the input variable, which would determine which form
+% of the inner product would be appropriate.\par
+
+% Before we continue, we should consider what we're going to
+% consider the ``domain'' of the input variable for a function.
+% More specifically, over what interval should we integrate
+% a periodic function: all of \(\domain{R}\) or just one period's
+% worth \(T\)?
+% The ``better'' option might become clearer if we consider
+% the \textbf{metric}\index{metric}, or \textbf{distance function},
+% induced by our norm (which was in term induced by our
+% inner product).\footnote{
+%   Note that the inner product ``induces'' a norm
+%   because if the inner product and norm of a vector space
+%   are defined independently of each other,
+%   we suddenly have inconsistent notions of ``similarity''
+%   and ``length''. Likewise for norms and metrics
+%   with ``lengths'' and ``distances''.
+%   \href{http://people.math.gatech.edu/~heil/books/metricbrief.pdf}{This document}
+%   seems promising in explaining why these ``inducements''
+%   make sense \textemdash{} we will report back and
+%   update this when it's been read.
+% }
+% When an inner product is defined, the metric 
+% induced on our inner product space is
+
+% \[d(x,y) = \norm[x-y] = \sqrt{\innerprod[x-y][x-y]} \]
+
+% Now, say we have \(f = \cos(t)\) and \(g\) as a sawtooth
+% wave of period, amplitude, and phase equal to \(f\)
+% (i.e., \(g(t) = Saw(t; T = 2\pi, A = 1, \phi = 0)\).
+% What would be the distance between our functions if
+% we decide to integrate over all of \(t\) for which
+% they're defined?
+
+% \[d(f,g) = \sqrt{\int_{t = -\infty}^{\infty} \left(\cos(t) - Saw(t; 2\pi, 1, 0)\right)^2 dt} \rightarrow \infty \]
+
+% Ouch. I mean sure, the sawtooth doesn't perfectly match
+% the sinusoid, but do they really feel \emph{infinitely apart}
+% from each other? I don't know about you, but these two
+% functions feel a lot closer to each other than, say,
+% \(\cos(t)\) and \(\sin(t)\). What can we do to fix it?\par
+
+% Well, when you think about it, \emph{all} of the information
+% about both of our functions 
+% is contained in the interval \([0, 2\pi)\).
+% Really, it would be more appropriate to say that our
+% functions are defined over an interval of length \(2\pi\),
+% e.g.,
+% \(t \mod 2\pi \) (where \(t \in \domain{R}\)), and that
+% we're just making copies of our functions outside of
+% the defined interval as a ``courtesy'' more than
+% anything. If you don't perform the modulo operation,
+% you end up with weirdness \textemdash{} if there's only
+% \(2\pi\) radians in a circle, how do you get the
+% \((x,y)\) coordinate (read: sine or cosine) of the
+% point \(3\pi\) radians into the circle? We immediately
+% say ``Oh that's just \(-1,0\)'', but that's just because
+% we've been sort of ``programmed'' to perform the modulo
+% operation without realizing what we're doing.
+% And the
+% fact that we usually tile \(\domain{R}\) 
+% with our periodic function
+% reinforces the idea that \(\cos(3\pi) = -1\) makes sense, when
+% really what makes sense is that we've defined the cosine function
+% over an interval (say \([0, 2\pi)\)), \(3\pi \mod 2\pi = \pi\),
+% and \(\cos(\pi) = -1\).\par
+
+% All this to say, it feels like if we want to compare periodic
+% functions with identical periods, we should compare
+% only over one period (which captures all the ``content''
+% of the functions) instead of amplifying the difference an
+% infinite number of times over a repeatedly tiled domain:
+
+% \[
+% \begin{split} d(f,g) &= \sqrt{\int_{t = 0}^{2\pi} \left(\cos(t) - Saw(t; 2\pi, 1, 0)\right)^2 dt} \\
+%   &= \sqrt{4 \times \left(\frac{5\pi}{12} + \frac{4}{\pi} - 2\right)} \\
+%   &< \infty
+% \end{split}
+% \]
+
+% which just feels a whole lot more reasonable.
+% In general then, if two functions are periodic with the same period \(T\),
+% we would have the inner product be
+
+% \[\innerprod[f][g] = \int_{t=-T/2}^{T/2} f(t)g(t) dt \]
+
+% with the norm and metric updated accordingly.
+% This would seem to break the inner product for aperiodic functions.
+% But what is an aperiodic function but a periodic function with
+% infinite period \sout{and one less space}?
+% Simply let \(T \rightarrow \infty\) in these cases.
+% % What about if you have different periods?
+% % Well, we want 
+% % Well, we want to stay
+% % in our vector space, which means some sort of ``average
+% % value over all possible phases'' scheme is out of the picture
+% % since there is no way to create a phase-shifted periodic function
+% % out of a linear combination of basis functions without explicitly
+% % adding basis functions unless we just happen to ``luck out''\footnote{
+% %   As an example, remember that \(\sin(\omega t + \phi) = \sin(\omega t)\cos(\phi) + \cos(\omega t)\sin(\phi)\),
+% %   which is not a linear combination of sines and cosines.
+% % }. So we're stuck with the same starting phase for both.
+% % Then we'll just take \(T\) to be the maximum of the periods of
+% % the functions in question.
+
+% \subsubsection{Aside on cross-correlations.}
+
+% What if \(f\) and \(g\) have different periods? 
+% \emph{Then} how would you measure the similarity between them?\par
+% % OK, but what if we \emph{did} allow phase shifts?
+% % \emph{Then} how would you measure the similarity between two functions
+% % if the periods of the two functions \(f\) and \(g\) are different?
+% Well, in that case we'd probably want to know how ``similar''
+% the two are for a phase shift for each function \(\phi_f\) and \(\phi_g\),
+% where we'd have \(\phi_X = 1\) be a phase shift corresponding to a full
+% period of the function \(X\).\footnote
+% {
+%   Note that at the very least for sinusoidal waves, we can
+%   describe a phase-shifted periodic function as a linear combination
+%   of two non-shifted functions. That is to say, the statement
+%   \(\exists b_1, b_2 \left(a\sin(\omega t + \phi) = b_1\cos(\omega t) + b_2\sin(\omega t)\right)\) is true.
+% }
+% Interestingly, only the \emph{relative} phase shift 
+% \(\left(\phi_f - \phi_g\right) \mod 1 := \phi \)
+% matters \textemdash{} when you're integrating over a full period,
+% it doesn't matter where you start.
+% So then we can calculate the ``similarity'' between two periodic
+% functions as a function of phase difference between them:
+
+% \[ \begin{split}
+%   CC(s; F(s), G(s)) &:= 
+%     \int_{\phi = 0}^{1} F(s + \phi) G(s) d\phi \\
+%     &= \int_{\phi = 0}^{1} F(s) G(s + \phi) d\phi
+% \end{split}
+% \]
+
+% % where we define a variable \(s_{\cdot}\) so that for a function \(x(t)\)
+% % with period \(T\), \(s_x = \frac{t}{T}\).
+% % This normalizes the units so that \(F(s)\) and \(G(s)\) 
+% where we've defined \(F\) and \(G\) such that 
+% \(F(s) = f(sT_f)\)
+% and
+% \(G(s) = g(sT_g)\). That is, we \emph{normalize} our input variable
+% across all functions so that \(s\) reports how many periods into
+% the function we are. 
+% This assumes a measure where we weight a differential phase shift
+% \(d\phi\) equally between the two functions, despite the same
+% magnitude of phase shift requiring ``more'' of the original
+% input variable in one function (the function with the larger period)
+% than the other.\par
+
+% While I feel the above form makes more intuitive sense (though
+% it may take a bit of work to intuitively understand \(s\) and \(\phi\) since
+% we need to decouple these variables from the original input variables
+% in our minds), 
+% we often
+% instead see things in terms of periods and time.
+% Given two periodic functions with periods \(T_1\) and \(T_2\),
+% any arithmetic combination (sum or product) of them yields
+% another periodic function of period \(T = \frac{T_1 T_2}{\gcf{T_1, T_2}}\). With this, we can continue:
+
+% \[ \begin{split}
+%   CC(t; f(t), g(t)) &:= 
+%     \int_{\tau = 0}^{T} f(t + \tau) g(t) d\tau \\
+%     &= \int_{\tau = 0}^{T} f(t) g(t + \tau) d\tau
+% \end{split}
+% \]
+
+% Note that the \(CC\) function is slightly different depending
+% on whether we're using our normalized input variable \(s\) or
+% our unnormalized input variable \(t\) (they \emph{are}
+% from different domains, after all). The latter
+% requires some ``tiling'' of our periodic functions in
+% \(t\)'s domain
+% in order to compare all possible relative phase shifts.\par
+
+% It would be fine if we kept things like this (the form suggests
+% an intuition), but often people just immediately jump to
+% aperiodic functions and so suddenly take limits to infinity\footnote
+% {
+%   The most common bounds given are
+%   \([0, \infty)\) or \(\domain{R}\) depending on where
+%   the function is defined \textemdash{} we'll show the most
+%   commonly seen one (over \(\domain{R}\)), though it pains us slightly.
+%   The pain is because sending both \(T_f\) and \(T_g\) to \(\infty\)
+%   makes it extremely difficult to consider what changes when we
+%   shift \(g\) instead of \(f\) \textemdash{} the darn thing
+%   looks exactly the same, after all!
+% }:
+
+% \[ \begin{split}
+%   CC(t; f(t), g(t)) &:= 
+%     \int_{\tau = -\infty}^{\infty} f(t + \tau) g(t) d\tau \\
+%     &= \int_{\tau = -\infty}^{\infty} f(t) g(t + \tau) d\tau
+% \end{split}
+% \]
+
+% This is called the \textbf{cross-correlation}\index{cross-correlation}
+% operator
+% and can be used to determine ``how much'' of an aperiodic 
+% function defined over \domain{R} is in another aperiodic function 
+% defined over \domain{R}. Hopefully, now that we discussed it
+% from its more natural situation with periodic functions,
+% it makes more sense! \par
+
+% And I suppose to answer our initial question,
+% we would have to integrate over \(s\) (or \(t\)) so that
+% our final value is a scalar (i.e. that our inner product maps
+% to a field). In \(s\) form:
+
+% \[ \innerprod[f(t)][g(t)] =
+% \int_{s=0}^{1}CC\left(s; F\left(s\right), G\left(s\right)\right) ds = 
+% \int_{s=0}^{1} \int_{\phi = 0}^{1} F(s + \phi) G(s) d\phi ds
+% \]
+
+% and in \(t\) form:
+
+% \[ \begin{split}
+%   \innerprod[f(t)][g(t)] &= \int_{t=0}^{T} CC(t; f(t), g(t)) dt \\
+%   &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t + \tau) g(t) d\tau dt \\
+%   &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t) g(t + \tau) d\tau dt
+% \end{split}
+% \]
+
+% though as far as I'm aware, this value isn't used all that
+% often (people seem to usually stick to the autocorrelation). \par
+
+% We can define another very useful operator
+% (the \emph{convolution} operator)
+% by taking the above equation and tweaking it seemingly innocuously
+% \textemdash{} which ends up being the \emph{Hermitian adjoint}
+% of the cross-correlation operator\footnote{
+%   Something I hope to actually understand the meaning of soon.
+% } \textemdash{}
+% but that equation comes far more naturally from consider
+% \href{https://stats.stackexchange.com/a/332127}{the addition of two random variables}
+% and would send us on an (even more) obtuse tangent from our talk of
+% vector spaces and inner products. 
+
+% \subsubsection*{Inner product wrap-up.}
+
+% Now this definition of an inner product would be great 
+% \textemdash{}
+% we'd have a way of describing any function in terms of 
+% our desired basis by doing an integral!
+% \textemdash{}
+% \emph{if}
+% we can get it to converge.
+% Hardly a guarantee: take \(f(x) = x^0, g(x) = x^2\)
+% (both natural unit vectors in 
+% our current basis of polynomial space!)
+% and \(x \in \domain{R}\) as just one example.
+% But let's not give up on it just yet \textemdash{}
+% we may just be able to make things work with another basis!
+
+% \subsection{Beyond the countable, and picking a basis.}
+
+% It would help if
+% we expanded our horizons a bit.
+% I mean, getting to have \(x^i,\ i \in \domain{N}\)
+% is great and all, but we're definitely not spanning nearly
+% as much of our function space (say the space of smooth
+% (i.e., infinitely differentiable) functions, 
+% \(\domain{C}^\infty\)) as we could.
+% I mean, I can't even fully encode \(x^\pi\) or \(x^e\) 
+% with such a puny basis! And I like both \(\pi\) and \(e\)!
+% \sout{And especially pie! \textit{Mmmm... Pie.}}\par
+
+% Enough belly-aching. We're now going to expand our
+% set of basis functions to be \emph{continuous}:
+% \[B_{P+} = \{x^i \mid i \in [1, \infty)\} \] 
+
+% Now we can handle \(x^\pi\) and \(x^e\) quite easily.
+% But we still can't describe \emph{every} function (namely,
+% any functions which contain \(x^i, i < 1\)).
+% And we're probably still in trouble with using our
+% inner product \textemdash{} outside of \(\abs{x} < 1\),
+% we're probably exploding.\par
+
+% Alright, let's not be so negative! Or wait... 
+% Actually, let's be negative!
+
+% \[B_{P} = \{x^{-i} \mid i \in [1, \infty)\} \] 
+
+% Alright, \emph{this} looks promising! Now if we restrict
+% the domain of our input variable to 
+% something like \(x \in [1, \infty)\),
+% our inner product
+% won't explode just by taking the norm of a basis vector.
+% This is promising, but there may be an even more useful
+% set of basis functions to use \textemdash{} it's kind of
+% lame to have to start at \(x=1\). What if we're modeling
+% something over time? We don't want to just chop
+% off the first horizontal unit's worth of data if we 
+% could help it! \par
+
+% Before we get carried away, we should realize what these
+% changes of basis mean. You'll notice that in our switch
+% from \(B_{P+}\) to \(B_{P}\), we lost the ability to
+% fully/easily encode \(x^\pi\) and \(x^e\), and we
+% had to change our allowed input domain from \((-1,1)\)
+% to \([1, \infty)\). So when we change our basis, it
+% isn't without consequence. We end up
+% \emph{changing the part of function space we can describe}. 
+% Put in a way that may sound almost tautological,
+% \emph{different sets of basis functions
+% describe different (potentially disjoint) sets of functions}.
+% This is worth keeping in mind as we finally talk about
+% integral transforms.
+
+
+% \subsection{The integral transform: a concatenation of inner products.}
+
+% So what is an integral transform?
+% You could make your own if you wanted to!
+% (Whether or not it would be useful is another question.)
+% Essentially all it is is \emph{a bunch of inner products
+% over a set of previously selected basis functions}.
+% As we talked about before, taking inner products of
+% a vector \(\vec{v}\)
+% with basis vectors \(\{\vec{b_i}\}\)
+% and dividing by the norm of the basis vector
+% provides us the coefficients needed to describe \(\vec{v}\)
+% in the vector space spanned by \(\{\vec{b_i}\}\).
+% Going back to functions again, 
+% we can say that \emph{the integral transform
+% produces from the input function \(f(x)\)
+% the vector representation of \(f\),
+% in the form of the coefficient-generating function \(A_f(n)\),
+% in the function space spanned by a set of basis functions
+% \(\{K(x;n)\}\)}. In mathematical form,
+
+% \[A_f(n) = \innerprod[K(x;n)][f(x)] 
+%   = \int_{Dom(x)} K(x;n) f(x) dx \]
+
+% You're free to choose whatever set of basis functions
+% \(\{K(x;n)\}\) you'd like, and have the size of this set
+% (measured by \(n\)) be whatever you'd like.
+% Since the choice of \(K(x;n)\) is at the core of
+% the integral transform (it determines what functions you
+% can represent and in what way they're represented),
+% \(K(x;n)\) is called the 
+% \textbf{kernel}\index{kernel!in integral transforms}
+% of the transform.\footnote{
+%   Which is unrelated to the kernel, i.e. nullspace, of a matrix in linear algebra\par
+%   ...Yeah, I know, it would have been nice if they were a
+%   bit more creative with the names. 
+%   \sout{I mean, ``nullspace''
+%   was perfectly good for what it was describing \textemdash{}
+%   why'd they have to go and call it the ``kernel'' too?
+%   All it succeeded in doing was make me try to understand
+%   the connection between these two kernels in vain until
+%   I realized there was no connection and they're just
+%   named the same thing.}
+%   I found it confusing too.
+% }
+% With a properly restricted input domain and properly
+% chosen kernel, the mapping between \(f\) and \(A_f\)
+% is one-to-one, implying both the uniqueness of \(A_f\)
+% \emph{and} a possible to ``invert'' the transform
+% back into the form of the original function!\footnote{
+%   Technically, not entirely true.
+%   Two functions \(f\) and \(g\) would have identical encodings
+%   (\(A_f = A_g\)) if \(f\) and \(g\)
+%   differ at only a countable set of points \(S\),
+%   i.e., that the Lebesgue measure of \(S\) is 0.
+%   This is because we're using an integral as our inner product
+%   \textemdash{}
+%   we're performing a ``simple'' integral over the input domain,
+%   implying the use of the Lebesgue measure,
+%   and since \(S\) would has a Lebesgue measure of zero,
+%   it doesn't affect the output of the inner product at all.
+%   So it isn't foolproof, but it works if you restrict
+%   the portion of function space so as to not have
+%   these sorts of ``antagonistic'' examples in them.
+% }\par
+
+% You'll notice that in the above definition of the transform,
+% I didn't divide by the norm of the basis vectors.
+% Technically, if we want \(A_f\) to capture the \emph{projections}
+% of \(f\) onto the basis functions, we would indeed need
+% to divide through by the norm
+% (expansion assumes an \(L^2\) norm):
+
+% \[\begin{split}
+%   \vec{f} &= \frac{\innerprod[K(x;n)][f(x)]}{\norm[K(x;n)]} \\
+%   &= \frac {\int_{Dom(x)} K(x;n) f(x) dx } {\sqrt{\int_{Dom(x)} K(x;n)^2 dx }}
+% \end{split}
+% \]
+
+% Personally, I kind of like this form a little bit more, mainly
+% because its seemingly out-of-nowhere form might prompt a student
+% to ask ``What's up with that denominator?''. Which
+% may lead to a discussion about 
+% this pretty interesting way of thinking of functions,
+% which may help demystify the Transforms\textsuperscript{TM} 
+% that otherwise appear to be delivered from on high.
+% However, in this case, simplicity prevails.
+% See, because the denominator is invariant to the input function
+% \(f(x)\), all coefficient-generating functions \(A_f\) for
+% \emph{every} function is off by the same factor
+% \(1/\sqrt{\int_{Dom(x)} K(x;n)^2 dx}\) at any particular \(n\).
+% But if they're \emph{all} off by the exact same factor at the
+% exact same locations,
+% the coefficient-generating functions will be unique
+% whether you correct by that factor or not.
+% This is good, because many times the norm will contain
+% factors which would complicate the transform's output.
+% And so often they don't until/unless they perform an
+% inverse transform, 
+% at which point they make up for the difference.
+% We'll argue through an example of this in a moment.
+
+% \subsection{The Laplace Transform: a differential equations-friendly integral transform.}
+
+% One of the most common integral transforms one comes across,
+% often in the context of differential equations,
+% is the Laplace Transform, often written with 
+% \(t\)'s and \(s\)'s instead of \(x\)'s and \(n\)'s as
+% I had done above:
+
+% \[\mathcal{L}(f(t)) = F(s) = \int_{t=0}^{\infty}e^{-st}f(t)dt\]
+
+% Considering this from a function space perspective,
+% we're choosing to describe a function \(f(t)\)
+% using the set of basis functions \(\{e^{-st}\}\).
+% So the kernel of the Laplace transform is \(K(s,t) = e^{-st}\),
+% chosen because exponential functions turn on Easy Mode
+% for integration/differentiation, making them
+% incredibly useful for certain classes of
+% differential equations (which anyone who has 
+% taken a differential equations course is probably 
+% already familiar with). Not only
+% that, they have an associated inverse transform!
+% (More on that in a moment.)
+% The transform gives us the (unscaled)
+% coefficient-generating function \(F(s)\),
+% which, given an \(s\), computes the (function space's)
+% inner product of \(f(t)\) 
+% with the appropriate basis vector \(K(s,t)\), and therefore
+% the (not properly rescaled) coefficient of \(f\) at the index \(s\)
+% in the chosen basis \(\{e^{-st}\}\).\par
+
+% Technically, we haven't fully specified the transform yet.
+% As with any transform, the domain of the input variable 
+% (in this case, \(t\)) and the basis we've chosen
+% (specified by both the kernel \(K(s,t)\) and the domain of
+% the ``indexing'' variable, \(s\)) determine which functions
+% we can describe, because we need the inner product 
+% \innerprod[K(s,t)][f(t)] to converge.\par
+
+% As it turns out, there are two variations on a theme here:
+% imaginary vs complex domains.
+% Let's start with the one I personally find more interesting.
+
+% \subsubsection{The Fourier transform: Orthogonal Bases.}
+
+% If we want to transform a function \(f(t)\) that's defined
+% for \(t \in (-\infty, \infty)\), we need \(f(t)\) to be a member
+% of \(L^1\) space; i.e. that \(f(t)\) be \(L^1\)-integrable; 
+% i.e. (less cryptically) we need the \(L^1\) norm of \(f(t)\)
+% to converge:
+% \[\norm[f(t)]_1 = 
+%   \int_{t=-\infty}^{\infty} \abs{f(t)} dt < \infty \]
+
+% If this condition is met, then we would want to constrict
+% \(s\) to be an imaginary number, which we'll parametrize
+% i.e. \(s \in S = (-i\infty, i\infty)\) 
+% where \(i := \sqrt(-1)\).
+% To make the path explicit, we can have \(s = i\omega\),
+% in which case we'd have \(\omega \in (-\infty, \infty)\).\par
+
+% What does that make our kernel look like?
+% In parametrized form, we have \(K(\omega) = e^{i\omega t}\).
+% But wait, we know from Euler's formula
+% (provable using Taylor series) that
+% \[e^{i\omega t} = \cos{\omega t} + i\sin{\omega t} \]
+
+% that is, \(e^{i\omega t}\) involves a rotation around 
+% the unit circle in the real-imaginary plane 
+% (counterclockwise if \(\omega t\) is positive,
+% clockwise if it's negative).\footnote
+% {
+%   What's especially neat is
+%   that it can be shown that the two functions that ``comprise''
+%   \(e^{i\omega t}\), 
+%   \(\{\cos{\omega t} \mid \omega \in \Omega_{C} = (0, \infty) \}\) and 
+%   \(\{\sin{\omega t} \mid \omega \in \Omega_{S} = [0, \infty) \}\) are 
+%   \emph{mutually orthogonal} functions, i.e. that
+%   for a period \(T\) over the implied resultant waves
+%   for the integrands below,
+%   \begin{itemize}
+%     % \tightlist
+%     \item
+%       \(\int_{T}\cos{\omega_1t}\cos{\omega_2t} > 0 \implies \omega_1 = \omega_2\)
+%     \item
+%       \(\int_{T}\sin{\omega_1t}\sin{\omega_2t} > 0 \implies \omega_1 = \omega_2\)
+%     \item
+%     \(\forall 
+%       (\omega_1, \omega_2) \in \Omega_{C} \times \Omega_{S}, 
+%     \int_{T}\cos{\omega_1t}\sin{\omega_2t} = 0 \)
+%   \end{itemize}
+%   So we can view \(e^{i\omega t}\) as ``packaging together''
+%   these mutually orthogonal basis functions into one nice,
+%   easily integrable/differentiable function.\par
+
+%   The cosine function is even (\(\cos(-x) = \cos(x)\)) and
+%   the sine function is odd (\(\sin(-x) = -\sin(x)\)), so
+%   changing \(\Omega_{C}\) and \(\Omega_{S}\) to 
+%   \((-\infty, \infty)\) would gain no new information.
+%   (And in fact, the \emph{cosine} integral transform and
+%   \emph{sine} integral transform need not be over \domain{R}.)
+%   However, \(e^{i\omega t}\), being the sum of an even function
+%   and an odd function, is neither even nor odd and so
+%   has no simple symmetry and
+%   \(\{e^{i\omega t} \mid \omega \in (-\infty, \infty)\}\)
+%   are all linearly independent.
+% }
+% So when we perform the integral transform:
+
+% \[\fancy{F}(f(t)) = F(\omega) 
+%   \propto \innerprod[e^{-i\omega t}][f(t)]
+%   = \int_{t=-\infty}^{\infty} e^{-i\omega t} f(t) dt\]
+
+% (we'll explain the \(\propto\) in a bit)
+% we can interpret the (probably complex-valued) coefficient
+% ``indexed'' by \(\omega\) as answering the following
+% (very long-winded) question:\par
+
+% Let's say
+% I coiled output of \(f(t)\), 
+% starting from \(t=-t'\) and going until \(t=t'\),
+% around the complex unit circle clockwise\footnote{
+%   ``Clockwise'' because the exponent of \(e^{-i\omega t}\)
+%   has a negative sign at the front.
+% }
+% with a winding angular frequency of \(\omega\). I'd end
+% up somewhere in the complex plane, say at a point \(p(t')\).
+% Where would I end up as I use more and more of
+% \(f(t)\), i.e., what is \(\lim_{t' \rightarrow \infty} p(t')\)?
+% \par
+
+% This doesn't necessarily help us in performing the transform
+% itself (called the \textbf{Fourier transform}),
+% and it may be harder to wrap one's head around it
+% compared to the (potentially) more straightforward
+% ``\(F(\omega)\) is the inner product between the input function
+% and the basis function indexed by \(\omega\)''.
+% But this complex-plane rotation interpretation is
+% incredibly important in just about any topic involving
+% the \emph{phasor} interpretation of (sinusoidal) waves. 
+% For example, the above question
+% pegs \(\omega\) as a frequency of rotation. If we observed
+% a circuit element's 
+% voltage response to a signal over time as \(f(t)\),
+% then the Fourier transform of that signal 
+% \(\fancy{F}(f(t)) = F(\omega)\) shows how the circuit element
+% respond to the \emph{frequencies} of the signal.
+% This \emph{transfer function} becomes useful in determining
+% what wave content is amplified/preserved/attenuated when
+% passing through the element, among other things.\par
+
+% Perhaps more importantly for the moment, this gives us
+% an intuitive way of determining the form of the 
+% \emph{inverse Fourier transform}.
+% Remember, we said that
+% by coiling \(f(t)\) around the complex unit circle clockwise
+% with a winding frequency of \(\omega\), we got \(F(\omega)\).
+% How would we undo such an operation?\par
+% Well, how about taking \(F(\omega)\) and rotating it
+% \emph{counterclockwise}?
+% \[f(t) \propto 
+%   \int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) d\omega \]
+
+% We're \emph{almost} there, but notice the use of \(\propto\)
+% and not \(=\).
+% As it turns out, the proportionality constant is \(1/2\pi\).
+% The constant comes out a bit more naturally if one arrives
+% at the Fourier transform by taking the limit of
+% the Fourier series,
+% but we can still make sense of it.
+% We'll try to make sense of it in a few ways:
+
+% \paragraph{An appeal to physical intuition: ``natural'' units.}
+
+% In our phasor interpretation of the Fourier trasnform,
+% we pegged \(\omega\) as a frequency of rotation.
+% More specifically, it is an \emph{angular} frequency of rotation,
+% where one full revolution around the unit circle
+% (in the real-imaginary plane)
+% has a period of \(2\pi\).\par
+
+% Let's continue to ``interpret'' the inputs of our functions
+% by considering \(f(t)\). In particular, let's say \(f(t)\)
+% is a periodic function in time \(t\) with period \(T\). 
+% We already said we're converting to a function based
+% on frequency (currently, angular frequency).
+% In terms of units,
+% the simplest way to convert from time to frequency?
+% Well, just inversion, no?
+
+% \[t \mapsfrom \frac{1}{t} := f \]
+
+% where \(f\) is the \emph{temporal frequency} of the function.
+% With such a transformation, \(f=1\) corresponds to
+% a winding frequency such that a time-interval
+% of \(\Delta t = 1\) corresponds to one revolution around
+% the unit circle (in the real-imaginary plane).
+% It's like there's the same ``density'' between the two units,
+% i.e., \(df = dt\).
+% That just \emph{feels} right, doesn't it?
+% \par
+
+% But as it stands, we \emph{don't} have such a setup.
+% Instead we have \(\omega = 2\pi\) corresponding to
+% a wrap of \(\Delta t = 1\) around the unit circle.
+% So we kind of have to go through ``more'' \(\omega\)
+% to wrap all of \(t\). 
+% So it's like if we were comparing
+% differential amounts of \(t\) with \(\omega\), we'd have
+
+% \[d\omega = 2\pi dt\]
+
+% rather than our cleaner \(df = dt\).\par
+% But if we're going back to a domain in \(t\) 
+% via an inverse transform, we don't
+% want our unit's ``thickness'' to have dilated by \(2\pi\)
+% \textemdash{} that'd be a different function (with a period
+% larger than our original by a factor of \(2\pi\))!
+% So we need to change our thickness of \(d\omega\) to match
+% that of \(dt\):
+
+% \[  dt = \frac{d\omega}{2\pi} \]
+
+% and so
+
+% \[\begin{split}
+%   f(t) &=
+%   \int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) \frac{d\omega}{2\pi} \\
+%   &= \frac{1}{2\pi}\int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) d\omega
+% \end{split}\]
+
+% A much cleaner way of having this all work out
+% is to have our transform map directly to the unit that just
+% ``feels'' right, i.e., the temporal frequency.
+% That would mean making a \(\Delta f = 1\) correspond to
+% our phasor spinning around the unit circle exactly once.
+% This is easily done by pulling out the period of \(2\pi\)
+% out of our frequency unit and sticking it as a constant
+% in the exponennt, i.e., changing our basis function
+% for our original transform:
+
+% \[e^{-i\omega t} \mapsto e^{-2\pi ift} \]
+
+% making our Fourier transform be
+
+% \[\fancy{F}(x(t)) = X(f) 
+%   = \int_{t=-\infty}^{\infty} e^{-2\pi ift} x(t) df\]
+
+% where we've denoted the function as \(x\)
+% to avoid confusion with the temporal frequency \(f\).
+% Now because our unit's ``thicknesses'' are equal,
+% the ``size'' of the domain of \(t\) and the size of the
+% domain of \(f\) are equal, so when we perform the
+% inverse transform and integrate over \(f\), we don't
+% have to divide our differential by any factor:
+
+% \[x(t) \propto 
+%   \int_{f=-\infty}^{\infty} e^{2\pi ift} X(f) df \]
+
+% This definitely is the ``nicer'' option, but it required
+% to interpret the math to reach it. Physical intuitions
+% of mathematical operations are wonderful, but it would
+% be shocking if there weren't a way to get to the answer
+% while ``sticking to math''.
+% % Well, such methods exist, but it involves considering
+% % how to construct unitary operators over a Hilbert space
+% % (and the revelation that we usually ``intuitively''
+% % think of functions as elements of a Hilbert space).
+% % I hope to get the chance to give such explanations
+% % once I learn them properly myself.
+% % When that's the case, we'll expand this section
+% % more mathematical rigor.\par
+
+% % All this to say, inverse transforms are tricky things
+% % to find! After all, such a task amounts to inverting
+% % an infinite-dimensional transformation matrix \textemdash{}
+% % would be a shock if it \emph{were} simple!
+
+% \paragraph{An appeal to norms.}
+
+% Well, what about norms? I made such a big hullabaloo about
+% it earlier. Why don't we use them here? \par
+
+% Say our basis function \(e^{-i\omega t}\) is a periodic function
+% with period \(T = 2\pi\).\footnote
+% {
+%   Remember Euler's formula: \(e^{ix} = \cos(x) + i\sin(x)\).
+%   The periodicity of the complex exponential \(e^{ix}\) is then
+%   the period of the sum of the two sinusoidal functions.
+%   Since they both have the same period \(T = 2\pi\),
+%   then \(e^{ix}\) does as well.
+% } What is its norm? 
+% (Remember that for complex numbers, we use an 
+% \(L^2\) norm and consider \(z\)'s domain isomorphic to 
+% \(\domain{R}^2\), so that \(\abs{z} = \abs{x + iy}
+% = \sqrt{\abs{x}^2 + \abs{y}^2}\).)
+
+
+% \[\begin{split}
+%   \norm[e^{-i\omega t}] &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{e^{-i\omega t}}^2 d(\omega t)} \\
+%   &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{\cos(\omega t) + i\sin(\omega t)}^2 d(\omega t)} \\
+%   &= \sqrt{\int_{\omega t=0}^{2\pi}
+%   \left(
+%     \left(\cos(\omega t)^2 + \sin(\omega t)^2\right)^{1/2}
+%     \right)^2 
+%     d(\omega t)} \\
+%   &= \sqrt{\int_{\omega t=0}^{2\pi} 1 d(\omega t)} \\
+%   &= \sqrt{2\pi}
+% \end{split}\]
+
+% This is regardless of one's choice in \(\omega\) or \(t\) and
+% so is the same even if the the exponent didn't have the
+% negative sign.
+% (The result of the integral is
+% also not too suprising when you consider the phasor interpretation of the complex exponential function).
+% So then our basis functions for \emph{both} the Fourier
+% transform \emph{and} the inverse Fourier transform have
+% norms of \(\sqrt{2\pi}\). Then it would probably be better
+% to divide through by the relevant norm in both directions, no?
+
+% \[\fancy{F}(f(t)) = F(\omega)
+%   = \frac{1}{2\pi} \int_{t=-\infty}^{\infty} e^{-i\omega t} f(t) dt\]
+
+% \[\fancy{F}^{-1}(F(\omega)) = f(t)
+%   = \frac{1}{2\pi} \int_{\omega=-\infty}^{\infty} e^{i\omega t} F(\omega) d\omega\]
+
+% Dividing through by the norm has had the added consequence
+% of preserving inner products of two functions \(f\) and \(g\)
+% before and after our transform, i.e., 
+% \(\innerprod[f][g] = \innerprod[\fancy{F}(f)][\fancy{F}(g)]\).
+% This makes the transform as we defined it just now a
+% \textbf{unitary operator}\index{unitary operator} over
+% our function space (which, through our choice of inner product,
+% is a Hilbert space and so has a notion of ``unitary operator'').
+% Intuitively, a unitary operator doesn't squash or stretch
+% the norms of the objects it operates on. For a more easily
+% graspable example, the linear transformation \(T\)
+% on \(\domain{C}\)
+% corresponding to a rotation in the counterclockwise direction
+% by an angle \(\phi\) is an example of a unitary operator.
+% If we find another unitary operator \(T^{-1}\) 
+% that ``undoes'' \(T\), then everything ends up exactly where
+% it used to be. And that's exactly what we just did,
+% but with functions 
+% over an uncountably infinite-dimensional vector space!
+% Pretty neat, huh?
+
+% \subsubsection{The Laplace transform: just a slightly augmented Fourier transform.}
+
+% Now, not all functions \(f(t)\)
+% are \(L^1\)-integrable over their domain
+% at first, so the Fourier transform wouldn't work on those. 
+% But what if we actively tried to squish our 
+% function down with our basis functions? Specifically,
+% let's squash it by an exponentially decaying function.
+% That would mean allowing \(s\) of our basis functions 
+% to have a real component to them and so be complex.
+% Say \(s = r + i\omega\)
+% All we'd need to do is choose an \(r\) large enough to
+% make the following integral converge:
+
+% \[ \fancy{L}(f(t)) = F(s) = \int_{t \in Dom(t)} e^{-(r + i\omega)t} f(t) dt \]
+
+% This would be our \textbf{Laplace transform}. It amounts
+% to the same sort of winding action described in the Fourier
+% transform, except that we're also squashing all the vectors
+% we eventually sum (and so the resultant vector)
+% by a factor of \(e^{-rt}\). Since it's so similar to
+% the Fourier transform, we can use the same idea as
+% before to get the inverse transform: wind the output
+% of the forward transform in the opposite direction
+% (i.e., clockwise). We just will also need to de-squashify
+% our values by now stretching each of our points by
+% \(e^{rt}\), but besides that, we'd be set to migrate
+% over our inverse transform from our analysis of the Fourier
+% transform:
+
+% \[ \fancy{L}^{-1}(F(s)) = f(t) = \frac{1}{2\pi} \int_{\omega = -\infty}^{\infty} e^{i\omega t} e^{rt} f(t) d\omega \]
+
+% where we have that factor of \(1/2\pi\) because of the reasons
+% we've discussed before.\par
+
+% Some people like to be real fancy and describe the above
+% as a path integral in the complex plane that covers the
+% same path we've implicitly described above:
+
+% \[ \fancy{L}^{-1}(F(s)) = f(t) = \frac{1}{2\pi i} \int_{s = r - i\infty}^{r + i\infty} e^{st} f(t) ds \]
+
+% You'll notice a factor of \(1/i\) pop out of seemingly
+% nowhere.
+% Well, when we integrate over a domain \(D\),
+% our resulting value is expressed with the domain we integrated
+% over as our ``reference point''. This works great if
+% we're integrating over one domain and going to
+% that same domain (say, integrating over \(\omega \in \domain{R}\)
+% and ending up with a function of \(t \in \domain{R}\)).
+% But if we integrate along the imaginary axis, our result
+% will be in reference to an axis \emph{perpendicular} to
+% our target domain of \(t \in \domain{R}\), specifically
+% to an axis that is oriented \(\pi/2\) radians counterclockwise
+% compared to the axis we desire. So we stick
+% a \(1/i = i^{-1}\), a root of unity corresponding
+% to a clockwise rotation of a point in the
+% complex plane by\(\pi/2\) radians 
+% when thought of as an operator (and applied via multiplication),
+% to orient our output to the axis we want, that is, the
+% real numbers.
+% \\
+% \subsection{Exiting the rollercoaster.}
+% Well, that was quite a ride.
+% And this was to derive a relatively \emph{straightforward}
+% inverse transform \textemdash{}
+% inverse transforms are tricky things
+% to find! After all, such a task amounts to inverting
+% an infinite-dimensional transformation matrix
+% (set by our choice of basis functions and therefore our choice
+% of kernel).
+% It would be a shock if such a 
+% monumental task \emph{were} simple!\par
+
+% In any case, I think that's enough for now.
+% \\
+% \\
+% - DK, 6/19/18
+
+
+% \paragraph{An appeal to (and amendment of) norms in function spaces over complex numbers.}
+
+% Another way to think about it is to go back to the idea of
+% dividing through by the norm of a function.
+% We previously defined our norm in function space to
+% be over all values for which the input is defined, which led
+% to functions defined on \(\domain{R}\) to have the following norm if it converges:
+
+% \[\norm[f] = \innerprod[f][f] = \sqrt{\int_{t=-\infty}^{\infty} \abs{f}^2 dt}\]
+
+% The choice of this sort of \(L^2\) norm over our function space
+% means that the function space we're working with is a
+% \textbf{Hilbert space}\index{Hilbert space}, an inner product
+% space that reflects many phenomena of reality when
+% interpreted in physics/engineering.\par
+% Now, we run into a problem if we try to calculate
+% the norm of a periodic function, say \(e^{i\omega t}\):\footnote{Remember that, staying consistent
+% with the \(L^2\) norm, a complex
+% number has magnitude
+
+% \[\abs{z} = \abs{x + iy} = \left(\abs{x}^2 + \abs{y}^2\right)^{1/2} \]}
+
+
+% \[\norm[e^{i\omega t}] = \sqrt{\int_{t=-\infty}^{\infty} \abs{e^{i\omega t}}^2 dt} \rightarrow \infty \]
+
+% But that just feels wrong, doesn't it? This ``length'' doesn't
+% really capture how this function responds to its input \(t\).
+% It makes even less sense if we compare the distance between
+% two basis vectors 
+% \(f(t) = e^{i\omega_2 t}, g(t) = e^{i\omega_1 t}\):\footnote
+% {
+%   The \textbf{distance}\index{distance!in inner product spaces}
+%   between two vectors is implicitly defined when an
+%   inner product is defined, via
+
+%   \[d(x,y) = \innerprod[x-y][x-y] \]
+% }
+
+% \[d(f, g) = \sqrt{\int_{t=-\infty}^{\infty} \abs{a - b} dt} \rightarrow \infty\]
+
+
+% or even the distance between two constant functions 
+% \(f(t) = a, g(t) = b\):
+
+% \[d(f, g) = \sqrt{\int_{t=-\infty}^{\infty} \abs{(a - b) dt}} \rightarrow \infty\]
+
+% I mean, sure, they're not the same vector, but are they really
+% \emph{infinitely} far apart?\par
+
+% This suggests a change in how we define our inner product,
+% because it's clearly busted at the moment.
+
+% % ... my period argument doesn't really work...
+
 
 
 % but we can still make sense of it
@@ -3997,7 +4788,12 @@ This
 
 
 
+\chapter{The graveyard.}
 
+This is where some nontrivial amount of work
+went into a writeup before realizing that I was
+basically confusing \emph{myself} with how I was going
+about things.
 
 
 \section{The Fourier and Laplace Transforms.}
@@ -4377,25 +5173,6 @@ What if the Fourier transform explodes?
 For example, consider the function
 
 
-
-
-\section{Generating functions: dealing with uneven probabilities.}\label{sec:generating-functions} % 5/27/18
-
-% https://math.stackexchange.com/questions/1646101/distribution-of-the-sum-of-n-loaded-dice-rolls
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{Central Limit Theorem} % 5/27/18
 
 
 
