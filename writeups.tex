@@ -35,6 +35,7 @@
 
 
 
+    \usepackage{physics} % contains sane definitions for the different flavors of derivatives (/dv{}{}, /pdv{}{}, /fdv{}{})
 
 
 
@@ -43,13 +44,21 @@
     \usepackage{xparse}
   % see https://tex.stackexchange.com/questions/29973/more-than-one-optional-argument-for-newcommand
 
-    \NewDocumentCommand{\innerprod}{O{\cdot} O{\cdot}}{\ensuremath{\left<#1,#2\right>}}
+    \NewDocumentCommand{\innerprod}{m m}{\ensuremath{\left<#1,#2\right>}}
     \NewDocumentCommand{\domain}{m}{\ensuremath{\mathbbm{#1}}}
-    \NewDocumentCommand{\norm}{O{\cdot}}{\ensuremath{\left\lVert#1\right\rVert}}
-    \NewDocumentCommand{\abs}{m}{\ensuremath{\left|#1\right|}}
+    % \NewDocumentCommand{\norm}{O{\cdot}}{\ensuremath{\left\lVert#1\right\rVert}}
+    % \NewDocumentCommand{\abs}{m}{\ensuremath{\left|#1\right|}}
     \NewDocumentCommand{\fancy}{m}{\ensuremath{\mathcal{#1}}}
     \NewDocumentCommand{\normexpanded}{}{}
     \NewDocumentCommand{\gcf}{m}{\ensuremath{\text{gcf}\left(#1\right)}}
+    % \NewDocumentCommand{\grad}{m}{\ensuremath{\nabla #1}}
+    \NewDocumentCommand{\definedas}{}{:=}
+    \NewDocumentCommand{\setequalto}{}{:=}
+    \NewDocumentCommand{\suchthat}{}{\mid}
+
+    \DeclareMathOperator*{\argmax}{argmax}
+    \DeclareMathOperator*{\argmin}{argmin}
+
 
     \usepackage{makeidx} % allows for indexing
     \makeindex
@@ -641,27 +650,27 @@ and which also follows four key properties:
 \begin{itemize}
   \tightlist
   \item
-    Symmetry: \innerprod[u][v] = \innerprod[v][u]
+    Symmetry: \innerprod{u}{v} = \innerprod{v}{u}
   \item
     Linearity: \(\alpha \in \domain{R} 
-          \rightarrow \innerprod[\alpha u][v] = \alpha \innerprod[u][v]\)
+          \rightarrow \innerprod{\alpha u}{v} = \alpha \innerprod{u}{v}\)
   \item
     Distributivity:
-      \(\innerprod[u+v][w] = \innerprod[u][w] + \innerprod[v][w]\)
+      \(\innerprod{u+v}{w} = \innerprod{u}{w} + \innerprod{v}{w}\)
   \item
     Positive Definiteness:
-      \(\innerprod[v][v] \geq 0. \innerprod[v][v] = 0 \rightarrow v = \vec{0}\)
+      \(\innerprod{v}{v} \geq 0. \innerprod{v}{v} = 0 \rightarrow v = \vec{0}\)
 \end{itemize}
 
 A vector space with an associated inner product is called an \textbf{inner product space}.
 We can choose \emph{any} operation that fulfills these four requirements to be our
 definition of an inner product! There are some standard ones though.
 In the case of vectors in \(\domain{R^n}\), the standard is
-\(\innerprod[u][v] = \sum_{i=1}^{n}u_i v_i \).
+\(\innerprod{u}{v} = \sum_{i=1}^{n}u_i v_i \).
 With our definition of an inner product in hand, we can have our \textbf{projection}\index{projection}
 
 \begin{equation}
-\vec{v}_{v\parallel w} = \frac{\innerprod[v][w]}{\norm[w]} \hat{w}
+\vec{v}_{v\parallel w} = \frac{\innerprod{v}{w}}{\norm{w}} \hat{w}
 \end{equation}\label{equation:projection}
 
 where \(\hat{w}\) is the unit vector in the direction of \(w\) and \(\norm{w}\)
@@ -669,17 +678,17 @@ is the
 \textbf{norm} (which we'll discuss in a moment)
 of the vector \(w\).
 The remaining component \(\vec{v}_{v\perp w}\) is \textbf{orthogonal} to \(w\),
-meaning \(\innerprod[\vec{v}_{v\perp w}][w] = 0\).
+meaning \(\innerprod{\vec{v}_{v\perp w}}{w} = 0\).
 \par 
 
 Conveniently, if \(\vec{w}\) is already of unit magnitude, 
-then \(\norm[w] = 1, \hat{w} = \vec{w}\), and
-\(\vec{v}_{v\parallel w} = \innerprod[v][w]\vec{w}\).
+then \(\norm{w} = 1, \hat{w} = \vec{w}\), and
+\(\vec{v}_{v\parallel w} = \innerprod{v}{w}\vec{w}\).
 That is, the ``amount/number'' of a 
-unit vector \(w\) inside \(v\) is simply \innerprod[u][v].
+unit vector \(w\) inside \(v\) is simply \innerprod{u}{v}.
 And if the unit vector \(w\) is a basis vector \(b_i\), then 
 \(\vec{v}_{v\parallel w}\) is 
-that basis vector, scaled by \innerprod[v][b_i]!\footnote{
+that basis vector, scaled by \innerprod{v}{b_i}!\footnote{
   ``!'' used to denote excitement, not factorialization.
 }
 \par
@@ -690,7 +699,7 @@ in terms of a new basis \(\{\vec{\beta}_i\}\)
 we can calculate the coefficients \(\{\alpha_i\}\)
 simply by calculating \emph{the projection of \(\vec{v}\)
 onto each of the basis vectors \(\vec{\beta_i}\)}
-\(\frac{\innerprod[v][\beta_i]}{\norm[\beta_i]}\)
+\(\frac{\innerprod{v}{\beta_i}}{\norm{\beta_i}}\)
 (with both \(v\) and \(\{\beta_i\}\) represented
 in terms of a common basis
 \textemdash{} presumably the natural basis \(\{e_i\}\) \textemdash{}
@@ -705,7 +714,7 @@ in linear algebra is
 the \(L^2\) norm 
 (the \(L\) may be named after \textbf{L}ebesgue), 
 given in the discrete form by
-\[\norm[w]_2 := \left(\sum_{i} \abs{w_i}^2\right)^{1/2}\]
+\[\norm{w}_2 := \left(\sum_{i} \abs{w_i}^2\right)^{1/2}\]
 
 This corresponds to the notion of
 length/distance that is physically intuitive to us,
@@ -716,7 +725,7 @@ is raised to an even power and so are not strictly necessary).
 Most likely, if no explict definition of a norm is given,
 the \(L^2\) norm is probably implied.\par
 We can generalize quite readily to the \(L^p\) norm:
-\[\norm[w]_p := \left(\sum_{i} \abs{w_i}^p\right)^{1/p}\]
+\[\norm{w}_p := \left(\sum_{i} \abs{w_i}^p\right)^{1/p}\]
 
 The above works for discrete vectors. 
 For continuous vectors (which we'll be thinking about in a bit),
@@ -724,7 +733,7 @@ we can adapt our definition of a norm
 by switching from summation to
 integration (let's say \(w(n)\) gives the coefficient at
 ``index'' \(n\)):
-\[\norm[w]_p = \left(\int_{n \in Dom(n)} \abs{w(n)}^p dn\right)^{1/p} \]
+\[\norm{w}_p = \left(\int_{n \in Dom(n)} \abs{w(n)}^p dn\right)^{1/p} \]
 
 We'll see this continuous form return when considering
 the norms of continuous functions. (It's almost as if
@@ -879,11 +888,11 @@ Keeping this in mind and looking back at the requirements to
 be an inner product, we can see that a reasonable choice
 is an integral over the domain of \(x\) if \(x\) is continuous:
 
-\[\innerprod[f][g] = \int_{Dom(x)} f(x)g(x) dx \]
+\[\innerprod{f}{g} = \int_{Dom(x)} f(x)g(x) dx \]
 
 or, if \(x\) is a discrete variable, then a summation instead:
 
-\[\innerprod[f][g] = \sum_{x_i \in Dom(x)} f(x)g(x) \]
+\[\innerprod{f}{g} = \sum_{x_i \in Dom(x)} f(x)g(x) \]
 
 Note that an inner product space only has one inner product.
 Part of the description of a function space is the domain 
@@ -913,7 +922,7 @@ inner product).\footnote{
 When an inner product is defined, the metric 
 induced on our inner product space is
 
-\[d(x,y) = \norm[x-y] = \sqrt{\innerprod[x-y][x-y]} \]
+\[d(x,y) = \norm{x-y} = \sqrt{\innerprod{x-y}{x-y}} \]
 
 Now, say we have \(f = \cos(t)\) and \(g\) as a sawtooth
 wave of period, amplitude, and phase equal to \(f\)
@@ -972,7 +981,7 @@ which just feels a whole lot more reasonable.
 In general then, if two functions are periodic with the same period \(T\),
 we would have the inner product be
 
-\[\innerprod[f][g] = \int_{t=-T/2}^{T/2} f(t)g(t) dt \]
+\[\innerprod{f}{g} = \int_{t=-T/2}^{T/2} f(t)g(t) dt \]
 
 with the norm and metric updated accordingly.
 This would seem to break the inner product for aperiodic functions.
@@ -1098,7 +1107,7 @@ we would have to integrate over \(s\) (or \(t\)) so that
 our final value is a scalar (i.e. that our inner product maps
 to a field). In \(s\) form:
 
-\[ \innerprod[f(t)][g(t)] =
+\[ \innerprod{f(t)}{g(t)} =
 \int_{s=0}^{1}CC\left(s; F\left(s\right), G\left(s\right)\right) ds = 
 \int_{s=0}^{1} \int_{\phi = 0}^{1} F(s + \phi) G(s) d\phi ds
 \]
@@ -1106,7 +1115,7 @@ to a field). In \(s\) form:
 and in \(t\) form:
 
 \[ \begin{split}
-  \innerprod[f(t)][g(t)] &= \int_{t=0}^{T} CC(t; f(t), g(t)) dt \\
+  \innerprod{f(t)}{g(t)} &= \int_{t=0}^{T} CC(t; f(t), g(t)) dt \\
   &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t + \tau) g(t) d\tau dt \\
   &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t) g(t + \tau) d\tau dt
 \end{split}
@@ -1220,7 +1229,7 @@ in the form of the coefficient-generating function \(A_f(n)\),
 in the function space spanned by a set of basis functions
 \(\{K(x;n)\}\)}. In mathematical form,
 
-\[A_f(n) = \innerprod[K(x;n)][f(x)] 
+\[A_f(n) = \innerprod{K(x;n)}{f(x)} 
   = \int_{Dom(x)} K(x;n) f(x) dx \]
 
 You're free to choose whatever set of basis functions
@@ -1273,7 +1282,7 @@ to divide through by the norm
 (expansion assumes an \(L^2\) norm):
 
 \[\begin{split}
-  \vec{f} &= \frac{\innerprod[K(x;n)][f(x)]}{\norm[K(x;n)]} \\
+  \vec{f} &= \frac{\innerprod{K(x;n)}{f(x)}}{\norm{K(x;n)}} \\
   &= \frac {\int_{Dom(x)} K(x;n) f(x) dx } {\sqrt{\int_{Dom(x)} K(x;n)^2 dx }}
 \end{split}
 \]
@@ -1337,7 +1346,7 @@ As with any transform, the domain of the input variable
 (specified by both the kernel \(K(s,t)\) and the domain of
 the ``indexing'' variable, \(s\)) determine which functions
 we can describe, because we need the inner product 
-\innerprod[K(s,t)][f(t)] to converge.\par
+\innerprod{K(s,t)}{f(t)} to converge.\par
 
 As it turns out, there are two variations on a theme here:
 imaginary vs complex domains.
@@ -1350,7 +1359,7 @@ for \(t \in (-\infty, \infty)\), we need \(f(t)\) to be a member
 of \(L^1\) space; i.e. that \(f(t)\) be \(L^1\)-integrable; 
 i.e. (less cryptically) we need the \(L^1\) norm of \(f(t)\)
 to converge:
-\[\norm[f(t)]_1 = 
+\[\norm{f(t)}_1 = 
   \int_{t=-\infty}^{\infty} \abs{f(t)} dt < \infty \]
 
 If this condition is met, then we would want to constrict
@@ -1409,7 +1418,7 @@ clockwise if it's negative).\footnote
 So when we perform the integral transform:
 
 \[\fancy{F}(f(t)) = F(\omega) 
-  \propto \innerprod[e^{-i\omega t}][f(t)]
+  \propto \innerprod{e^{-i\omega t}}{f(t)}
   = \int_{t=-\infty}^{\infty} e^{-i\omega t} f(t) dt\]
 
 (we'll explain the \(\propto\) in a bit)
@@ -1599,7 +1608,7 @@ with period \(T = 2\pi\).\footnote
 
 
 \[\begin{split}
-  \norm[e^{-i\omega t}] &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{e^{-i\omega t}}^2 d(\omega t)} \\
+  \norm{e^{-i\omega t}} &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{e^{-i\omega t}}^2 d(\omega t)} \\
   &= \sqrt{\int_{\omega t=0}^{2\pi} \abs{\cos(\omega t) + i\sin(\omega t)}^2 d(\omega t)} \\
   &= \sqrt{\int_{\omega t=0}^{2\pi}
   \left(
@@ -1629,7 +1638,7 @@ to divide through by the relevant norm in both directions, no?
 Dividing through by the norm has had the added consequence
 of preserving inner products of two functions \(f\) and \(g\)
 before and after our transform, i.e., 
-\(\innerprod[f][g] = \innerprod[\fancy{F}(f)][\fancy{F}(g)]\).
+\(\innerprod{f}{g} = \innerprod{\fancy{F}(f)}{\fancy{F}(g)}\).
 This makes the transform as we defined it just now a
 \textbf{unitary operator}\index{unitary operator} over
 our function space (which, through our choice of inner product,
@@ -1726,6 +1735,305 @@ In any case, I think that's enough for now.
 - DK, 6/19/18
 
 \newpage
+
+\chapter{Analysis.}\label{chapter:analysis}
+
+(Currently in its infancy \textemdash{} we're starting
+with discussions about ``simple'' calculus at the moment.)
+
+\section{Directional derivatives and the gradient.}
+
+Why does the gradient of a function \(f\), \(\grad{f}\),
+point to the ``direction of steepest ascent'' for functions?
+To answer that, we need to remember 
+about directional derivatives.
+
+\subsection{Partial derivatives.}
+
+As a reminder, we define a 
+\textbf{partial derivative}\index{partial derivative}
+as a limit along one variable, akin to the derivative
+of a one-variable function.
+
+\[\begin{split}
+  \pdv{}{x_i}f(x_1, x_2, \cdots, x_i, \cdots, x_n) \definedas \lim_{h \rightarrow 0} \frac{f(x_1, x_2, \cdots, x_i + h, \cdots, x_n) - f(x_1, x_2, \cdots, x_i, \cdots, x_n)}{h}, 
+  \\
+  h \in \domain{R}, Dom(f) \in \domain{R}^n
+\end{split}\]
+
+Let's remember that for a limit to exist at a point, it
+must approach the same value regardless of the ``side''
+from which the point is approached. For limits that approach
+a point \(p\) in \domain{R}, 
+there are only two ``sides'' in \domain{R} from
+which the point can be approached: from values smaller
+than \(p\) and from values larger than \(p\).
+
+\[p \in \domain{R}, \lim_{x \rightarrow p}g(x) = c 
+\quad \longleftrightarrow \quad
+\lim_{x \rightarrow p^-}g(x) = \lim_{x \rightarrow p^+}g(x) = c\]
+
+\subsection{Directional derivatives.}
+
+Anyway, this is great for when we happen to want to 
+approach our point \(p\) 
+along one of the ``predefined'' axes \(x_1, x_2, \cdots, x_n\).
+But what if we want to approach our point along a
+\emph{different} line? For example, let's stick to two
+dimensions (so \(f: \domain{R}^2 \to \domain{R}\)) and say we want to approach \(p\) along the line
+\(x_2 = bx_1, \ b \in \domain{R}\). We could calculate this
+\textbf{directional derivative} via the following expression:
+
+\[\lim_{h \to 0} \frac{f(x_1 + h, x_2 + bh) - f(x_1,x_2)}{h} \]
+
+More cleanly, we can associate the line of approach with a vector
+\(\vec{v} = (1,b)\) and use vector notation:
+
+\[\lim_{h \to 0} \frac{f(\vec{x} + h\vec{v}) - f(\vec{x})}{h} \]
+
+where in this case \(\vec{x} \in \domain{R}^2\).\par
+But wait! Aren't there an infinite number of points on our line
+and so an infinite number of potential \(\vec{v}\) to choose
+from? Indeed there are, and for the limit above to exist
+they should all yield the same result (i.e., 
+we should get the same answer whether we start
+from the ``left'' or the ``right'' of \(h = 0\)). To disambiguate
+a bit, we'll constrain our line-of-approach vector to have
+a norm of 1, i.e., 
+we'll have \(\vec{u}\) be a \emph{unit vector}.
+This allows us to finally properly define the 
+\textbf{directional derivative} operator \(D_{\vec{u}}\)
+as
+
+\[D_{\vec{u}} = \lim_{h \to 0} \frac{f(\vec{x} + h\vec{u}) - f(\vec{x})}{h} \]
+
+From this definition, we can see that our definition of a
+partial derivative \(\pdv{f}{x_i}\),
+our approach along a ``predefined'' axis, 
+is simply a directional
+derivative along the standard basis vector \(\vec{e}_i\).\par
+
+So our directional derivative definition is a valid 
+\emph{extension}
+of the definition of a partial derivative. Neat. 
+But can we actually calculate it? Finding limits along an
+arbitrary axis seems like a huge pain. (And in fact,
+it is.) But wait, we observed that
+a partial derivative along a natural axis \(x_i\)
+is the directional derivative 
+along the natural basis vector \(e_i\):
+
+\[ D_{e_i}f = \pdv{f}{x_i} \]
+
+And normally in linear algebra, we can define vectors
+in terms of a linear combination of 
+a set of basis vectors (say the natural basis
+vectors \(\{\vec{e}_i\}\)):
+
+\[\exists \vec{\lambda} = \left(\lambda_1, \lambda_2, \cdots, \lambda_n\right) \suchthat \vec{v} = \sum_i \lambda_i \vec{e}_i \]
+
+Can we define our directional derivative along a unit vector
+\(\vec{u}\) as a linear combination of 
+the directional derivative along
+the natural basis vectors \(e_i\)? In fact, we can!
+And with both \(\vec{u}\) and \(e_i\) having unit norm, 
+it's just as simple
+as weighting the partial derivative of each \(\pdv{f}{x_i}\)
+by \(\lambda_i \setequalto \innerprod{\vec{u}}{\vec{e}_i} = u_i\):
+
+\[\begin{split}
+  D_{\vec{u}}f &= \sum_i \lambda_i D_{\vec{e_i}}f \\
+      &= \sum_i \innerprod{\vec{u}}{\vec{e}_i} \pdv{f}{x_i} \\
+      &= \sum_i u_i \pdv{f}{x_i} \\
+      &= \innerprod{\vec{u}}{\grad{f}}
+\end{split}
+\]
+
+where 
+\(\grad{f} = \left(\pdv{f}{x_1}, \pdv{f}{x_2}, \cdots, \pdv{f}{x_n}\right)\)
+is the \textbf{gradient operator} and 
+\(\innerprod{\cdot}{\cdot}\) denotes the inner product
+on our domain \(\domain{R}^n\), i.e.,
+the \emph{dot product}.\footnote
+{
+A rigorous proof would involve defining a single-input function
+\(g(z)\) which moves along the unit vector \(u\) and
+noting that \(g'(0)\) equals both the definition of the
+directional derivative and the result we achieved by our
+linear-algebra reasoning.
+}\par
+
+Note that this expression for the directional derivative
+explains why the gradient of a function at that point is
+often intuitively explained as 
+``the direction of steepest ascent''. Specifically,
+if we wished to maximize \(D_{\vec{u}}\), we'd have
+
+\[
+  \argmax_{\vec{u}}(D_{\vec{u}}(f)) 
+  = \argmax_{\vec{u}}\innerprod{\vec{u}}{\grad{f}}
+\]
+
+and by the properties of the dot product,
+\(\innerprod{\vec{u}}{\grad{f}} = 
+\norm{\vec{u}}\norm{\grad{f}}\cos(\theta)\) where
+\(\theta\) is the angle between the two vectors.
+We have constrained \(\norm{u} = 1\) and so we
+maximize the expression by having \(cos(\theta) = 1\), 
+i.e. \(\theta = \cos^{-1}(1) = 0\).
+So there is \emph{no} angle between \(\vec{u}\)
+and \(\grad{f}\), so \(\vec{u}\) points in the direction
+of \(\grad{f}\). In math-speak,
+
+\[
+  \argmax_{\vec{u}}(D_{\vec{u}}(f)) 
+  = \frac{\grad{f}}{\norm{\grad{f}}}
+\]
+
+and by substituting the value for \(\vec{u}\)
+and noting that \(\cos(\theta) = 1\), we have
+
+\[
+  \max_{\vec{u}}(D_{\vec{u}}(f)) 
+  = \norm{\grad{f}}
+\]
+
+To find the direction of steepest \emph{descent} at 
+some point \(p\),
+we instead find the vector such that \(\cos(\theta) = -1\),
+i.e. \(\theta = \pi\), meaning the vectors are antiparallel.
+Then we have
+
+\[
+  \argmin_{\vec{u}}(D_{\vec{u}}(f)) 
+  = \frac{-\grad{f}}{\norm{\grad{f}}}
+\]
+
+and now
+
+\[
+  \min_{\vec{u}}(D_{\vec{u}}(f)) 
+  = -\norm{\grad{f}}
+\]
+
+which, when considering partial derivatives as ``slopes''
+along each axis (like how we often think of 1-D derivatives),
+should make sense.
+A differential step ``up'' the \(x_i\) axis 
+and a differential step ``down'' the \(x_i\) axis
+would have the same magnitude \(\pdv{f}{x_i}\) and so differ
+only by a negative sign.
+This holds for all \(x_i\), so it ought to hold
+for the gradient as well.
+
+% To find the direction of steepest \emph{descent} at 
+% some point \(p\),
+% we note that if the directional derivative exists
+% along the \(\grad{f}\) axis, then 
+% a step ``up'' from \(p\) along the \(\grad{f}\) axis 
+% and a step ``down'' from \(p\) along the \(\grad{f}\) axis 
+% will have the same magnitude \(\norm{\grad{f}}\)
+% for a differential step \(dp\).
+% And we previously found that \(\norm{\grad{f}}\)
+% is the largest magnitude we can get for a directional derivative
+% and is attained with the unit vector along the \(\grad{f}\)
+% axis.
+% So then the direction of steepest descent is ``down'' the
+% axis, i.e., in the direction of \(-\grad{f}\).
+
+% \subsection{Beyond lines: conservative vector fields.}
+
+% This is great if we're only interested getting to our 
+% destinations along specific lines, but things may break
+% if we \sout{read} move between the lines and 
+% go along different \emph{curves}. 
+% For example, what if we did some silly ``rotational derivative''
+% toward a point \(p\), i.e.,
+
+% \[\vec{u}(r) = \left(r\cos(\frac{\theta}{r}), r\sin(\frac{\theta}{r})\right) \implies \lim_{r \to 0}\frac{f(\vec{p} + \vec{u}(r)) - f(\vec{p})}{r} = R_{\theta}f(p) = \ ? \]
+
+% I mean, it feels like \(R_{\theta}f(p)\) \emph{should} have
+% a value, since it's approaching \(p\)
+% and we can define a directional derivative for any
+% arbitary angle of approach \(u\) via \(D_{u}f\). 
+% But which \(u\) should correspond to \(D_{u}f = R_{\theta}f\)?
+% How would one choose the \(u\)?\par
+
+% Well, the answer is ``''
+
+
+% \subsection{Directional derivatives in the complex plane.}
+
+% Now let's consider a function \(f: \domain{C} \to \domain{C}\) which takes in a \emph{complex} input \(z \in \domain{C}\)
+% and returns a complex output \(f(z)\).
+% \(\domain{C}\) is quite similar to \(\domain{R}^2\) in some
+% ways, with real and imaginary axes. So we can break down
+% our input \(z = x + iy\) in terms of its real and imaginary
+% components, and also describe the output components
+% in terms of these components
+% \(f(z) = f(x + iy) = u(x,y) + v(x,y)i\).\par
+
+% Now, if we want a derivative to exist in the \emph{complex}
+% plane, we'd the limit of a directional derivative with
+% unit vector \(\vec{c} \in \domain{C}\)
+
+% \[ D_{\vec{c}}f(z) = \lim_{h \to 0} \frac{f(z + h\vec{c}) - f(z)}{h} \]
+
+% to exist and be equivalent for \emph{all} unit vectors 
+% \(\vec{c} \in \domain{C}\).
+% Otherwise the limit as \(h \to 0\) doesn't make sense.
+% This is analogous to how, for a regular 1-D real-valued
+% derivative, we'd consider it to exist only if the limit
+% as we approached it from \emph{every possible ``angle'' of
+% approach} agreed with one another. It's just that in
+% the 1-D case, there's only two ``angles'' from which
+% we can approach a point: 
+% from its ``left'' and from its ``right''.\footnote{
+%   Recall the mathematical formulation of the above:
+%   \[p \in \domain{R}, \lim_{x \rightarrow p}g(x) = c 
+% \quad \longleftrightarrow \quad
+% \lim_{x \rightarrow p^-}g(x) = \lim_{x \rightarrow p^+}g(x) = c\]
+
+% \(p^-\) and \(p^+\) are the two angles, ``left'' and ``right'',
+% from which we can approach the point.
+% }\par
+
+% OK, then how could we make \emph{every} possible angle of
+% approach agree with one another? There's an (uncountably)
+% infinite number of such approaches! Well, we can
+% rely on our previous realization: if we have directional
+% derivatives along a set of basis vectors \(b_1\) and \(b_2\)
+% for the domain in
+% question, we can describe any other directional derivative
+% as a linear combination of the ones we've computed.
+% Once again, we'd choose the natural basis vectors
+% \(e_1\) and \(e_2\), where this time
+% \(e_1 = \hat{x}\) (for the real axis)
+% and \(e_2 = \hat{iy} = i\hat{y}\) (for the imaginary axis).
+% Then once again, the weighting scheme for a directional
+% derivative defined by the unit vector \(\vec{c}\)
+% is just
+% \(\lambda_i = \innerprod{\vec{c}}{\vec{e_i}}\).\par
+% % Once again, limiting ourselves to unit vectors \(\hat{c}\),
+% % and assuming we choose natural basis vectors (of unit norm)
+% % \(e_1\) and \(e_2\), the scalar value we'd have for each
+% The complex plane is isomorphic to \(\domain{R}^2\) and
+% only has two basis vectors along which we need to evaluate
+% \textemdash{} let's choose the real and imaginary axes
+% \(x\) and \(iy\). Say they were equal at some point \(p\), i.e.,
+
+% \[\pdv{f}{x}(p) = \pdv{f}{iy}(p) = g(p)\]
+
+% Then, since we would describe every other derivative
+% as a linear combination of \(\pdv{f}{x}(p)\) and
+% \(\pdv{f}{iy}(p)\)
+
+
+
+\subsection*{References.}
+
+\href{http://tutorial.math.lamar.edu/Classes/CalcIII/DirectionalDeriv.aspx}{Paul's notes} 
+seem to always be there for all things calculus.
 
 \chapter{Constrained Optimization
 Problems}\label{constrained-optimization-problems}
@@ -3421,27 +3729,27 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % \begin{itemize}
 %   \tightlist
 %   \item
-%     Symmetry: \innerprod[u][v] = \innerprod[v][u]
+%     Symmetry: \innerprod{u}{v} = \innerprod{v}{u}
 %   \item
 %     Linearity: \(\alpha \in \domain{R} 
-%           \rightarrow \innerprod[\alpha u][v] = \alpha \innerprod[u][v]\)
+%           \rightarrow \innerprod{\alpha u}{v} = \alpha \innerprod{u}{v}\)
 %   \item
 %     Distributivity:
-%       \(\innerprod[u+v][w] = \innerprod[u][w] + \innerprod[v][w]\)
+%       \(\innerprod{u+v}{w} = \innerprod{u}{w} + \innerprod{v}{w}\)
 %   \item
 %     Positive Definiteness:
-%       \(\innerprod[v][v] \geq 0. \innerprod[v][v] = 0 \rightarrow v = \vec{0}\)
+%       \(\innerprod{v}{v} \geq 0. \innerprod{v}{v} = 0 \rightarrow v = \vec{0}\)
 % \end{itemize}
 
 % A vector space with an associated inner product is called an \textbf{inner product space}.
 % We can choose \emph{any} operation that fulfills these four requirements to be our
 % definition of an inner product! There are some standard ones though.
 % In the case of vectors in \(\domain{R^n}\), the standard is
-% \(\innerprod[u][v] = \sum_{i=1}^{n}u_i v_i \).
+% \(\innerprod{u}{v} = \sum_{i=1}^{n}u_i v_i \).
 % With our definition of an inner product in hand, we can have our \textbf{projection}\index{projection}
 
 % \begin{equation}
-% \vec{v}_{v\parallel w} = \frac{\innerprod[v][w]}{\norm[w]} \hat{w}
+% \vec{v}_{v\parallel w} = \frac{\innerprod{v}{w}}{\norm[w]} \hat{w}
 % \end{equation}\label{equation:projection}
 
 % where \(\hat{w}\) is the unit vector in the direction of \(w\) and \(\norm{w}\)
@@ -3449,17 +3757,17 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % \textbf{norm} (which we'll discuss in a moment)
 % of the vector \(w\).
 % The remaining component \(\vec{v}_{v\perp w}\) is \textbf{orthogonal} to \(w\),
-% meaning \(\innerprod[\vec{v}_{v\perp w}][w] = 0\).
+% meaning \(\innerprod{\vec{v}_{v\perp w}}{w} = 0\).
 % \par 
 
 % Conveniently, if \(\vec{w}\) is already of unit magnitude, 
 % then \(\norm[w] = 1, \hat{w} = \vec{w}\), and
-% \(\vec{v}_{v\parallel w} = \innerprod[v][w]\vec{w}\).
+% \(\vec{v}_{v\parallel w} = \innerprod{v}{w}\vec{w}\).
 % That is, the ``amount/number'' of a 
-% unit vector \(w\) inside \(v\) is simply \innerprod[u][v].
+% unit vector \(w\) inside \(v\) is simply \innerprod{u}{v}.
 % And if the unit vector \(w\) is a basis vector \(b_i\), then 
 % \(\vec{v}_{v\parallel w}\) is 
-% that basis vector, scaled by \innerprod[v][b_i]!\footnote{
+% that basis vector, scaled by \innerprod{v}{b_i}!\footnote{
 %   ``!'' used to denote excitement, not factorialization.
 % }
 % \par
@@ -3470,7 +3778,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % we can calculate the coefficients \(\{\alpha_i\}\)
 % simply by calculating \emph{the projection of \(\vec{v}\)
 % onto each of the basis vectors \(\vec{\beta_i}\)}
-% \(\frac{\innerprod[v][\beta_i]}{\norm[\beta_i]}\)
+% \(\frac{\innerprod{v}{\beta_i}}{\norm[\beta_i]}\)
 % (with both \(v\) and \(\{\beta_i\}\) represented
 % in terms of a common basis
 % \textemdash{} presumably the natural basis \(\{e_i\}\) \textemdash{}
@@ -3659,11 +3967,11 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % be an inner product, we can see that a reasonable choice
 % is an integral over the domain of \(x\) if \(x\) is continuous:
 
-% \[\innerprod[f][g] = \int_{Dom(x)} f(x)g(x) dx \]
+% \[\innerprod{f}{g} = \int_{Dom(x)} f(x)g(x) dx \]
 
 % or, if \(x\) is a discrete variable, then a summation instead:
 
-% \[\innerprod[f][g] = \sum_{x_i \in Dom(x)} f(x)g(x) \]
+% \[\innerprod{f}{g} = \sum_{x_i \in Dom(x)} f(x)g(x) \]
 
 % Note that an inner product space only has one inner product.
 % Part of the description of a function space is the domain 
@@ -3693,7 +4001,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % When an inner product is defined, the metric 
 % induced on our inner product space is
 
-% \[d(x,y) = \norm[x-y] = \sqrt{\innerprod[x-y][x-y]} \]
+% \[d(x,y) = \norm[x-y] = \sqrt{\innerprod{x-y}{x-y}} \]
 
 % Now, say we have \(f = \cos(t)\) and \(g\) as a sawtooth
 % wave of period, amplitude, and phase equal to \(f\)
@@ -3752,7 +4060,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % In general then, if two functions are periodic with the same period \(T\),
 % we would have the inner product be
 
-% \[\innerprod[f][g] = \int_{t=-T/2}^{T/2} f(t)g(t) dt \]
+% \[\innerprod{f}{g} = \int_{t=-T/2}^{T/2} f(t)g(t) dt \]
 
 % with the norm and metric updated accordingly.
 % This would seem to break the inner product for aperiodic functions.
@@ -3878,7 +4186,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % our final value is a scalar (i.e. that our inner product maps
 % to a field). In \(s\) form:
 
-% \[ \innerprod[f(t)][g(t)] =
+% \[ \innerprod{f(t)}{g(t)} =
 % \int_{s=0}^{1}CC\left(s; F\left(s\right), G\left(s\right)\right) ds = 
 % \int_{s=0}^{1} \int_{\phi = 0}^{1} F(s + \phi) G(s) d\phi ds
 % \]
@@ -3886,7 +4194,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % and in \(t\) form:
 
 % \[ \begin{split}
-%   \innerprod[f(t)][g(t)] &= \int_{t=0}^{T} CC(t; f(t), g(t)) dt \\
+%   \innerprod{f(t)}{g(t)} &= \int_{t=0}^{T} CC(t; f(t), g(t)) dt \\
 %   &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t + \tau) g(t) d\tau dt \\
 %   &= \int_{T = 0}^{T} \int_{\tau = 0}^{T} f(t) g(t + \tau) d\tau dt
 % \end{split}
@@ -4000,7 +4308,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % in the function space spanned by a set of basis functions
 % \(\{K(x;n)\}\)}. In mathematical form,
 
-% \[A_f(n) = \innerprod[K(x;n)][f(x)] 
+% \[A_f(n) = \innerprod{K(x;n)}{f(x)} 
 %   = \int_{Dom(x)} K(x;n) f(x) dx \]
 
 % You're free to choose whatever set of basis functions
@@ -4053,7 +4361,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % (expansion assumes an \(L^2\) norm):
 
 % \[\begin{split}
-%   \vec{f} &= \frac{\innerprod[K(x;n)][f(x)]}{\norm[K(x;n)]} \\
+%   \vec{f} &= \frac{\innerprod{K(x;n)}{f(x)}}{\norm[K(x;n)]} \\
 %   &= \frac {\int_{Dom(x)} K(x;n) f(x) dx } {\sqrt{\int_{Dom(x)} K(x;n)^2 dx }}
 % \end{split}
 % \]
@@ -4117,7 +4425,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % (specified by both the kernel \(K(s,t)\) and the domain of
 % the ``indexing'' variable, \(s\)) determine which functions
 % we can describe, because we need the inner product 
-% \innerprod[K(s,t)][f(t)] to converge.\par
+% \innerprod{K(s,t)}{f(t)} to converge.\par
 
 % As it turns out, there are two variations on a theme here:
 % imaginary vs complex domains.
@@ -4189,7 +4497,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % So when we perform the integral transform:
 
 % \[\fancy{F}(f(t)) = F(\omega) 
-%   \propto \innerprod[e^{-i\omega t}][f(t)]
+%   \propto \innerprod{e^{-i\omega t}}{f(t)}
 %   = \int_{t=-\infty}^{\infty} e^{-i\omega t} f(t) dt\]
 
 % (we'll explain the \(\propto\) in a bit)
@@ -4408,7 +4716,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % Dividing through by the norm has had the added consequence
 % of preserving inner products of two functions \(f\) and \(g\)
 % before and after our transform, i.e., 
-% \(\innerprod[f][g] = \innerprod[\fancy{F}(f)][\fancy{F}(g)]\).
+% \(\innerprod{f}{g} = \innerprod{\fancy{F}(f)}{\fancy{F}(g)}\).
 % This makes the transform as we defined it just now a
 % \textbf{unitary operator}\index{unitary operator} over
 % our function space (which, through our choice of inner product,
@@ -4513,7 +4821,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % be over all values for which the input is defined, which led
 % to functions defined on \(\domain{R}\) to have the following norm if it converges:
 
-% \[\norm[f] = \innerprod[f][f] = \sqrt{\int_{t=-\infty}^{\infty} \abs{f}^2 dt}\]
+% \[\norm[f] = \innerprod{f}{f} = \sqrt{\int_{t=-\infty}^{\infty} \abs{f}^2 dt}\]
 
 % The choice of this sort of \(L^2\) norm over our function space
 % means that the function space we're working with is a
@@ -4540,7 +4848,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 %   between two vectors is implicitly defined when an
 %   inner product is defined, via
 
-%   \[d(x,y) = \innerprod[x-y][x-y] \]
+%   \[d(x,y) = \innerprod{x-y}{x-y} \]
 % }
 
 % \[d(f, g) = \sqrt{\int_{t=-\infty}^{\infty} \abs{a - b} dt} \rightarrow \infty\]
@@ -4567,7 +4875,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % We'll keep our discussion below about the
 % inverse transform (so we're integrating over \(\omega\)).\par
 
-% Our inner product of \(\innerprod[f][e^{i\omega t}]\)
+% Our inner product of \(\innerprod{f}{e^{i\omega t}}\)
 % is ``overshooting'' the length of the projection 
 % \(\norm{\vec{f}_{f \parallel e^{i\omega t}}}\) by
 % \(\norm{e^i\omega t}\). Remember that by Euler's formula,
@@ -4579,7 +4887,7 @@ eventually lead to the \textbf{Fermi-Dirac distribution}\index{Fermi-Dirac distr
 % \(\norm{K(t; \omega_i)}\), and dividing
 % our inner product by this ala 
 % \(\vec{f}_{f \parallel K(t;\omega_i)} = 
-% \frac{\innerprod[f][K(t;\omega_i)]}{\norm{K(t; \omega_i)}\), 
+% \frac{\innerprod{f}{K(t;\omega_i)}}{\norm{K(t; \omega_i)}\), 
 % as
 
 % \[\int_{x=-\infty}^{\infty} \abs{e^{ix}} dx \rightarrow \infty \]
