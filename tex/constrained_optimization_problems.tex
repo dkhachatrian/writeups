@@ -1,0 +1,540 @@
+\documentclass[../main/main.tex]{subfiles}
+\begin{document}
+
+\chapter{Constrained Optimization
+Problems}\label{constrained-optimization-problems}
+
+Motivated to do this when I was reading
+\href{https://arxiv.org/pdf/1606.05579.pdf}{this paper} and realized I
+forgot how we get to/use the KKT conditions (which is implied in Eq. 2
+in the paper).
+
+\section{Equality constraints only: The Method of Lagrange
+Multipliers/The
+Langrangian}\label{equality-constraints-only-the-method-of-lagrange-multipliersthe-langrangian}
+
+NB:
+\href{https://www.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/lagrange-multipliers-and-constrained-optimization/v/constrained-optimization-introduction}
+{Khan
+Academy's videos on the subject} really make clear one potential
+intuition for one constraint.
+
+\subsection{Intuition with just one
+constraint}\label{intuition-with-just-one-constraint}
+
+Say you want to optimize (maximize or minimize) a smooth function
+\(f(\vec{x})\) subject to the constraint \(g(\vec{x}) = c\) (let's say
+\(\vec{x} \in R^n\) -\/- and we may just write \(x\) instead of
+\(\vec{x}\)). (It's worth remembering that the constraints themselves
+can also be expressed as functions -\/- they just happen to be set to
+specific constants.) So our goal is to find the best point(s),
+\({\vec{x}^*}\). For the purposes of explanation, we'll say our goal is
+maximization, but it all applies for minimization too.
+
+A way to build up the intuition is to consider the contour lines of
+\(f(\vec{x}) = m\) for particular values of m. Our goal then is to
+maximize \(m\) while having \(\vec{x}\) satisfy \(g(\vec{x}) = c\). If
+it didn't fulfill this second requirement, then we'd just be ignoring
+the constraint and solving an unconstrained optimization problem -\/- in
+which case, we'd just set the gradient equal to zero and solve (say,
+what a useful thought -\/- let's put that in our back pocket for
+later...).
+
+Let's call the constraint contour line (which we aren't allowed to
+change and is set to some constant \(c\)) \(G\) and the function contour
+line (which we can change by varying \(m\)) \(F(m)\). If we think about
+it for a bit, we'll see that \emph{solving our problem is analogous to
+choosing the largest value of \(m\) so that \(F(m)\) ``touches'' \(G\) in
+the fewest number of places while still actually ``touching'' \(G\).}
+Consider the alternatives:
+
+\begin{enumerate}
+% \def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{\(F(m)\) does not touch \(G\) at all:} Well, that means that
+  when we look at the set of points that comprise the contour line
+  \(f(x,y) = m\) (i.e., the \textbf{level set} \index{level set}
+   of \(f\) corresponding to
+  a value of \(m\)), \emph{none} of those points lie on
+  \(g(\vec{x}) = c\). So we ignored the constraint again -\/- oops.
+\item
+  \emph{\(F(m)\) touches \(G\) too many times:} This implies that
+  \(F(m)\) cuts across \(G\) (if it didn't, then where did the ``extra''
+  touches come from?) And in that case, why not increase \(m\) a bit
+  more? We're assuming \(f\) is relatively well-behaved, so if you nudge
+  \(m\) up a bit to \(m^+\), the contour line \(F(m^+)\) will be fairly
+  close to \(F(m)\) -\/- and so, still cross \(G\) somewhere.
+\end{enumerate}
+
+(By the way, I've been using the tortured phrase "minimal number of
+times but not zero like c'mon don't be cheeky" because there can be more
+than one location on the constraint curve that have the same maximal
+value for \(f\). Consider maximizing \(f(x,y) = x^2 y^2\) subject to
+\(x^2 + y^2 = 1\). The symmetry leads to four points that satisfy the
+criteria -\/- bump up \(f\)'s output higher and you're off the circle,
+bump it down and you're cutting across the circle (and also not
+maximizing \(f\)).)
+
+Now, if \(F(m)\) and \(G\) just barely touch but do not cross, then
+their instantaneous ``slopes'' at their touching point must be in the same
+orientation and the contour lines are moving in the exact same
+``direction'' -\/- if they weren't, then the touching point is a crossing
+point. So how do we capture this notion?
+
+\subsection{Doin' me some gradients}\label{doin-me-some-gradients}
+
+The (nonzero) gradient of a function is always perpendicular to its
+contour lines. (Seems like a deep statement, but with a bit of thought,
+you can see that it just comes from the definition/intuition of contour
+lines (on which the value is constant) and gradients (which points
+toward the direction that increases the function output the largest -\/-
+with no portion of the ``step'' being wasted on movement that would keep
+the value constant).)
+
+So, we can convert out ``contour lines \(F(m)\) and \(G\) are in the same
+direction'' directly to ``the gradients of \(f\) and \(g\) are in the same
+direction'', i.e. \[\nabla f = \lambda \nabla g \]
+
+where \(\nabla\) is the usual gradient operator and \(\lambda \neq 0\),
+the scalar proportionality constant (it's the \emph{direction} that
+matters, not the magnitude), is called the \textbf{Lagrange multiplier}
+\index{Lagrange multiplier}
+(dude got a lot of things named after him).
+
+It's actually worth looking at this a bit more. We originally framed our
+goal by trying to get \(F(m)\) and \(G\) to touch as little as possible.
+But we can also frame it in terms of \(\nabla f\) and its relation to
+the constraint functions:
+
+\[\nabla f = \lambda \nabla g \quad \impliedby \quad \nabla f \ \text{is perpendicular to the contour } G \]
+
+It makes sense that the right-hand side would be the case -\/- if
+\(\nabla f\) \emph{did} have some part of it along \(G\), then we're
+wasting that part! Why wouldn't we go along \(G\) a bit more? We'd still
+be meeting our constraint, and since we stepped partially along the
+direction of steepest ascent, we'd have increased \(f\) while we were at
+it! It'll be worth remembering this observation a little down the line,
+so keep it in your pocket for later (or some other handy container, if
+you are doomed to the fate of clothing without functional storage
+capabilities).
+
+Anyway, that's great and all, but we only have \(n\) equations (each of
+the \(n\) elements of the vector formulation above) and now we have
+\((n+1)\) unknowns (all the coordinates for \(x\), plus \(\lambda\)).
+Well, there's a reason the above relation used a(n) \(\impliedby\). On
+the left-hand side, we've only captured that the gradients have to be in
+the same direction -\/- we haven't added our constraint! (The right-hand
+side encapsulates both, since we have \(G\) as the contour corresponding
+to the specific constraint \(g(x) = c\).) So our full set of \((n+1)\)
+equations with \((n+1)\) unknowns is
+
+\[\nabla f = \lambda \nabla g \] \[g(x) = c\]
+
+Now go to town! Worth remembering that all of this provides
+\emph{necessary} but \textbf{not} \emph{sufficient} conditions for
+optimality. Sufficient conditions would involve, for example, proving
+the that Hessian matrix of \(f\) is negative semidefinite when trying to
+maximize \(f\) (analogous to the second-derivative test in the
+single-dimensional case), and even if you manage that you're only
+guaranteed local maximality. Sounds like a lot of qualifications, but
+we've actually narrowed the search space a great deal with these
+conditions, so it's not as terrible as it sounds.
+
+\label{sec:the-lagrangian-a-packaged-function}
+\subsection{The Lagrangian: a packaged function} 
+
+The above system of equations works great for people, but people have
+also spent so much time and energy to make computers solve math problems
+for us! Most of these programs are particular good and finding the zeros
+of a function (without any fancy constraints). So how could we repackage
+the (n+1) equations above into one function we can find into a
+zero-finder?
+
+Well, let's rewrite the above equations first:
+
+\[\nabla f - \lambda \nabla g = 0\] \[g(x) - c = 0\]
+
+Alright, now what? Well, if we were to write something like
+
+\[ L(x) = f(x) - g(x) \]
+
+we'd be \emph{almost} there, because if we took the gradient of \(L\)
+and set it equal to zero, we get the ``direction'' constraint back. But at
+the moment, we're making it so that the magnitudes of the two gradients
+have to be the same too (which doesn't have to be true) \emph{and} we
+forgot to incorporate our constraint again!
+
+Well, why don't we reintroduce \(\lambda\) as a variable in such a way
+that it handles the proportionality problem \emph{and} have it so that
+\(L_{\lambda} = g(x) - c\) (so that we reincorporate our constraint into
+the function)? Might sound tricky, but in fact we can modify \(L\) to
+satisfy these requirements fairly simply:
+
+\[ \mathcal{L}(x, \lambda) = f(x) - \lambda \left(g(x) - c\right) \]
+
+Now that it's achieved its final form (thankfully didn't take ten
+episodes of powering up), we change \(L\) to \(\mathcal{L}\) and call it
+the \textbf{Lagrangian} \index{Lagrangian}
+of \(f(x)\) (because dude needs more things
+named after him -\/- and you know, he \emph{did} revolutionize the study
+of classical mechanics with this formulation).
+
+Worth noting is that if we define the Lagrangian as
+
+\[ \mathcal{L^+}(x, \lambda ^+) = f(x) + \lambda^+\left(g(x) - c\right) \]
+
+we still get the same answer to our optimization problem -\/- the only
+difference is that compared with the \(\lambda\) we get from the
+\(\mathcal{L}\) formulation, \(\lambda ^+ = - \lambda\).
+
+A neat consequence of the formulation of \(\mathcal{L}\) is that we can
+consider \(\lambda\) as a measure of how much we could improve \(f(x)\)
+by incrementing the value of \(c\) (which we've been considering a
+constant) by a differential amount. While it may seem to be ``clear'' just
+by taking \(\mathcal{L}_c = \lambda\), it's a bit more subtle than that,
+since \(\mathcal{L}(x, \lambda; c)\) was formulated with \(c\) as a
+constant. The proof for this observation involves:
+
+\begin{itemize}
+\tightlist
+\item
+  forming a new function,
+  \(\mathcal{L}^*(x^*(c), \lambda ^*(c), c) = \mathcal{L}^*(c)\), a
+  single-variable function that parameterizes the input coordinates of
+  the answer(s) to the optimization problem (and also the Lagrange
+  multiplier) with respect to \(c\);
+\item
+  doing the multivariable chain rule;
+\item
+  thinking a bit to notice that a lot of things equal zero to get that
+  \(\frac{d\mathcal{L}^*}{dc} = \lambda \);
+\item
+  and, having remembered that we're interested specifically about the
+  points on \(\mathcal{L}\) that optimize \(f\) (which is exactly what
+  \(\mathcal{L}^*(c)\) captures), realizing that the above result
+  implies that first statement of the paragraph before this bulleted
+  list.
+\end{itemize}
+
+What a mouthful.
+
+\subsection{Extension to more than one
+constraint}\label{extension-to-more-than-one-constraint}
+
+Would be kind of a shame if we did all of this just to solve problems
+with just one constraint. But thankfully, the extension is fairly simple
+to describe!
+
+Say we want to optimize \(f\) subject to \(k\) constraints
+\(g_1 = c_1, g_2 = c_2, \cdots, g_k = c_k\). Now, in all but the most
+trivial of cases, it would be impossible to have the gradients of all of
+these different functions in the same direction. Intuitively (-ish, and
+assuming you feel comfortable-ish with concepts in linear algebra), if
+they can't all be in the same direction, you'd think that the "next best
+thing" would be that the gradient of \(f\) is in the same direction as
+some linear combination of the gradients of \(g_1, g_2, \cdots, g_k\),
+i.e. that
+
+\[ \nabla f = \sum_{i=1}^k \lambda _i \nabla g_i \]
+
+That statement above is in fact a condition that is met in the answer to
+our optimization problem! (How convenient.)
+
+Now we have \(n\) equations but \(n+k\) unknowns. We once again fix that
+by actually incorporating our constraints:
+
+\[ \nabla f = \sum_{i=1}^k \lambda _i \nabla g_i \] \[ g_1 = c_1 \]
+\[ ... \] \[ g_k = c_k \]
+
+We can once again package everything together as a Lagrangian by having
+that \(\mathcal{L}_{\lambda _i} = g_i - c_i\):
+
+\[\begin{split} \mathcal{L}(x, \lambda _1, \cdots, \lambda _k) &= 
+                                            f - (\lambda _1 (g_1 - c_1) + \cdots + \lambda _k (g_k - c_k) ) \\
+                     &= f - \sum_{i=1}^k \lambda _i (g_i - c_i) \end{split}\]
+
+And Bob's your uncle.
+
+\subsection{Explaining the convenience, and a more generalizable intuition.}\label{explaining-the-convenience}
+
+Earlier we just kind of accepted the convenience of our guess, but it's
+worth figuring out why it works. Remember that observation you kept in
+your pocket (or other handy container)?
+
+\[\nabla f = \lambda \nabla g \quad \impliedby \quad \nabla f \ \text{is perpendicular to the contour } G \]
+
+If \(\nabla f\) had any part of it along \(G\), then we could step along
+\(G\) and further increase \(f\). This sounds extensible to more than
+one constraint! And in fact, the ``convenient'' result captures this for
+the contour line created by the intersection of all the constraints:
+
+\[
+% \begin{multline*}  
+  \nabla f = \sum_{i=1}^k \lambda _i \nabla g_i  \impliedby
+  \nabla f \text{is perpendicular to the intersection
+  of all constraint contours } \bigcap _i G_i 
+% \end{multline*}
+\]
+
+Here, \(\bigcap _i G_i\) serves as the one contour line on which we can
+move along that satisfies all the constraints. (Presumably such
+continuous arcs exist -\/- otherwise, there are only discontinuities
+(i.e. discrete points), and so each point in the set would have to be
+checked individually.)
+
+Now, since we're dealing with the same construct (a contour along which
+we can move that satisfies the constraints), the same reasoning applies
+pretty much verbatim -- \emph{\textbf{if \(\nabla f\) weren't perfectly
+perpendicular to \(\bigcap _i G_i\), we'd be wasting the component of
+the gradient going along \(\bigcap _i G_i\), \(\nabla f ^{\parallel}\).
+So we'd just step along the contour and improve our result.}}\footnote{
+  Excessive bolding, italicizing, and a gratuitous footnote 
+  used to emphasize the fact that this is the
+  mathematically rigorous ``intuition'' to have/remember.
+}
+So that explains why the right-hand side makes sense. But how does that
+imply the left-hand side? Specifically, how do we get the linear
+combination part, \( \sum_{i=1}^k \lambda _i \nabla g_i \)?
+
+Well, since we're all on contour lines at the same time,
+\(\bigcap _i G_i\) is necessarily perpendicular to all the gradients
+\(\nabla g_i\). Then any linear combination \(\sum_{i=1}^k
+\lambda _i \nabla g_i \) is perpendicular to \(\bigcap _i G_i\).
+In fact, the gradients form a \emph{basis} for the space perpendicular
+to \(\bigcap _i G_i\), because of the symmetric property of the
+perpendicularity relation. More curtly, call the span of the gradients
+\(S\). By construction, \(\bigcap _i G_i \perp S\), and by symmetry, \(S
+\perp \bigcap _i G_i\). We want \(\nabla f\) to be perpendicular to
+\(\bigcap _i G_i\) (as we've said before). Well then, that means
+\(\nabla f \in S\), which implies that it \(\nabla f\) can be written as
+a linear combination of \(S\)'s basis vectors, i.e., \( \nabla f =
+\sum _{i=1}^k \lambda _i \nabla g_i \). Bam! Stick that beautiful
+\(Q.E.D.\) square in the corner, we are done! \sout{Would do it myself were I
+writing this in \(LaTeX\) and not Markdown.} 
+Well, since we've migrated to LaTeX, I think we owe ourselves a box!
+\begin{flushright}$\blacksquare$\end{flushright}
+Totally worth it.
+\\
+\\
+- DK, 4/28/18
+
+\newpage
+
+\section{Constraints with Inequalities: the Karush-Kuhn-Tucker (KKT)
+Conditions}\label{constraints-with-inequalities-the-karush-kuhn-tucker-kkt-conditions}
+
+\subsection{Not nearly as scary as they make it out to
+be.}\label{not-nearly-as-scary-as-they-make-it-out-to-be.}
+
+For all the pomp and circumstance around this, with the caravan of names
+in the name itself and the esoteric terms used in its description like
+``complementary slackness'' and ``dual feasibility'', the
+Karush-Kuhn-Trucker (KKT) conditions aren't nearly as hard to follow as
+one would expect if the method of Lagrange multipliers for multiple
+constraints makes sense/is comfortable.
+
+First, we pose the optimization problem in ``standard form'' (which mainly
+just saves us from lugging around extra constants like we did with \(c\)
+in the Lagrange multipliers explanation):
+
+Optimize \(f(x)\) subject to \(g_i(x)\leq 0\), \(h_j(x)=0\), with
+\(i \in \{1, \cdots, k\}\) and \(j \in \{1, \cdots, l\}\) (so \(k\)
+inequality constraints and \(l\) equality constraints). Below, we'll
+assume ``optimize'' = ``maximize''. We'll point out where changes will occur
+if you're minimizing instead.
+
+\subsubsection{Primal feasibility}\label{primal-feasibility}
+
+This time, before we do anything else, we're going to stick down the
+original constraints so we don't forget they exist:
+
+\[ g_i(x)\leq 0 \ \forall \ i, \ h_j(x) = 0 \ \forall \ j \]
+
+This is called the \textbf{primal feasibility} condition because it's a
+condition for the feasibility of the original, main, ``primal'' problem.
+
+\subsubsection{The dual formulation}\label{the-dual-formulation}
+
+We refer to the original problem as the ``primal'' problem to contrast it
+with the ``dual'' problem. That sounds all fancy, but we've made a dual
+problem before when we formed the Lagrangian for our
+equality-constraints-only version. That is, the 
+\textbf{dual problem} \index{dual problem} is simply a
+reframed but equivalent form of the primal problem. We did it before by
+solving a function that had all our constraints wrapped in one clean
+package (the Lagrangian form of the problem). And hey, that was both a
+neat \emph{and} a useful idea, and those don't come around all that
+often, so let's use it until it goes out of style.
+
+Worth noting is that we want to make our dual problem mirror the primal
+problem exactly (in \emph{optimal value} as well as optimal location),
+i.e. form a strong duality, i.e. have no
+\href{https://en.wikipedia.org/wiki/Duality_gap}{duality gap}. The
+following provide \emph{necessary} conditions, but not \emph{sufficient}
+conditions for a strong duality.
+
+So what would be the dual problem? We can do the same thing we did for
+the Lagrangian -\/- make a new function with some extra variables whose
+partial derivatives yield the constraints of our problem. Let's try it:
+\\
+We define a function
+
+\[L(x,\mu_1, \cdots, \mu_k, \lambda_1, \cdots, \lambda_l) = f(x) + \sum_i \mu_i g_i(x) + \sum_j \lambda_j h_j(x)\]
+
+Maximize \(L\) (with no external constraints; i.e., find the locations
+where \(\nabla L = \vec{0}\)). (We'll come back to minimization later.)
+\\
+\\
+Alright, well that's certainly something. Now we can recover the
+constraints by noting that \(L_{\mu_i} = g_i\) and
+\(L_{\lambda_j} = h_j\). But there are some things that are still funky
+with the inequality constraints here, so let's work on those.
+
+(By the way, there are some signs we'd have to flip if we were 
+doing a minimization instead. We'll discuss that later on.)
+
+\subsubsection{Dual feasibility}\label{dual-feasibility}
+
+For one thing, our dual problem won't mimic our primal problem of
+optimizing \(f\) at all if we let any \(\mu_i\) be less than zero. If we
+did, then we'd easily ``win'' the optimization game by choosing some \(x\)
+such that \(g_i(x) < 0\) (which is still satisfies our primal
+feasibility conditions), then setting the corresponding \(\mu_i\) to
+arbitrariliy large negative numbers -\/- who cares about \(f(x)\)
+anyway!? Oh wait, we do. So we should probably make sure that we can't
+break our problem:
+
+\[ \mu_i \geq 0 \]
+
+This is called the \textbf{dual feasibility} condition because, well,
+otherwise our dual problem isn't all that useful.
+
+\subsubsection{Complementary slackness and
+stationarity}\label{complementary-slackness-and-stationarity}
+
+For one thing, we can notice that there are two possibilities for the
+value \(g_i\) takes at an optimal point:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+% \tightlist
+\item
+  \(g_i(x^*) < 0\): That means the inequality constraint is not actually
+  stopping the function from getting to a ``better'' location where
+  \(g_i > 0\) (our optimal-point finder didn't hit a wall -- there's an
+  open neighborhood around \(x^*\) that still satisfies the constraint),
+  so the constraint isn't being restrictive at all. So we don't have to
+  worry about it!
+\item
+  \(g_i(x^*) = 0\): The inequality constraint \emph{is} potentially
+  stopping the function from reaching a more optimal point, so the
+  constraint is actually affecting the outcome. So we should be sure to
+  be othorgonal to the contour in our final answer.
+\end{enumerate}
+
+These observations inform the following two constraints,
+\textbf{complementary slackness} and \textbf{stationarity}:
+
+\[\begin{split} \mu_i g_i = 0 \ \forall \ i \qquad & \text{complementary slackness} \\
+\nabla f = \sum _i \mu _i \nabla g_i + \sum _j \lambda _j \nabla h_j \qquad & \text{stationarity} \end{split}\]
+
+Let's once again consider our two cases:
+
+\begin{enumerate}
+% \def\labelenumi{\arabic{enumi}.}
+% \tightlist
+\item
+  \(g_i(x^*) < 0\): This constraint is inactive and so is not part of
+  the contour lines we use to find the set of points on which \(f\) must
+  lie. Recall that we form this set by evaluating the intersection of
+  all the active constraints \(C\); that the span of the gradients of
+  the active constraint functions form a space \(S\) orthogonal to
+  \(C\); and that since \(\nabla f\) must be orthogonal to \(C\) in
+  order to be a potential extremum, \(\nabla f \in S\) and can be
+  written as a linear combination of the gradients of the active
+  constraints. (Boy, another mouthful.) Well, \(g_i\) is not an active
+  constraint, and so \(\nabla g_i\) is not part of the basis for \(S\).
+  So we want its contribution in the stationary condition to be
+  \(\vec{0}\). We can do this by setting the corresponding
+  \(\mu_i := 0\). Not-so-coincidentally, this necessary consequence
+  leads to compliance with the complementary slackness condition as
+  well.
+\item
+  \(g_i(x^*) = 0\): The complementary slackness condition is met no
+  matter what value \(\mu_i\) takes. And that's perfect: the constraint
+  is active, so \(\nabla g_i\) is part of the basis for \(S\). So we
+  \emph{need} \(\mu_i\) to be nonzero so that we can describe any vector
+  in \(S\) (of which \(\nabla f\) is an element, as we talked about when
+  we ``explained the convenience'' for the multiple-equality-constraint
+  formulation earlier).
+\end{enumerate}
+
+So the two conditions are tied to one another in this interesting way
+that makes it a more-or-less direct extension of the
+multiple-equality-constraint formulation!
+
+\subsubsection{Finishing our duel with
+duals.}\label{finishing-our-duel-with-duals.}
+
+...And with that, we've formed our dual problem with only equalities!
+We'll copy them here to show we have enough equations for our unknowns:
+
+\[\begin{split} h_j(x) = 0 \qquad            & \text{primal feasibility} \\
+\mu_i g_i = 0 \ \forall \ i \qquad           &\text{complementary slackness} \\
+\nabla f = \sum _i \mu _i \nabla g_i + \sum _j \lambda _j \nabla h_j \qquad & \text{stationarity}\end{split}\]
+
+That's \(k + l + n\) equations for \(k + l + n\) unknowns! Now stick the
+system of equations into a (probably numerical) zero-finder and you're
+done!
+
+\subsubsection{\texorpdfstring{On minimizing
+\(f\)}{On minimizing f}}\label{on-minimizing-f}
+
+Let's not forget that we had done all this assuming we were
+\emph{maximizing} \(L\) (and thus \(f\)). If we were \emph{minimizing}
+\(f\), we would be trying to minimize \(L\) and we could change the
+above equations in one of the following ways:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Replace \(L\) with
+  \(L(x,\mu_1, \cdots, \mu_k, \lambda_1, \cdots, \lambda_l) = f(x) - \sum_i \mu_i g_i(x) - \sum_j \lambda_j h_j(x)\)
+  (note the minus signs). Replace the stationarity condition with
+  \(-\nabla f = \sum _i \mu _i \nabla g_i + \sum _j \lambda _j \nabla h_j\)
+  (again, note the minus sign).
+\item
+  Keep \(L\) the same. Replace the dual feasibility condition with \(
+  \mu_i \leq 0 \)
+\end{enumerate}
+
+The sign changes just ensure that our dual problem is still well-formed
+for the minimization problem (if you don't flip the sign somewhere, then
+we can just make arbitrarily ``good'' values by playing with \(\mu_i\)
+again; and if you flip the sign in the formulation of \(L\), you have to
+make sure you update the gradient expression accordingly (Option 1)).
+
+\subsection{If it's not that bad, why did you talk so
+much?}\label{if-its-not-that-bad-why-did-you-talk-so-much}
+
+...OK, so maybe this was a lot more to explain than I had given credit
+at first. But it's really not that bad! The main intuition is that either:
+\begin{enumerate}
+  \tightlist
+  \item
+    the inequality constraint is lax and doesn't actually do any
+``constraining''; or 
+  \item 
+    the inequality constraint is actually stopping us,
+    in which case it just becomes another equality constraint!
+\end{enumerate}
+All the blah-blah-blah is to make sure we dotted our \(i\)'s and crossed
+our \(t\)'s. (And boy, did we...)
+\\
+\\
+- DK, 4/30/18
+
+
+\end{document}

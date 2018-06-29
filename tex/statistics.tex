@@ -1,0 +1,171 @@
+\documentclass[../main/main.tex]{subfiles}
+\begin{document}
+
+\chapter{Statistics}\label{statistics}
+\section{Bayes' Theorem}\label{bayes-theorem}
+
+I can never seem to remember Bayes' Theorem directly, as they write it
+out in textbooks. It makes so much more sense to me to think about it
+from the relationships between conditional and joint
+probabilites/distributions, and one of the common tricks to make Bayes'
+Theorem useful in practice also comes to me far more easily when
+explicitly thinking about events as being sampled from a \emph{sample
+space} of possibilities/outcomes.
+
+Consider two possible events A and B. Let's keep in mind that A is just
+one possible outcome out of a set of possibilities, as is B; we'll say
+\(\alpha\) is the set of possibilities from which \(A\) was drawn and
+\(\beta\) is the set of possibilities from which \(B\) was drawn, i.e.
+\(A \sim \alpha\) and \(B \sim \beta\) (this will be good to remember
+later). Now:
+
+\[ \text{Pr[A and B both occur]} := P(A,B) \]
+
+Assuming individual events happen separately, there are two ways for
+both A and B to occur: 
+\begin{enumerate}
+  \tightlist
+    \item
+      A happens first, then B happens. 
+    \item 
+      B happens first, then A happens.
+\end{enumerate}
+(``Duh'', I know.)
+\\
+Keeping in mind that the first event might affect the probability of the
+second event occurring (i.e. remembering that conditional probabilities
+exist), we can write:
+
+\[ P(A,B) = P(A) \times P(B \mid A) = P(B) \times P(A \mid B) \]
+
+And then it's simple to write out Bayes' Theorem as it's often written
+(we'll write it perhaps a bit more evocatively):
+
+\[ P(B) \times P(A \mid B) = P(A) \times P(B \mid A) \]
+
+\[\begin{split} P(A \mid B) &= \frac{P(A) \times P(B \mid A)} {P(B)} \\
+                        &= P(A) \times \frac {P(B \mid A)} {P(B)} \end{split}\]
+
+Using the Bayesian interpretation: At first we thought the probability
+that \(A\) occurs is \(P(A)\). After we saw that \(B\) happened, we
+re-evaluate the probability that \(A\) occurs with a scaling factor \(
+\frac {P(B \mid A)} {P(B)} \), which answers the following question: considering I've
+seen \(B\) occur, how much \emph{more} likely did I observe \(B\) due to
+\(A\) also being the case (the numerator \(P(B \mid A)\)), versus my having observed
+\(B\) just because of how common/rare it is (the denominator, \(P(B)\))? To see
+why this scaling factor makes sense, let's consider some edge cases:
+
+\begin{itemize}
+  \tightlist
+  \item 
+    \emph{A and B are uncorrelated}: Then observing B is irrelevant when it comes
+    to predicting A. So our scaling factor should be 1. And in fact, the lack of 
+    correlation implies \(P(B \mid A) = P(B) \implies \frac {P(B \mid A)} {P(B)} = 1\).
+  \item
+    \emph{A precludes B}: Then via contrapositivity, if we saw B, A must not be the case.
+    So our scaling factor should be 0. And since A precludes B,
+    \(P(B \mid A) = 0 \implies \frac {P(B \mid A)} {P(B)} = 0\).
+  \item
+    \emph{B implies A (and no other outcome from \(\alpha\))}:
+    Then the total probability
+    must become 1, and the scaling factor must come out to be \(\frac {1} {P(A)}\).
+    We'll come back to this in a bit.
+\end{itemize}
+
+Also worth knowing the fancy terminology: 
+\begin{enumerate}
+  \tightlist
+  \item
+    the \textbf{\textit{a priori} probability} or just the \textbf{prior} 
+    \index{prior (Bayesian statistics)}
+    is what 
+    we thought would be the
+    probability that a random variable takes on a certain value before we
+    observed anything. So the \emph{a priori} probability (or just prior)
+    for the event \(A\) would be \(P(A)\). If we consider \(A\) to be a
+    random variable instead of an event, we're guessing the distribution of
+    \(A\) and so \(P(A)\) would be an \textbf{\textit{a priori} distribution}
+    (or again, just the prior). 
+  \item
+    the \textbf{\textit{a posteriori}
+    probability} or just the \textbf{posterior}
+    \index{posterior (Bayesian statistics)}
+    is what we think the
+    probability that a random variable takes on a certain value is after
+    observing something. In this case, the \emph{a posteriori} probability
+    (or just posterior) of the event \(A\) after observing \(B\) is
+    \(P(A \mid B)\). If we consider \(A\) to be a random variable instead of
+    an event, we're guessing the distribution of \(A\) after observing a
+    random variable/event B and so \(P(A \mid B)\) would be an
+    \textbf{\textit{a posteriori} distribution}, (or again, just the
+    posterior).
+\end{enumerate}
+
+\subsection{Substitution to the rescue.}\label{subsitution-to-the-rescue}
+Now, in cases of inference via supervised learning, 
+we have some data on the probability of one of the observable variables
+\textemdash{} let's say we observe variables \(A \sim \alpha\) \textemdash{}
+and the labels/targets for the observed variables (let's say \(B ~ \beta\)).
+Then we can approximate \(P(B \mid A\)) and \(P(A)\) via empirical counts \textemdash{}
+and would want to fit a continuous function, e.g. a Gaussian, to \(P(A)\) to
+handle out-of-sample feature combinations.
+So we've already guessed some prior \(P(A)\), and we're trying to improve it by
+calculating the posterior \( P(A \mid B) \). But what if we don't know
+\( P(B) \)? Do we need to also guess a function for \( P(B) \)? Well, that would
+involve another outside assumption which may or may not be true, and usually we want
+to make as few assumptions as possible and
+``let the data speak for itself''.
+So then is our guessing and data collection all for naught!?
+Thankfully, not so! The answer lies right under our noses -\/- or in
+this case, in our previous calculations.
+
+Consider \(P(A,B)\) again. What would we get if we added \(P(A,B)\) over
+all possible values of A? (Remember we said that \(A \sim \alpha\), so A
+could have been some other event within the set \(\alpha\).) That's
+basically just saying that we don't care what value \(A\) is, so we end
+up with \(P(B)\)!\footnote{
+  `!' used to denote excitement, not factorialization.
+  }
+And conveniently, we'd already have a way to estimate these values:
+
+\[\begin{split} P(B) &= \sum_{A \in \alpha} P(A,B) \\
+                     &= \sum_{A \in \alpha} P(A) \times P(B \mid A)          \end{split}\]
+
+Our summand is the same as the values we've estimated either by guessing
+(\(P(A)\)) or from our data (\(P(B \mid A)\))! With that, we can rewrite
+our earlier equation as
+
+\[ P(A \mid B) = 
+  \frac{P(A) \times P(B \mid A)} {\sum_{A' \in \alpha} P(A') \times P(B \mid A')} \]
+
+With that, we can crunch the numbers and perform Bayesian inference like
+a champ or have a machine do it for us like a prudent delegator.
+\\
+\\
+Returning to our discussion of our scaling factor, we needed to show that if
+we're trying to predict \(P(A \mid B)\) via
+\[P(A \mid B) = P(A) \times \frac {P(B \mid A)} {P(B)} \]
+and B implies A (and nothing else from \(\alpha\), then the right-hand side should equal 1.
+
+Expanding P(B), we get
+\[ P(A \mid B) = 
+  \frac{P(A) \times P(B \mid A)} {\sum_{A' \in \alpha} P(A') \times P(B \mid A')} \]
+
+Via our implication, we have that \(P(B \mid A') = 0 \forall A' \neq A\).
+So the denominator simplifies to just \(P(A) \times P(B \mid A)\), which is exactly the
+numerator! So then \(\left(B \implies A\right) \implies P(A \mid B) = 1\) (which implies
+\( \frac {P(B \mid A)} {P(B)} = \frac {1} {P(A)} \)), as expected.
+% Though
+% for our everyday activities, we often don't have the luxury of having
+% someone/something checking our heuristics. So it's always worth trying
+% to keep in mind that oftentimes, many different factors that you may not
+% know or take into consideration can culminate in observations that
+% surprise you -\/- there's a good reason you aren't told to constantly
+% get yourself tested for a medical condition if you don't believe to be
+% at risk!
+\\
+\\
+- DK (4/24/18)
+
+
+\end{document}

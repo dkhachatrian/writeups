@@ -1,0 +1,247 @@
+\documentclass[../main/main.tex]{subfiles}
+\begin{document}
+\chapter{Information Theory}\label{information-theory}
+
+\section{Entropy and Cross-Entropy}\label{entropy-and-cross-entropy}
+
+There are a number of ways to think about/get to the Shannon entropy
+(\(H\)). One simple way is to say what we want
+it to mean qualitatively and impose some desired characteristics to
+determine its mathematical formulation. In this case, it may make more
+sense to start with cross-entropy first.
+
+Say you're sending me messages from an alphabet of symbols \(A\). Some
+are more likely than others, and we'll call the probability distribution
+associated with the actual generator of symbols \(p\). I'm over here on
+the other side thinking like I'm a pair of smartypants that
+has figured out how likely you are to send each symbol to me. We'll call
+my expected distribution (which may or may not be the correct
+distribution) \(q\).
+
+Now we want to measure how surprised I am by any given message you send
+me -\/- let's call it \(\tau\).\footnote{
+    Rhymes with ``wow''. 
+    Alas, not standard notation for a measure of surprise.
+    }
+We would imagine the following properties would be useful for \(\tau\) to have:
+\begin{enumerate}
+  % \def\labelenumi{\arabic{enumi}.}
+  \tightlist
+  \item
+    The more surprised I am, the larger
+    \(\tau\) gets (otherwise, it wouldn't exactly be doing a good job
+    measuring my surprise) 
+  \item
+    If symbols are independently generated, we can
+    construct the total surprise of my message by adding the total surprise
+    of each symbol in the message, i.e.,
+    \(\tau_{M} = \sum_{i=1}^{m} \tau_{M[i]}\) where \(M \in A^m\) is a
+    string of symbols, \(m\) is the cardinality of \(M\), and \(M[i]\)
+    denotes the \(i\)'th element of \(M\).
+\end{enumerate}
+
+
+Using these two criteria, a reasonable mapping is
+
+\[\tau_{a \sim q} = \log\left(\frac{1}{q(a)}\right), a \in A\]
+
+where \(q(a)\) is the probability I think you'll send the symbol \(a\).
+
+I mean, that's great and all, but that works for individual instances of
+strings or symbols. How much should I \emph{expect} to be surprised by
+any given symbol? Well, that'd depend on how often you \emph{actually}
+send me a symbol, alongside how often I expect to receive that
+particular symbol.
+
+Hmm, this smells of expectation! And indeed, that's all we do -\/- take
+the expectation over \(A\) (using the \emph{actual} probability of each
+symbol occurring, i.e., using \(p\)) of my surprise per symbol:
+
+\[E_{a \sim p}[\tau_{a \sim q}] = \sum_{a \in A} p_a \log\left(\frac{1}{q(a)}\right) = H(p,q)\]
+
+We denote this metric \(H(p,q)\) (where \(p\) and \(q\) are the actual
+and presumed distributions, respectively) and call it the
+\textbf{cross-entropy} \index{cross-entropy}
+(because that sounds pretty cyberpunk to me. I
+like to think they throw in ``cross'' because it measures the surprise
+caused by ``crossing'' the distributions \(p\) and \(q\) together.)
+
+Now, we'd imagine that I'd be the least surprised if my presumed
+distribution of symbols were in fact the actual distribution, i.e. when
+\(p = q\). In fact, this is true!
+\[H(p,p) = H(p) = \sum_{a \in A} p_a \log\left(\frac{1}{p_a}\right)\]
+
+is called the \textbf{entropy} (or \textbf{Shannon entropy})
+\index{entropy (information theory)!for distributions}
+of the
+probability distribution and written \(H\).\footnote
+{
+  You know, it'd arguably make more sense for the 
+  \emph{\textbf{S}hannon} entropy to be denoted \(S\),
+  which would also be a happy notational coincidence 
+  with the symbol used for entropy in most other fields. 
+  Instead, we have a notational collision with \emph{enthalpy}.
+  Ah well, such is the arbitrariness of a symbol's meaning. 
+  (I suppose it's fitting.)
+}
+Usually, the \(log\)s written above are base-2. This permits a way of
+thinking of the value of the Shannon entropy: if I'm only allowed to ask
+the same series of questions to you to figure out which symbol you want
+to send me and I know the actual probability distribution \(p\) of
+symbols, how many questions should I expect to ask (i.e. mean/average)
+before I figure out the answer? The cross-entropy is the same thing,
+expect I don't necessarily know the actual probability distribution
+\(p\) of symbols, I just think I do (and I think it's \(q\)) and base my
+series of questions based on \(q\).
+
+\section{KL divergence and mutual information.}\label{kl-divergence-and-mutual-information}
+
+
+Now, hopefully that makes it clear that \( p \neq q \implies H(p,q)
+> H(p) \) --- if I don't know the actual distribution, I'm
+not going to be able to answer the most optimal series of questions.
+This suggestions to us a notion of ``distance'' (i.e. a metric) between
+the probability distributions \(p\) and \(q\):
+\[ KL(p \mid\mid q) = H(p,q) - H(p) \]
+
+This metric is called the \textbf{Kullback--Leibler divergence}
+\index{KL divergence} \index{relative entropy (information theory)}
+(because
+names) or the \textbf{KL divergence} (because initialisms), or seemingly
+most rarely but probably most clearly the \textbf{relative entropy}. Out
+loud, you'd say \(KL(p \mid\mid q)\) is ``the {[}blah{]} of p with
+respect to q". The closer the KL divergence is to 0, the closer \(q\) is
+to being \(p\), and \( KL(p \mid\mid q) = 0 \implies p = q \) at every
+point in the domain of \(q\) (which is the same as the domain of \(p\)). 
+(From the above formula, 
+it should be clear that the KL divergence is not symmetric. The
+first argument is the ``correct'' distribution and we're measuring how suboptimal
+the second argument/distribution is at replicating the first one.)
+
+This makes describing the
+\textbf{mutual information between two random variables \(X\) and \(Y\)}
+\index{mutual information (information theory)}
+in terms of a KL divergence fairly intuitive. Just
+running off the name, if X and Y were independent, you'd expect no
+mutual information between them --- 
+observing one variable wouldn't tell you anything about the other variable, you don't gain
+a lot of information about one from the other. 
+In such a case, we know something about their probability distributions,
+namely that they're independent, i.e., \(P(X,Y) = P(X)P(Y)\), which implies 
+\( KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) = 0\). 
+And in fact, one way of writing the mutual information 
+between random variables X and Y is exactly
+
+\[ I(X;Y) = KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) \]
+\\
+which I think is pretty neat.
+\\
+\\
+- DK (4/24/18)
+
+\section{Entropy of variables vs. entropy of distributions}\label{entropy-of-variables-vs-entropy-of-distributions}
+
+Now, there is another way of approaching mutual information by 
+defining a conditional entropy between two random variables 
+(itself requiring a defintion of joint entropy in order to put
+the equation in a ``plug n' chug'' form). This raises some questions, the
+first and most pressing of which being ``\emph{Variable?} We've been talking
+about distributions this whole time!''\footnote
+{
+  More an outcry than anything, but still appropriate.
+} 
+, and the answer to which is ``Yes, variable.'' Since we've been 
+focusing on distributions this whole time, the switch to a random variable \(X\) is
+actually fairly straightforward -- we use the distribution from which \(X\) is drawn.
+
+More explicitly, say \(X\) is drawn from a probability distribution \(p\). Then the
+\textbf{entropy of \(X\)} is
+\index{entropy (information theory)!for random variables}
+
+\[ H(X) = \sum_{x \in X} p(x) \log\left(\frac{1}{p(x)}\right) \]
+
+This may be reminiscent of our \(\tau_{a \sim q}\) from earlier, except that now we're using
+the actual distribution of \(X\) (which is \(p\)), so it'd be \(\tau_{x \sim p}\). 
+
+We can sort of think of it like this: the information entropy only really makes sense
+for probability distributions. So, if we want to figure out how hard it 
+is to encode a random variable \(X\),
+we kind of ``pull out'' the probability distribution that \(X\) is drawn from and
+use that in our formula.
+\\
+Now, unfortunately, the notation gets muddy when we allow ourselves to shove in
+these random variables as arguments. For example, what does \(H(X,Y)\) (X and Y being
+random variables) mean? H is provided two arguments -- is it the cross-entropy between
+the underlying distributions of X and Y? Nope, it's the \textbf{joint entropy} of X and Y,
+i.e., \index{joint entropy}
+
+\[ H(X,Y) = H(p)\]
+
+where \(p\) is the joint distribution of the random variables \(X\) and \(Y\).
+Our main defense against confusing the two formulae is that random variables are
+(normally -- hopefully!) denoted by capital letters while distributions are usually
+denoted by lowercase letters.
+\\
+\\
+You may wonder ``what's the point?'' Well, this begins to allow information theory analogues
+for intuitions on random variables gleaned from statistics. The main missing piece at this point
+is the \textbf{conditional entropy} \index{entropy (information theory)!conditional}
+of a random variable Y with respect to X.
+We'd expect that we could relate the joint entropy and conditional entropy of random variables
+with one another, like how we can do so with the joint and conditional probability
+distributions of the variables, especially since we've defined the entropy of a random
+variable in terms of its probability distribution. And since:
+\begin{enumerate}
+  \tightlist
+  \item 
+    we applied a logarithm to the probability distribution (and took the expected value) when defining the entropy of a random variable; and
+  \item
+    the relationship between conditional and joint probability depends on multiplication:
+    \[P(Y|X) \times P(X) = P(X,Y) \]
+\end{enumerate}
+we'd want the relationship between conditional and joint entropy to hold via addition:
+\[ H(Y|X) + H(X) = H(X,Y) \]
+
+In fact, that's exactly the case! You can derive the formula 
+for conditional entropy based on the above relationship.
+And just to circle back to information gain, we'd expect that we might gain some information
+about a random variable X when we observe the random variable Y, depending on how the joint
+distribution P(X,Y) compares with P(X). Earlier, we defined the mutual information in terms
+of a KL divergence:
+\[ I(X;Y) = KL\left(P(X,Y)\mid\mid P(X)P(Y)\right) \]
+
+but we can also capture the quantity of ``how much does knowing Y (on average) help us figure
+out X (and vice-versa)?'' using the language of entropies of random variables:
+\[ I(X;Y) = H(X) - H(X|Y) \]
+
+This is the expected amount of information gained 
+by knowing the state of the random variable Y. 
+Specific values of Y may give more information
+about X -- may lead to a much tighter conditional distribution -- than others.
+Then, you can look at it for specific cases, i.e., the
+\textbf{information gain} \index{information gain}
+about X from observing a specific state y for Y,
+IG(X,Y = y), which is related to the mutual information via
+\(E_{y \sim Y}\left[IG(X,Y)\right] = I(X;Y)\)).
+So if we observe that Y took on the
+value y, the information gain for X would be
+\[ IG(X, Y = y) = KL\left(P(X,Y)\mid\mid P(X | Y = y)\right) \]
+
+Writing the above in terms of information entropy would be
+\[ IG(X, Y = y) = H(X) - H(X|Y = y) \]
+
+
+where \(H(X|Y = y)\) is an expectation over the conditional distribution 
+\(P(X | Y = y)\):
+\[
+  H(X| Y = y) = \sum_{x \in X} p(x|y) \times \log\left(\frac{1}{p(x|y)}\right)
+\]
+
+The main takeaway is that \emph{defining the entropy of a random variable as it is above
+allows for the migrations of intuitions about random variables
+from statistics and probability.} A worthy cause!\footnote{The notational confusion is still unfortunate though.}
+\\
+\\
+- DK, 5/14/18
+
+\end{document}

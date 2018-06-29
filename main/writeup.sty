@@ -1,0 +1,76 @@
+% as per https://en.wikibooks.org/wiki/LaTeX/Modular_Documents#The_file_mystyle.sty
+
+\ProvidesPackage{writeup}
+
+
+\usepackage[margin=1in,letterpaper]{geometry}% This shaves off default margins (which are too big)
+\usepackage{amsmath} %This lets us do more advanced math stuff -- in particular create unnumbered equations
+\usepackage{graphicx} %This lets us add figures
+\usepackage{float} %This lets us put figures smack in the middle of text, if we need to.
+\usepackage{grffile} %To prevent filenames from showing
+\usepackage{siunitx} %To put units properly, allow \SI[parse-numbers=false (if necessary)]{value}{unit}
+\usepackage{booktabs} %for fancier tables
+\usepackage{amssymb} % gives some fun symbols to play with, e.g. $\blacksquare$
+\usepackage[bottom]{footmisc} % have footnotes at bottom of page
+\usepackage{enumerate}
+\usepackage[normalem]{ulem} % allows for strikeout with \sout{}
+\usepackage{xcolor}% http://ctan.org/pkg/xcolor
+\usepackage{hyperref}% allow for links via \url{} and \href{}: http://ctan.org/pkg/hyperref
+\hypersetup{% because the red outline boxes are very bleh
+  colorlinks=true,
+  % allcolors=purple
+  urlcolor = blue,
+  linkcolor = purple
+}
+\usepackage{titlesec}
+\usepackage{enumitem} % be able to reference specific items in a list
+% \usepackage{bookmark} % maybe fixes silly refuse-to-compile-for-no-reason issues?
+%         % i.e. "File '*.out' has changed (rerunfilecheck) Rerun to get outlines right (rerunfilecheck) or use package 'bookmark'."
+
+\titleformat{\chapter}{\bfseries\Huge}{\thechapter.}{1.5ex}{}
+\titlespacing{\chapter}{0pt}{10pt}{30pt}
+
+
+\usepackage{textcomp} % lets \texttildelow -> ~
+\usepackage{stmaryrd} % have, e.g., \mapsfrom
+
+
+
+\usepackage{physics} % contains sane definitions for the different flavors of derivatives (/dv{}{}, /pdv{}{}, /fdv{}{})
+
+
+
+\usepackage{bbm} % allow for fancy-case of numbers
+
+\usepackage{xparse}
+% see https://tex.stackexchange.com/questions/29973/more-than-one-optional-argument-for-newcommand
+
+\NewDocumentCommand{\innerprod}{m m}{\ensuremath{\left<#1,#2\right>}}
+\NewDocumentCommand{\domain}{m}{\ensuremath{\mathbbm{#1}}}
+% \NewDocumentCommand{\norm}{O{\cdot}}{\ensuremath{\left\lVert#1\right\rVert}}
+% \NewDocumentCommand{\abs}{m}{\ensuremath{\left|#1\right|}}
+\NewDocumentCommand{\fancy}{m}{\ensuremath{\mathcal{#1}}}
+\NewDocumentCommand{\normexpanded}{}{}
+\NewDocumentCommand{\gcf}{m}{\ensuremath{\text{gcf}\left(#1\right)}}
+% \NewDocumentCommand{\grad}{m}{\ensuremath{\nabla #1}}
+\NewDocumentCommand{\definedas}{}{:=}
+\NewDocumentCommand{\setequalto}{}{:=}
+\NewDocumentCommand{\suchthat}{}{\mid}
+
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+
+
+\usepackage{makeidx} % allows for indexing
+\makeindex
+
+
+
+% from pandoc conversion (from markdown to LaTeX)
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% from jupyter notebook conversion (I can agree with the font choice)
+\usepackage[T1]{fontenc}
+% Nicer default font (+ math font) than Computer Modern for most use cases
+\usepackage{mathpazo}

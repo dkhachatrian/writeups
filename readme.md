@@ -11,4 +11,4 @@ This is (probably) where I'll stick writeups on more theoretical topics, for fut
 
 ...And more!
 
-(The PDF has a clickable table of contents that it seems Github isn't able to render on-site. It does work when downloaded though!)
+(The PDF located in the `main` directory has a clickable table of contents that it seems Github isn't able to render on-site. It does work when downloaded though!)

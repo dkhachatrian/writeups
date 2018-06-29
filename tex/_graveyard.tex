@@ -1,0 +1,425 @@
+\documentclass[../main/main.tex]{subfiles}
+\begin{document}
+
+\chapter{The graveyard.}
+
+This is where some nontrivial amount of work
+went into a writeup before realizing that I was
+basically confusing \emph{myself} with how I was going
+about things.
+
+
+\section{The Fourier and Laplace Transforms.}
+
+
+
+% good source (unfortunately discovered in the middle of the process of thinking up/writing up
+% an explanation): https://www.youtube.com/watch?v=zvbdoSeGAgI
+
+% Laplace trasnform *as phasors*!?
+% https://www.youtube.com/watch?v=6MXMDrs6ZmA
+
+
+
+
+General flow is:
+
+\begin{enumerate}
+  \item
+    Explore the Taylor series in terms of linear algebra (countably infinite basis vectors).
+    Consider where and how it lacks power (discrete vs continuous).
+    From this discrete case, extend to a continuous case
+    (\emph{un}countably infinite basis vectors!)
+  \item
+    Define \emph{linear independence} for vectors in function space, 
+    and use this to determine what our basis vectors can be.
+    Massage out pseudo-Laplace transforms.
+
+\end{enumerate}
+
+\subsection{Revisiting the Taylor series.}
+
+Previously, we've discussed the Taylor series centered around a fixed point \(a\):
+\begin{equation}
+\begin{split}
+  f(x) &\approx \sum_{n=0}^{k}\frac{f^{(n)}(a)}{n!}(x-a)^n  \\
+       &= \sum_{n=0}^{k}F_D(n; a) (x-a)^n \text{ where } F_D(n;a) = \frac{f^{(n)}(a)}{n!} \\
+       &= p(x;a,k)
+\end{split}
+\end{equation}\label{equation:taylor-series}
+
+The rationale for the expression we choose for \(F_D(n;a)\) 
+is that \(p(x;a,k)\) will have identical \(i\)'th order derivatives with \(f(x)\) at \(a\)
+for \(k \in \{0, 1, \cdots, k\}\), i.e., that
+\[p^{(i)}(x=a) = f^{(i)}(x=a) \ \forall \ i \in \{0, 1, \cdots, k \}    \]
+
+So as \(k\) becomes larger and larger, \(p(x;a,k)\) acts more and more like \(f(x)\)
+at \(x=a\),
+which we hope makes it ``act'' more and more like \(f(x)\)
+in a neighborhood around \(a\).\footnote
+{
+  This doesn't always work perfectly for all functions. For example,
+  \(f(x) = 
+  \begin{cases}
+    0 & x = 0 \\
+    e^{1/x^2} & x \neq 0
+  \end{cases}
+  \)
+  has \(f^{(i)}(0) = 0 \ \forall i \in \mathbb{N}\), 
+  so its Taylor series centered at \(x=0\) yields \(p(x) = 0\),
+  which certainly doesn't capture how \(f\) acts outisde the origin!
+}
+Letting \(k \rightarrow \infty\) makes \(p(x;a,k)\) ``act'' \emph{exactly}
+like \(f(x)\) at \(x=a\).
+For some functions \(f\), 
+we can show that \(p(x) = f(x) \ \forall x\in \mathbb{R}\) for \emph{all} 
+inputs of the function
+by taking the limit of \href{https://math.stackexchange.com/a/2136695}{Lagrange remainders}.
+The most notable functions for this are \(f(x) \in \{e^x,\cos(x),\sin(x)\}\).\par
+
+% But what if we looked at the Taylor series a different way, through the lens of linear algebra?
+% To make notation a bit less cumbersome, let's have \(F_D(n) := F_D(n; a = 0)\) and
+% \(
+%   p_T(x) = \lim_{k\rightarrow \infty}P(x;a=0,k)
+%         =\lim_{k\rightarrow \infty}\sum_{n=0}^{k}F_D(n) x^n
+% \).\par
+
+\subsection{Discrete function spaces.}
+
+Now let's go on a seemingly random \sout{secant} tangent.\par
+Consider some random polynomial \(p(x;k)\) of order no greater than \(k\).
+We could describe it as weighted sum of monomials, where the coefficients
+of the monomial \(x^n\) is given by the function \(A(n)\):
+
+\[p(x;k) = \sum_{n=0}^{k}A(n) x^n\]
+What does this remind us of?\par
+Well, it kinda looks like a linear combination of vectors, doesn't it?
+\\
+\\
+Consider a \(k\)-dimensional vector space with the basis
+\(B = \{e_n \mid n \in \{0, 1, \cdots, k\}\}\).
+If we wanted to describe some vector in this space, we could do so as a linear
+combination of the basis vectors:
+\[ \vec{v}_A = \sum_{n=0}^{k}A(n) e_n = [A_0, A_1, \cdots, A_k]\]
+
+That alone is kind of boring. What becomes more interesting is if we can create an
+\emph{isomorphism} between this
+(to be honest, kinda bland) \(k\)-dimensional vector space and something
+more interesting. If we think of a neat, valid isomorphism for our basis vectors,
+some other neat consequences should follow. \par
+Well, what if we make the mapping \(e_n \leftrightarrow x^n\) (for \(x \in \mathbb{R}\))?
+This is a valid mapping, because we can describe the set of
+\(\{x^n \mid n \in \{0, 1, \cdots, k\}\}\) as linearly independent, in that
+there's no way to make a weighted sum of other monomials \(x^b, b\neq n\)
+identical to \(x^n\) for all \(x\) in our domain of interest.\par
+Let's keep this going. What would \(\vec{v}_A\) mean on the other side of our
+isomorphism?
+\[ \vec{v}_A = [A_0, A_1, \cdots, A_k] = \sum_{n=0}^{k}A(n) e_n
+  \longleftrightarrow \sum_{n=0}^{k}A(n)x^n = p_A(x)  \]
+
+where \(p_A(x)\) is the (no greater than \(k\)'th-order) whose coefficients
+are enumerated by \(A(n)\). This means that if we agree on a valid ``encoding'' process
+\textemdash{}
+in this case, that we'll describe \(p_A(x)\) as a weighted sum of monomials \(x^n\)
+\textemdash{}
+then we can go from function to vector and vice-versa.
+When we let \(k \rightarrow \infty\), we're allowing our vectors, described by \(A(n)\),
+to describe the space of all possible polynomials \(P^\infty\).\par
+
+
+
+
+Worth noting is that there's no reason why we \emph{have} to choose the function \(x^n\)
+in our mapping
+\(e_n \leftrightarrow x^n\)
+. We can choose \emph{any} function where it makes sense to say
+that the functions for different \(n\) are linearly independent of each other.
+For example, we could choose to have the mapping
+\[e_n \leftrightarrow e^{nx}\]
+since the set 
+\(\{e^nx \mid n \in \{0, 1, \cdots, k\}\}\)
+is linearly independent.\footnote
+{
+  In fact, since \(e^nx = \left(\sum_{k=0}^{\infty}\frac{x^k}{k!}\right)^n\), we could view
+  \(e^{nx}\) as a(n oddly) weighted combination of \(x^0, x^n, x^{2n}, \cdots\),
+  implicitly describing an infinite-degree polynomial with potentially only a finite
+  number of coefficients.
+}
+The more-or-less complete freedom in choosing our basis mapping will prove useful,
+as some ``encodings'' (i.e. some sets of basis functions)
+will be more useful in some contexts than others.
+The main caveat is that subset of function space implied by your basis mapping
+is always limited as to what functions it can
+``encode'' fully and/or concisely 
+\textemdash{} if you choose the mapping \(e_n \leftrightarrow e^{nx}\),
+there is no \(A(n)\) such that \(\sum_{n=0}^{k}A(n)e^{nx} = x \), so we're definitely not
+spanning \(P^\infty\) with this new mapping and if you're interested
+in simple finite-degree polynomials, you're probably better off
+with our earlier encoding.\footnote
+{
+  Worth noting is that trying to create a mapping that can recreate \emph{all}
+  functions is not the best idea.
+  Recall that if we designate an input \(x\) in some domain \(D_x\)
+  and some output \(y\) in some domain \(D_y\),
+  then a \textbf{function}\index{function} \(f \in \mathcal{P}(D_x \times D_y)\)
+  is simply a set of ordered pairs \((x,y)\)
+  where each \(x\) appears only once in the set.
+  (Here \(\mathcal{P}\) denotes the \emph{powerset} operator
+  and \(\times\) the \emph{Cartesian product} operator.)
+  So there are \emph{many} wacky functions one could make and basically no
+  hope in accounting for all of them in a simple-to-describe basis.
+}
+
+\subsection{Equipping our vector space.}
+
+% Now here's something trickier: how do we map a \textbf{metric}, or a function describing
+% the ``distance'' between two points, so that it captures how close a function is
+% to a point outside our function subspace? After all, not all functions can be described as
+% a sum of the natural-order monomials \(x^n, n \in \mathbb{R}\), so how do we choose
+% the point that matches it the best? Well, that depends on what we're aiming for.
+% If we only care about the polynomial \(p\) associated with our function
+% having identical derivatives to the target function \(f\) at some point \(x=a\),
+% we could have the metric associated with each point be 
+% \(\sum_i|f^{(i)}(a) - p^{(i)}(a)|\)
+Here's something trickier: how do we perform a projection on a function that's 
+outside our subspace? That is to say, how would we actually \emph{calculate} the
+function \(A(n)\)?\par
+Well, so far we haven't touched on that. We've defined a vector space, but we
+haven't defined a \emph{norm} \(|\cdot|\) or
+an
+\emph{inner product} \(\left<\cdot, \cdot\right>\) for our vector space meant to represent,
+in this case, polynomials.
+% http://mathworld.wolfram.com/InnerProduct.html
+% http://mathworld.wolfram.com/SchwarzsInequality.html
+which 
+we'd want to have capture ``how much'' of one vector is along in another vector would
+be used to calculate our coefficients \(A(n)\) by supplying \(e_n\) as one of the
+inputs to our inner product.
+Well, that depends on what our metric is for considering two
+functions to be ``close''
+% \begin{verbatim}
+%   Need to figure out how metrics change.
+
+%   ...?
+% \end{verbatim}
+
+
+
+\subsection{Re-revisiting the Taylor series.}
+
+Let's consider the Taylor series again,
+where we'll set \(a:=0\) and let \(k \rightarrow \infty\):
+
+\begin{equation}
+  \begin{split}
+    f(x) &\approx \sum_{n=0}^{\infty}F_D(n) x^n \text{ where } F_D(n) = \frac{f^{(n)}(0)}{n!} \\
+         &= p(x)
+  \end{split}
+\end{equation}
+
+Relating the Taylor series to our vector-space isomorphism,
+setting \(A(n) := F_D(n)\) picks a point \(\vec{p}\) in our vector space \(P^k\) that corresponds
+to the polynomial \(p\) which is ``closest'' to \(f\)
+in the sense that \(p\)'s value and first \(k\)'th derivatives agree with \(f\)'s at \(x=0\).
+It's almost like \(p\) is \(f\)'s ``\emph{projection}'' onto \(P^k\) under our chosen
+definition of ``closeness''.\par
+Our point \(p\) \textemdash{} and as such, our function that captures the
+coordinates of \(p\), \(A(n)\) \textemdash{}
+definitely has to be related to our definition of ``closeness''.
+In this case, the metric we're minimizing is
+\(\sum_i|f^{(i)}(0) - p^{(i)}(0)|\).
+If our definition of closeness was instead, say, that they have identical definite integrals
+\( \int_{x=0}^{1}f(x)dx = \int_{x=0}^{1}p(x)dx \),
+we'd have a different ``closest'' point in our vector space.
+This also shows that the metric of ``closeness'' we use determines whether there is a
+\emph{unique} \(A(n)\) for \(f(x)\) in a given function space. If we're considering the space
+of polynomials, there is only one point that satisfies the ``equal derivatives at \(a\)''
+constraint, but many that satisfy the ``equal definite integral over \([0,1]\)'' constraint.
+
+
+
+% % Let's say if can find some isomo
+% % where the basis vector
+% % \(e_n\) corresponds to the coefficient of \(x^n\) for
+% % \(n \in \{0, 1, \cdots, k\}\).
+% % The set \(B = \{e_n \mid n \in \{0, 1, \cdots, k\}\}\)
+% % is in fact a valid basis,
+% % because there's no way to make a weighted sum of other monomials \(x^b, b\neq n\)
+% % identical to \(x^n\) for all \(x\)
+% % and therefore no way to create one basis vector from a linear combination of the others.
+% % Then \(B\) forms a basis for the vector space in question.
+% Let's call this vector space \(P^k\), for the space of all \textbf{p}olynomials with order
+% no greater than \(k\) with domain \(\mathbb{R}\).\par
+% If \(P^k\) contains all \(k\)'th order polynomials, how is
+% \(p(x;k)\) represented?
+% It's represented by the (zero-indexed) vector whose \(n\)'th index equals \(A(n)\) for all
+% \(n \in \{0, 1, \cdots, k\}\), because in such a case, the vector is described by
+% \[ \sum_{n=0}^{k}A(n) e_n = \vec{v} \]
+% If we allow \(e_n\) to ``assume'' its identity as the monomial \(x^n\), then we get
+% \[\sum_{n=0}^{k}A(n) e_n = \vec{v} \longrightarrow \sum_{n=0}^{k}A(n) x^n = p(x;k)\]
+
+% \(A(n)\) encodes exactly the coefficients needed that get us to \(p(x;k)\).
+% It just so happens that if we have some function \(f(x)\), the point in \(P^k\)
+% that has identical derivatives to \(f(x)\) at \(x=0\) is the point reached by
+% setting the coefficients via \(F_D(n) = \frac{f^{(n)}(0)}{n!}\).
+% Letting \(k\) grow larger means that we're choosing a polynomial
+% from a larger and larger space of polynomials
+% (which is itself a subset of all possible functions\footnote
+% {
+%   Recall that if we designate an input \(x\) in some domain \(D_x\)
+%   and some output \(y\) in some domain \(D_y\),
+%   then a \textbf{function}\index{function} \(f \in \mathcal{P}(D_x \times D_y)\)
+%   is simply a set of ordered pairs \((x,y)\)
+%   where each \(x\) appears only once in the set.
+%   (Here \(\mathcal{P}\) denotes the \emph{powerset} operator
+%   and \(\times\) the \emph{Cartesian product} operator.)
+%   So there are \emph{many} wacky functions one could make.
+% })
+
+
+
+
+
+
+\subsection{But first, let's talk eigenfunctions.}
+
+In order to ``trust'' that the Fourier and Laplace transforms are capturing all of the
+``content'' of our input function
+
+
+\subsection{The Fourier transform and wiggles over time.}
+
+The Fourier transform is the way one maps a function
+\(f: t \mapsto y,\ t \in \mathbb{R}, \ y \in \mathbb{R}\)
+to its uniquely equivalent function \(F: \omega \mapsto z, \ z \in \mathbb{R}^2\).
+Looking at it more explicitly through the lens of linear algebra,
+if we say \(f\) came from a space \(\mathcal{F}_t\), i.e., \(f \in \mathcal{F}_t\), and
+likewise that \(F \in \mathcal{F}_\omega\), then the Fourier transform \(FT\) is a mapping
+\(FT: \mathcal{F}_t \mapsto \mathcal{F}_\omega\).\par
+
+The actual definition for the \textbf{Fourier transform}\index{Fourier transform} is
+\begin{equation}
+  F(\omega) = \frac{1}{2\pi} \int_{-\infty}^{\infty}e^{-i\omega t}f(t)dt
+\end{equation}\label{equation:fourier-transform}
+
+
+and can be derived from taking 
+the limit of the \emph{discrete-time Fourier series} of \(f(t)\) as the function's
+period \(T \rightarrow \infty\).\footnote{
+  Which we hope to discuss further at some point.
+}
+The inverse map, aptly named the
+\textbf{inverse Fourier transform}\index{inverse Fourier transform},
+is 
+
+\begin{equation}
+  f(t) = {2\pi} \int_{-\infty}^{\infty}e^{-it\omega}F(\omega)d\omega
+\end{equation}\label{equation:inverse-fourier-transform}
+
+Here we use \(i = \sqrt{-1}\).
+(We may flip-flop between \(i\) and \(j\) to denote \(\sqrt{-1}\).
+It should be clear from context.)\par
+
+OK, cool, but what does it mean? Well, first let's remember one of the neatest things
+you can prove using Taylor series, i.e. \emph{Euler's formula}\index{Euler's formula}:
+
+\[e^{ix} = \cos(x) + i\sin(x) \]
+
+% Also, the set of sine and cosine functions (and in fact any two sinusoids that are not
+% identical) are orthogonal, i.e.,
+% Also, any two non-identical sinusoidal functions are orthogonal, i.e.,
+Also, note that
+% \(\sin(\omega t)\) and \(\cos(\omega t)\)
+\(\sin(x)\) and \(\cos(x)\)
+% TODO: define orthogonality more clearly 
+% (integral is zero in product with anyone except itself)
+are mutually orthogonal\footnote{
+  That is to say,
+  % \[\int_{-1/\omega}^{1/\omega} \cos(\omega t)\sin(\omega t)dt = 0 \]
+  \(\int_T \cos(x)\sin(x)dx = 0 \)
+  over their aggregate period \(T\).
+  To be proven later. See in the meantime
+  \href{http://tutorial.math.lamar.edu/Classes/DE/PeriodicOrthogonal.aspx}{this resource}.
+},
+and in fact all sinusoidal functions
+\(\{\cos(ax) \mid a \in \mathbb{R}\}\) and \(\{\sin(bx) \mid b \in \mathbb{R}-\{0\}\}\)
+are mutually orthogonal.\footnote{
+  When \(b=0\), \(\sin(bx) = \sin(0) = 0 \forall x\) and so doesn't fit the definition 
+  of orthogonality since \(\int_{-\infty}^{\infty}sin(0x)sin(0x)dx = \int_T 0 dx = 0 \ngtr 0\).
+}
+That means that if we were to describe functions in a vector space, then each 
+sinusoidal function \(\cos(ax), a \geq 0\) and 
+\(\sin(bx), b > 0\) 
+would be linearly independent from one another.\footnote{
+  Only one ``half'' of \(\mathbb{R}\) is needed to capture all non-redundant information
+  as \(\cos(-x) = \cos(x)\) and \(\sin(-x) = -\sin(x)\).
+}
+\par
+
+All this points to a \emph{different basis} on which we can describe functions.
+The origina
+% every point in F(\omega) has some information about f across *all* of t
+% it's like having an infinite ``power series'' built
+% using the orthogonal functions cos(wt) and sin(wt).
+% We've already established that cos(wt) and sin(wt) are orthogonal,
+% So the only parts of f(t) that contributes to F(w) is the part that would
+% correspond to cos(wt) (or sin(wt)) in a ``frequency series'' of f.
+% I.E., if we could say that f(t) = 1 + a_1cos(wt) + a_2cos(2wt) + ...
+% then F(w) = \int cos(wt)f(t)dt = \int cos(wt) \times a_1cos(wt)dt
+
+
+
+% It's important to remember that this is a transformation of \emph{function to a function
+% with a different input space}, and not a transformation of our coordinate system.
+% There is no clear way of s
+
+% Considering that functions are themselves maps (from their input space to their output space),
+% the Fourier transform is a map of maps.
+% This may sound like voodoo magic, 
+% That is to say, the Fourier transform is a mapping for
+
+
+
+\subsection{The Laplace transform as a patch for the Fourier transform.}
+
+What if the Fourier transform explodes?
+For example, consider the function
+
+
+
+
+
+
+% \appendix
+
+% \chapter{Weird things about integrals.}\label{apx:weird-things-about-integrals}
+
+% In our derivation of the Boltzmann distribution, we reached the point where to derive
+% the exponential form, we needed to assume independence of energies among the particles 
+% in the system, an assumption which, 
+% as mentioned in the footnote at \ref{foot:independence-weirdness},
+% is a bit crazy-making (by exceeding the total energy of the system).
+% It can be even weirder than that when we think about what we consider the differential
+% \(dE\) to be.
+% \\
+% In standard analysis, differentials are not numbers, they are operators.
+
+% And if we don't subscribe to the tenets of
+% \emph{nonstandard analysis}\index{nonstandard analysis} wherein
+% there exist hyperreals which are larger than the countable infinity \(\aleph_0\)
+% and whose reciprocals are differentials (a potential extension of
+% number theory that is realized
+% if one takes \(\neg G\) from \emph{Godel's incompleteness theorem}
+% to be an axiom), then things become even \emph{more} ridiculous.
+% % [adapt the stuff below]
+% % Or, if we stick to talking about the discrete energy steps, if we say there are an
+% % infinite number of them, then no matter how large an energy step \(i\)
+% % we assign to each particle, \(\sum_{i=1}^{N} E_idE = 0 \neq E_T \), 
+% % so energy in the system completely disappears and all particles have
+% % \emph{zero} energy! Unless we have an \emph{infinite} number of particles.
+% % In which case, we would have that
+% % \(\lim_{N\rightarrow \infty}\sum_{i=1}^{N} E_idE = E_T \), but still 
+% % These are the questionable outcomes that com
+
+
+\end{document}

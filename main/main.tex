@@ -1,0 +1,81 @@
+% Let's remember, if we're looking for a particular symbol, this link can help:
+% http://detexify.kirelabs.org/classify.html
+
+\documentclass[letterpaper,12pt]{report}
+
+% Restructure to modular documents in large part from reading
+% https://en.wikibooks.org/wiki/LaTeX/Modular_Documents
+%  
+% using file hierarchy workaround as per
+% https://tex.stackexchange.com/a/48170
+% to use \subfiles{} package (vs standalone)
+\usepackage{../main/writeup} % .sty file
+
+% limit which sections get compiled 
+% (comma-separated; don't put file extension at end of entries)
+% \includeonly{} 
+
+% for now, the chapters needn't have different styles
+% so instead of using \usepackage{standalone}
+% we'll do \usepackage{subfiles}
+\usepackage{subfiles}
+
+\begin{document}
+
+
+
+
+% Document parameters
+\title{A quick(ish) reference for some concepts whose
+ intuitions/simple methods of understanding sometimes escape me.}
+\author{David Khachatrian}
+\date{Ongoing.}
+
+\maketitle
+
+\newpage
+
+
+\tableofcontents
+
+\newpage
+
+
+% chapters
+
+\subfile{../tex/information_theory}
+
+\subfile{../tex/statistics}
+
+\subfile{../tex/linear_algebra}
+
+\subfile{../tex/analysis}
+
+\subfile{../tex/constrained_optimization_problems}
+
+\subfile{../tex/machine_learning_methods}
+
+\subfile{../tex/physics}
+
+\subfile{../tex/_wips}
+
+\subfile{../tex/_graveyard}
+
+
+
+
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+
+
+
+    % show index
+      % add index to table of contents
+      \clearpage % flush all floating figures, "officially" start on next page
+      \addcontentsline{toc}{chapter}{Index}  % add entry to ToC
+    \printindex % actually print the index
+    
+\end{document}
