@@ -101,7 +101,7 @@ Also worth knowing the fancy terminology:
     posterior).
 \end{enumerate}
 
-\subsection{Substitution to the rescue.}\label{subsitution-to-the-rescue}
+\subsection*{Substitution to the rescue.}\label{subsitution-to-the-rescue}
 Now, in cases of inference via supervised learning, 
 we have some data on the probability of one of the observable variables
 \textemdash{} let's say we observe variables \(A \sim \alpha\) \textemdash{}
@@ -167,5 +167,401 @@ numerator! So then \(\left(B \implies A\right) \implies P(A \mid B) = 1\) (which
 \\
 - DK (4/24/18)
 
+\newpage
+
+\section{Testing multiple hypotheses.}
+
+\subsection{Comical correlations.}
+
+There are some wonderfully comical examples of making questionable statistical
+interpretations.
+One example is literally a comic: the webcomic \textit{xkcd} published an example where
+\href{https://xkcd.com/882/}{it is ``shown'' that green jelly beans are linked to acne}.
+In another (perhaps more striking) context,
+data mining is prone to discovering all sorts of questionable 
+``correlations'', as shown in 
+\href{http://www.tylervigen.com/spurious-correlations}{Tyler Vigen's collection
+of such conclusions}, where it is ``shown'' that (among other facts) 
+that US per-capita margarine consumption
+is linked to the divorce rate in Maine.\par
+
+But what's the problem? All of xkcd's statistical experiments were run
+at the ``industry-standard'' confidence level of \(\alpha = 0.05\),
+and confidence intervals on the data shown
+on Vigen's website would have lower bounds well above \(r = 0\) 
+even at a 99.9\% confidence level.
+So the conclusions made in both are totally valid, right?\par
+
+...But of course they aren't \textemdash{} at least, not as it stands.
+The fact is both of the scenarios above are testing (far) more than
+one hypothesis: 21 tests total in the xkcd case, and who knows how many millions
+of tests in the data mining case.\par
+
+
+
+
+\subsection{The problem: confounding exploratory vs confirmatory analyses.}
+
+The thing is, there's nothing inherently wrong with performing
+all these statistical tests as had been done above.
+Data mining in particular is very good as a tool for
+\emph{exploratory data analysis}, which is meant to
+help a researcher generate hypotheses that are
+potentially worth testing. It's a \emph{start}, after which
+proper statistical protocol should be established: 
+what population is under study, what effect is being looked at,
+how the sample was gathered (with rationale),
+which statistical test will be used and at what confidence
+level (with rationale), etc etc. \par
+
+The more concerning part is taking the initial point of significance
+as evidence of an actual correlation.
+Remember that a significance level \(\alpha\) corresponds to the
+frequency at which we would commit a 
+\emph{Type I error}, 
+wherein we reject the null hypothesis due to effects caused by random chance alone
+(and not due to any actual meaningful connections between
+the variables in question).
+So when you churn through \(k\) independent
+hypothesis tests with corresponding significance levels 
+\(\alpha_i\), the likelihood that you reject at least
+one null hypothesis due to random chance is
+\[FDR = \text{Pr[at least one Type I error]} = 
+  1 - \text{Pr[no Type I errors]} = 1 - \prod_{i=1}^{k} (1 - \alpha_i) \]
+
+And so we can't really go back and say that any of the
+rejected hypotheses have significance level \(\alpha_i\)
+\textemdash{} you can only be roughly \((1 - FDR)\)-confident
+that the hypothesis was rejected due to something other
+than random chance. \par
+
+Alright, then how \emph{could} you establish a test with
+your desired significance level of \(\alpha_i\)?
+With an entirely new iteration of the statistical test, 
+done all on its lonesome, 
+with a brand new batch of data\footnote{
+  This is done so that we aren't
+  ``poisoning'' our sample with data we already would
+  lead to rejecting the null hypothesis. If we \emph{did} 
+  reuse the data,
+  we'd be introducing some heavy bias, which is no good.
+}. Only then would you have the false positive rate actually 
+matching the intended value of \(\alpha_i\).\footnote
+{
+  This method of validation 
+  (as well as the likely observation that the first
+  null hypothesis rejection was a Type I error) 
+  is implied in the alt-text of the xkcd comic 
+  \textemdash{}
+  thankfully the allure of Minecraft did not prevent
+  the scientists from doing their statistician's duty.
+}
+
+
+
+
+\subsection{The Bonferroni correction: fewer false positives (and more false negatives).}
+
+OK, but say we \emph{don't} have the ability to just
+generate a fresh batch of samples to run clean statistical
+tests
+on the more ``promising'' hypotheses from an initial
+exploratory analysis.
+But we \emph{still} want to run our huge battery of tests
+\emph{and} we want any statistically significant ``discoveries''
+we may find to have a false positive rate of at most \(\alpha\).
+Well, we can do that! But the notion that 
+``there is no such thing as a free lunch'' applies here as well.
+This applies in at least two ways.
+One of these sacrifices is inescapable as it is intrinsic to the relationship
+between false positives and false negatives \textemdash{}
+since we're finally going to pull down our false positive rate
+to our desired level, we necessarily have an increase in
+our \emph{false negative rate}.
+The other is that by applying the correction we're about
+to discuss, we may end up being \emph{too} conservative
+and have an effective false positive rate \(FPR < \alpha\).
+This one is more manageable.\par
+% That is to say, 
+% by demanding that our statistic \(\hat{\mu} = \mu_0 + \Delta\) 
+% deviate largely from the
+% null hypothesis's parameter \(\mu_0\), 
+% we're far less likely to notice if the true parameter is 
+But enough with all the buildup! What's the correction?\par
+
+Say you are testing \(k\) hypotheses and would like a total
+false positive rate of \(\alpha\). Then you may choose
+a set of individual significance levels \(\alpha_i\) such that
+
+\[\sum_{i = 1}^{k} \alpha_i = \alpha \]
+
+A particularly simple realization of the above is achieved
+by simply ``splitting the difference'' equally among the
+\(k\) hypotheses:
+
+\[ \alpha_i \setequalto \frac{\alpha}{k} \]
+
+Now, I know what you're saying.
+\textit{``Really? All that buildup just to divide 
+a number by another number?''}
+And yes, really that's the case. But just because it's
+simple doesn't mean it's unimportant! 
+After all, it satisfies the desired criterion of having a
+false positive rate of at most \(\alpha\). This is
+verifiable by \emph{Boole's inequality}:
+\begin{equation}
+%   \begin{split}
+%    \text{Pr[at least one Type I error]} &\leq 
+%    \sum_{i=1}^{k}\text{Pr[Type I error on hypothesis }i\text{]} 
+%   %  - \sum_{j=1}^{k-1}\left(\binom{k-1}{j})
+%   \\
+%   &= \sum_{i=1}^{k}\alpha_i \\
+%   &= \alpha
+% \end{split}
+   \text{Pr[at least one Type I error]} \leq 
+   \sum_{i=1}^{k}\text{Pr[Type I error on hypothesis }i\text{]} 
+  = \sum_{i=1}^{k}\alpha_i
+  = \alpha
+\label{equation:bonferri-proof-loose}
+\end{equation}
+
+A graphical intuition for Boole's inequality can be gleaned by
+picturing the Venn diagram of events corresponding to
+the errors and considering how the union of the ``areas''
+of each event would relate to their sum:
+\[P(A \cup B) \leq P(A) + P(B) \]
+
+This is extensible to an arbitrary number of events
+\(A, B, C, \cdots\).
+The 
+\href{https://en.wikipedia.org/wiki/Inclusion–exclusion_principle}{inclusion-exclusion principle}
+shows an exact method of calculating the relationship,
+but the main point is that the right-hand side of
+the first line in
+\ref{equation:bonferri-proof-loose} would have a nonpositive
+term were it an equality, so the inequality is valid.\footnote
+{
+  The inclusion-exclusion principle applies because 
+  the probability of at least one Type I error is a
+  (normalized) union of the events which cause Type I errors.
+}
+\subsection{Thinking about M\&M's some more.}
+
+Let's work along the xkcd example.
+The last twenty hypotheses were essentially the same
+with no reason
+to believe any of them would be significant
+and (presumably) no difference in the statistical methods
+used to reach the p-value.
+We match their conditions and have \(\alpha_i \setequalto 0.05\)
+for each of our \(k=20\) tests.
+Then (assuming independence between tests) the likelihood of 
+rejecting a null hypothesis due to random chance alone within our \(k\) tests
+is not \(\alpha_i = 0.05\) 
+(as the cover of the sensationalist magazine in the webcomic implies)
+but rather
+
+\[
+  FWER = \text{Pr[at least one Type I error]} = 
+  1 - \text{Pr[no Type I errors]} = 1 - \prod_{i=1}^{k} (1 - \alpha_i) \approx 0.64 
+\]
+
+which is a far less impressive threshold of significance.
+Here, \(FWER\) is the \emph{familywise error rate}, where
+our ``family'' consists of the twenty nearly identical
+hypothesis tests.\par
+
+Now let's assume that M\&M's have become
+a treasured commodity\footnote
+{
+  This may not differ from reality, depending on who you ask.
+} and are difficult to come across,
+or for whatever other reason we wouldn't be able to
+perform a follow-up experiment to validate any
+exploratory analysis above. 
+So, before we perform our family of tests,
+we apply a Bonferroni correction via
+``splitting the difference'', i.e.,
+\(\alpha_i' \setequalto 0.05/20 = 0.0025\) for all \(i\).
+The amount of evidence required to reject any individual
+hypothesis increases from a deviation of 
+\(\Delta \approx 1.6\hat{\sigma}\) to 
+\(\Delta \approx 2.8\hat{\sigma}\)
+\textemdash{} a pretty big deal for z-tests and t-tests
+of just about any size! Now we have a familywise error rate of
+
+\[FWER = \text{Pr[at least one Type I error]} = 
+  1 - \text{Pr[no Type I errors]} = 1 - \prod_{i=1}^{k} (1 - \alpha_i') \approx 0.0488 \]
+
+Which is definitely less than our maximum tolerated
+Type I error rate of \(\alpha = 0.05\).
+
+\subsection{Slightly less conservative: the Sidak correction.}
+
+We saw at the end of our example that our familywise error rate
+was smaller than our target of 0.05 and so is more conservative
+than we originally wanted. Indeed, with the Bonferroni
+correction it is always the case that \(FWER < \alpha\).
+The simplest, ``split the difference equally'' method in fact
+gives us the
+most conservative such \(FWER\).\footnote
+{
+  This comes from the fact that given
+  the constraints \(\sum_i^{k} a_i = a, a_i > 0\), 
+  \(\prod_i a_i\) is maximized when \(a_i \setequalto a/k\).
+  For the problem in question, \(a = k-\alpha\)
+  for a desired significance level \(\alpha\) and so
+  \(a_i \setequalto 1 - \alpha/n\) maximizes their product
+  \(\prod_i a_i\).
+  But then we're subtracting this product from unity,
+  so the choice of \(a_i\) in fact minimizes
+  \(1 - \prod_i a_i = FWER\).
+}
+\footnote
+{
+  Fun fact: from the form of the expression for \(FWER\),
+  we can see that using the ``split the difference equally''
+  model, as we test arbitrarily many hypotheses,
+  \[
+    \lim_{k \to \infty} FWER = 
+    \lim_{k \to \infty} \left(1 - \prod_{i=1}^{k} (1 - \alpha/k)\right)
+    = \lim_{k \to \infty} \left(1 - (1 - \alpha/k)^k\right)
+    = 1 - \lim_{k \to \infty} \left(1 - \frac{\alpha}{k}\right)^{k}
+    = 1 - e^{-\alpha}
+  \]
+  \sout{That silly \(e\), getting itself into all sorts of places!}
+}
+So, how could we have our total Type I error rate
+be \emph{exactly} \(\alpha\) instead of \emph{at most}
+\(\alpha\)?
+Well, we've kind of been playing with the relevant
+equation for a while now. We want \(FWER = \alpha\), so
+(once again assuming \(k\) hypotheses with
+significance levels \(\alpha_i\)):
+
+\[
+  FWER = \text{Pr[at least one Type I error]} = 
+  1 - \text{Pr[no Type I errors]} = 1 - \prod_{i=1}^{k} (1 - \alpha_i) \setequalto \alpha
+\]
+
+If we decide we'll use the same significance level
+for all the individual hypotheses, 
+say \(\alpha_i \setequalto s\), then we can simplify
+and solve for \(s\) in terms of \(\alpha\):
+
+\[\begin{split}
+  \alpha &= 1 - \prod_{i=1}^{k} (1 - s) \\
+   &= 1 - (1 - s)^k \\
+   &\cdots \\
+   s &= 1 - \left(1 - \alpha\right)^{1/k}
+\end{split}
+\]
+
+This method of accounting for familywise error rate,
+setting \(\alpha_i \setequalto s\),
+is known as the
+\textbf{Sidak correction}\index{Sidak correction}.\footnote{
+  The font I've chosen apparently cannot handle some
+  of the characters needed in Sidak's actual name.
+  \href{https://en.wikipedia.org/wiki/\%C5\%A0id\%C3\%A1k_correction}{The Wikipedia article}
+  on the correction bears the proper rendering.
+}
+
+\subsection{Conclusion.}
+There are many other clever methods of properly
+limiting the error rate of a family of hypothesis tests,
+such as the \href{https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method}{Holm-Bonferroni method}, with more fine-tuned
+methods for controlling the \href{https://en.wikipedia.org/wiki/False_discovery_rate}{false discovery rate}
+available.
+It's always worth remembering whether it makes
+sense to decrease the false positive rate at the cost
+of increasing the false negative rate \textemdash{}
+which mistake would be worse?
+There's also the importance of the quality of the
+sample we're studying \textemdash{} if we select a
+specific subset of a population for our tests,
+this \emph{selection bias} will limit our ability
+to draw conclusions about populations outside
+that subset.
+
+This is a dance
+with which clinical trial designers
+ought to be really familiar, as 
+when a trial is designed to test \emph{efficacy} 
+(``Under ideal circumstances, does this intervention
+improve the outcomes of that specific subset of
+the population which we targeted in the first place?''),
+you're necessarily sacrificing the trial's ability
+to speak to its generalizable \emph{effectiveness}
+(a sample of volunteers is the quintessential example
+of the self-selection bias, and most patients in the
+target population would not undergo the treatment 
+at quite the same level of fastidiousness 
+demanded by a clinical trial).
+
+And of course, not much can save questionable
+testing practices (e.g., forming a hypothesis based
+on exploratory analysis of a dataset and then
+testing the hypothesis on the very same set of
+\textemdash{} 
+no, I don't even want to finish the sentence!)
+
+Like any tool, one must be cognizant of when
+and how to properly 
+use false-positive controlling procedures
+such as the Bonferroni correction.
+
+\subsection*{References and related links.}
+
+The first mention of the Bonferroni method I heard
+was from it being mentioned in passing in
+one of the first episodes of the
+% \href{https://dataskeptic.com/podcast/}{\textit{Data Skeptic} podcast}
+\textit{Data Skeptic} podcast. (I would link
+to the website, but it seems they've had a hiccup
+with renewing their SSL certificates so it's broken
+at the moment. How I understand their pain!)\par
+
+\href{https://www.ncbi.nlm.nih.gov/pubmed/24697967}
+{This 2014 paper by Armstrong} discussed
+the use
+of the Bonferroni correction in various ophthalmological 
+publications and gave some good relevant reminders
+about when it should be used. 
+It helped me remember the ``Statistics 101''
+concept that \[\text{false positive rate} \propto \frac{1}{\text{false negative rate}}\] 
+
+A thorough discussion about
+performing meta-regressions (trying to \emph{quantify}
+the relationship between variables as opposed to
+simply state \emph{whether} they seem related) is
+\href{https://www.ncbi.nlm.nih.gov/pubmed/12111920}{this 2002 paper by Thompson} (certainly still relevant).
+Just one of the important points brought up in the paper is
+\href{https://en.wikipedia.org/wiki/Ecological_fallacy}{the ecological fallacy},
+a formal fallacy where we expect a single individual
+to be similar (in the aspect under consideration) 
+to that of the population to which they belong.
+Probably the most striking and 
+commonly discussed form of the ecological fallacy is
+\href{https://en.wikipedia.org/wiki/Simpson%27s_paradox}{Simpson's paradox (or the reversal paradox)}.
+\par
+
+\href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1124898/}
+{This fun 2002 paper} laments how spurious correlations
+from observational studies that could have been
+better controlled
+find themselves on the cover of magazines
+as the ``health scare of the week''.
+\sout{Oh, how so much has changed \(\sim\).}
+It also talks about why the spurious correlations occur
+and some methods of controlling for them
+(e.g., repeating tests on different to mitigate
+the almost certain existence of confounding variables
+\textemdash{} if the association exists across
+many different populations, it's less likely to
+be due to a hidden confounding variable).
+\\
+\\
+- DK, 7/3/18
 
 \end{document}
