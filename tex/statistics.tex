@@ -564,4 +564,54 @@ be due to a hidden confounding variable).
 \\
 - DK, 7/3/18
 
+\subsection*{Addendum}
+
+I recently came across \href{https://lucklab.ucdavis.edu/blog/2018/4/19/why-i-lost-faith-in-p-values}{an interesting blog post} (which has a followup post worth reading as well) discussing
+how the significance level \(\alpha\) and the p-value do not
+track the false positive rate the way we may believe it does.
+The main crux was that the p-value states one form of
+false positive, namely, the probability
+that the given results would have occurred if the null hypothesis
+is actually true,
+\(P(\text{significant result} \given H_0 \text{ is true})\).
+So the hypothetical situation we're running with is
+``Say the null hypothesis is true. What's the probability I get
+a significant result (as determined by my choice of \(\alpha\))?''\par
+
+But we're basically never in a situation 
+where we know with certainty that \(H_0\) is true 
+(otherwise, we wouldn't even be bothering with the experiment
+in the first place).
+The situation we \emph{are} finding ourselves in, in scientific
+publication findings and the like, is that we received a 
+significant result. So the relevant scenario is 
+``Say we get a significant result (as determined by my choice of \(\alpha\)).
+What's the probability the null hypothesis is true?'', i.e., what is
+\(P(H_0 \text{ is true} \given \text{significant result})\)?\footnote{
+The flip in order makes for a pretty big difference. 
+By Bayes' rule, we have
+
+\[
+  P(H_0 \text{ is true} \given \text{significant result}) =
+\left(\frac{P(H_0 \text{ is true})}{P(\text{significant result})}\right)
+P(\text{significant result} \given H_0 \text{ is true}) \]
+}
+
+\emph{That} would be a more appropriate false positive rate,
+but that expression would be much more difficult to calculate
+for real-world experiments. That expression requires guesses of
+the likelihood a given alternative hypothesis is true and
+of the statistical power (and necessarily of the true effect size)
+of the experiment in question.
+(The article above goes through some simulated experiments
+with ground-truth parameters to show just how much
+the false positive rate, when defined in this more relevant way,
+can vary.)\par
+
+All the more reason to value additional experiments over
+summary statistics!
+\\
+\\
+- DK, 7/10/18
+
 \end{document}

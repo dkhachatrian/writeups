@@ -2,6 +2,13 @@
 
 \ProvidesPackage{writeup}
 
+% want to show subsubsections in table of contents
+% so as per https://tex.stackexchange.com/questions/17877/how-to-show-subsections-and-subsubsections-in-toc
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+
 
 \usepackage[margin=1in,letterpaper]{geometry}% This shaves off default margins (which are too big)
 \usepackage{amsmath} %This lets us do more advanced math stuff -- in particular create unnumbered equations
@@ -56,6 +63,8 @@
 \NewDocumentCommand{\definedas}{}{:=}
 \NewDocumentCommand{\setequalto}{}{:=}
 \NewDocumentCommand{\suchthat}{}{\mid}
+\NewDocumentCommand{\given}{}{\mid}
+
 
 \DeclareMathOperator*{\argmax}{argmax}
 \DeclareMathOperator*{\argmin}{argmin}
